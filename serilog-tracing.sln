@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{81CA4013-44B4-427D-A931-09BB1E0E2471}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "example", "example", "{E35D98E8-5F3C-4ABD-8A65-63B6E357DC2F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "example\Example\Example.csproj", "{747EABB8-0A05-4C09-945A-0270BF36D572}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing", "src\SerilogTracing\SerilogTracing.csproj", "{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Tests", "test\SerilogTracing.Tests\SerilogTracing.Tests.csproj", "{13DBE96D-AA92-40E1-AABB-7109C4A12B7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{747EABB8-0A05-4C09-945A-0270BF36D572} = {E35D98E8-5F3C-4ABD-8A65-63B6E357DC2F}
+		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
+		{13DBE96D-AA92-40E1-AABB-7109C4A12B7A} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{747EABB8-0A05-4C09-945A-0270BF36D572}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{747EABB8-0A05-4C09-945A-0270BF36D572}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{747EABB8-0A05-4C09-945A-0270BF36D572}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{747EABB8-0A05-4C09-945A-0270BF36D572}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13DBE96D-AA92-40E1-AABB-7109C4A12B7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13DBE96D-AA92-40E1-AABB-7109C4A12B7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13DBE96D-AA92-40E1-AABB-7109C4A12B7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13DBE96D-AA92-40E1-AABB-7109C4A12B7A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
