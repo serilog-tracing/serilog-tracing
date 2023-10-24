@@ -10,7 +10,6 @@ public sealed class LoggerActivity : IDisposable
 {
     internal const string SelfPropertyName = "SerilogTracing.LoggerActivity.Self";
     
-    bool _complete;
     readonly Activity? _activity;
 
     public LoggerActivity(Activity? activity, MessageTemplate messageTemplate, IEnumerable<LogEventProperty> captures)
@@ -33,22 +32,20 @@ public sealed class LoggerActivity : IDisposable
         LogEventLevel level = LogEventLevel.Information,
         Exception? exception = null)
     {
-        if (_complete)
+        if (_activity?.IsStopped is not false)
         {
             return;
         }
         
-        _complete = true;
-
         CompletionLevel = level;
         if (exception != null)
         {
             Exception = exception;
-            _activity?.AddEvent(EventFromException(exception));
+            _activity.AddEvent(EventFromException(exception));
         }
 
-        Activity?.SetStatus(level <= LogEventLevel.Warning ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
-        Activity?.Dispose();
+        _activity.SetStatus(level <= LogEventLevel.Warning ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
+        _activity.Dispose();
     }
 
     static ActivityEvent EventFromException(Exception exception)
@@ -79,38 +76,35 @@ public sealed class LoggerActivity : IDisposable
     }
 }
 
-public class TextException : Exception
+public class TextException(string? message,
+    string? type,
+    string? toString) : Exception(message ?? type)
 {
-    readonly string? _toString;
-
-    public TextException(
-        string? message,
-        string? type,
-        string? toString)
-    : base(message ?? type)
-    {
-        _toString = toString;
-    }
-
-    public override string ToString() => _toString ?? "No information available.";
+    public override string ToString() => toString ?? "No information available.";
 }
 
-static class SerilogActivitySource
+static class SerilogActivitySource<T>
 {
-    public const string Name = "Serilog";
-    const string Version = "0.0.1";
+    static readonly string Name = typeof(T).FullName ?? "Serilog";
 
-    public static ActivitySource Instance { get; } = new ActivitySource(Name, Version);
+    // ReSharper disable once StaticMemberInGenericType
+    public static ActivitySource Instance { get; } = new(Name, null);
 }
 
 public static class LoggerTracingExtensions
 {
-    static readonly MessageTemplate NoTemplate = new MessageTemplate(Enumerable.Empty<MessageTemplateToken>());
-    
+    static readonly MessageTemplate NoTemplate = new(Enumerable.Empty<MessageTemplateToken>());
+
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
     public static LoggerActivity StartActivity(this ILogger logger, string messageTemplate, params object?[] propertyValues)
     {
-        var activity = SerilogActivitySource.Instance.StartActivity();
+        return StartActivity<Logger>(logger, messageTemplate, propertyValues);
+    }
+
+    [MessageTemplateFormatMethod(nameof(messageTemplate))]
+    public static LoggerActivity StartActivity<TLogger>(this ILogger logger, string messageTemplate, params object?[] propertyValues)
+    {
+        var activity = SerilogActivitySource<TLogger>.Instance.StartActivity(messageTemplate);
 
         if (!logger.BindMessageTemplate(messageTemplate, propertyValues, out var parsedTemplate, out var captures))
             return new LoggerActivity(null, NoTemplate, Enumerable.Empty<LogEventProperty>());
@@ -119,14 +113,30 @@ public static class LoggerTracingExtensions
     }
 }
 
-public static class LoggerConfigurationTracingExtensions
+public sealed class SerilogActivityListener: IDisposable
 {
-    public static Logger CreateTracingLogger(this LoggerConfiguration loggerConfiguration)
+    readonly ActivityListener _listener;
+
+    internal SerilogActivityListener(ActivityListener listener)
     {
-        var logger = loggerConfiguration.CreateLogger();
+        _listener = listener;
+    }
+
+    public void Dispose()
+    {
+        _listener.Dispose();
+    }
+}
+
+public class ActivityListenerConfiguration(ILogger logger)
+{
+    public SerilogActivityListener CreateActivityListener()
+    {
         var listener = new ActivityListener();
         listener.Sample = delegate { return ActivitySamplingResult.AllData; };
-        listener.ShouldListenTo = source => logger.ForContext(Constants.SourceContextPropertyName, source.Name).IsEnabled(LogEventLevel.Fatal);
+        listener.ShouldListenTo = source => 
+            string.IsNullOrEmpty(source.Name) ? logger.IsEnabled(LogEventLevel.Fatal) :
+            logger.ForContext(Constants.SourceContextPropertyName, source.Name).IsEnabled(LogEventLevel.Fatal);
         listener.ActivityStopped += a =>
         {
             var serilogActivity = a.GetCustomProperty(LoggerActivity.SelfPropertyName) is LoggerActivity sa
@@ -148,7 +158,7 @@ public static class LoggerConfigurationTracingExtensions
                 if (properties.ContainsKey(tag.Key))
                     continue;
 
-                if (!logger.BindProperty(tag.Key, tag.Value, destructureObjects: false, out var property))
+                if (!activityLogger.BindProperty(tag.Key, tag.Value, destructureObjects: false, out var property))
                     continue;
                 
                 properties.Add(tag.Key, property);
@@ -169,11 +179,11 @@ public static class LoggerConfigurationTracingExtensions
                 a.TraceId,
                 a.SpanId);
 
-            logger.Write(evt);
+            activityLogger.Write(evt);
         };
         
         ActivitySource.AddActivityListener(listener);
 
-        return logger;
+        return new SerilogActivityListener(listener);
     }
 }

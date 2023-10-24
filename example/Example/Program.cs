@@ -1,18 +1,22 @@
 ﻿using Serilog;
-using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
-using Serilog.Formatting.Compact;
+using Serilog.Templates;
+using Serilog.Templates.Themes;
 using SerilogTracing;
 
 SelfLog.Enable(Console.Error);
 
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console(new CompactJsonFormatter())
-    .CreateTracingLogger();
+    .WriteTo.Console(new ExpressionTemplate(
+        "{ {@t, @mt, @l: if @l = 'Information' then undefined() else @l, @x, @sp, @tr, @ps, @st, @ra: {service: {name: 'Example'}}, ..rest()} }\n",
+        theme: TemplateTheme.Code))
+    .CreateLogger();
 
-var a = 1;
-var b = 2;
+using var _ = new ActivityListenerConfiguration(Log.Logger)
+    .CreateActivityListener();
+
+const int a = 1, b = 2;
 using var activity = Log.Logger.StartActivity("Compute sum of {A} and {B}", a, b);
 try
 {
