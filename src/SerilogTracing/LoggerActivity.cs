@@ -9,6 +9,8 @@ public sealed class LoggerActivity : IDisposable
 {
     public static LoggerActivity None { get; } = new(new LoggerConfiguration().CreateLogger(), null, new(Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>());
 
+    IEnumerable<LogEventProperty> _captures;
+    
     internal LoggerActivity(
         ILogger logger,
         Activity? activity,
@@ -18,7 +20,7 @@ public sealed class LoggerActivity : IDisposable
         Logger = logger;
         Activity = activity;
         MessageTemplate = messageTemplate;
-        Captures = captures;
+        _captures = captures;
 
         if (activity != null)
         {
@@ -34,17 +36,32 @@ public sealed class LoggerActivity : IDisposable
     ILogger Logger { get; }
     public Activity? Activity { get; }
     public MessageTemplate MessageTemplate { get; }
-    public IEnumerable<LogEventProperty> Captures { get; }
+    public IEnumerable<LogEventProperty> Captures => _captures;
     public Exception? Exception { get; private set; }
     public LogEventLevel? CompletionLevel { get; private set; }
 
     public DateTime StartTimestamp { get; }
-    public TimeSpan Duration { get; set; }
+    public TimeSpan Duration { get; private set; }
 
     public ActivityTraceId? TraceId => Activity?.TraceId;
     public ActivitySpanId? SpanId => Activity?.SpanId;
     public ActivitySpanId? ParentSpanId => Activity?.ParentSpanId;
 
+    public void AddProperty(string propertyName, object? value, bool destructureObjects = false)
+    {
+        if (Logger.BindProperty(propertyName, value, destructureObjects, out var property))
+        {
+            // May be best to split storage across the initial `IEnumerable` and a lazily-allocated
+            // `List` to avoid this without copying `captures` in the constructor.
+            _captures = _captures.Concat(new[] { property });
+        }
+
+        // In cases where `destructureObjects` is `true`, it's unlikely that the value will
+        // be an immutable scalar suitable for using with `AddTag()`, so we avoid surprises
+        // and stringify it in those cases.
+        Activity?.AddTag(propertyName, destructureObjects ? value?.ToString() : value);
+    }
+    
     public void Complete(
         LogEventLevel level = LogEventLevel.Information,
         Exception? exception = null)
