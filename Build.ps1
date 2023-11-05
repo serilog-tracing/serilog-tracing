@@ -23,9 +23,9 @@ foreach ($src in Get-ChildItem src/*) {
 	Write-Output "build: Packaging project in $src"
 
     if ($suffix) {
-        & dotnet pack -c Release --include-source -o ../../artifacts --version-suffix=$suffix
+        & dotnet pack -c Release -o ../../artifacts --version-suffix=$suffix
     } else {
-        & dotnet pack -c Release --include-source -o ../../artifacts
+        & dotnet pack -c Release -o ../../artifacts
     }
     if($LASTEXITCODE -ne 0) { throw "Packaging failed" }
 
