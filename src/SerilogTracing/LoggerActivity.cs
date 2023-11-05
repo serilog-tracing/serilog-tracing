@@ -98,7 +98,11 @@ public sealed class LoggerActivity : IDisposable
         LogEventLevel level = LogEventLevel.Information,
         Exception? exception = null)
     {
-        if (this == None || Activity?.IsStopped is true)
+        if (this == None
+#if FEATURE_ACTIVITY_ISSTOPPED
+            || Activity?.IsStopped is true
+#endif
+            )
         {
             return;
         }
