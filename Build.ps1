@@ -1,5 +1,7 @@
 Write-Output "build: Build started"
 
+$env:Path = "$pwd/.dotnetcli;$env:Path"
+
 Push-Location $PSScriptRoot
 
 if(Test-Path .\artifacts) {
