@@ -19,7 +19,7 @@ Serilog outputs can be used for simple local feedback.
 
 Here's what that looks like, routed through Serilog's console sink:
 
-![]
+![A screenshot of Windows Terminal showing output from the included Example application.](https://raw.githubusercontent.com/nblumhardt/serilog-tracing/dev/assets/console-output.png)
 
 The example is using Serilog's `ExpressionTemplate` to annotate each span in the trace with timing information. The
 layout is fully configurable - check out `Program.cs` in the included example project - so let your ASCII artistry run
