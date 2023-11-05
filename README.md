@@ -7,8 +7,8 @@ An experimental Serilog extension for producing and capturing hierarchical trace
 _SerilogTracing_ integrates Serilog with the `System.Diagnostics.Activity*` types provided by the .NET BCL. This makes
 it possible to:
 
- 1. record traces generated using the .NET APIs through Serilog sinks, and
- 2. generate rich traces using Serilog APIs and idioms, that can still be observed by other consumers of the .NET APIs.
+ 1. Record traces generated using the .NET APIs through Serilog sinks, and 
+ 2. Generate rich traces using Serilog APIs and idioms, that can still be observed by other consumers of the .NET APIs.
  
 There are two main scenarios where these capabilities combine usefully.
 
