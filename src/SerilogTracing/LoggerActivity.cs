@@ -99,6 +99,7 @@ public sealed class LoggerActivity : IDisposable
         Exception? exception = null)
     {
         if (this == None
+            || CompletionLevel.HasValue
 #if FEATURE_ACTIVITY_ISSTOPPED
             || Activity?.IsStopped is true
 #endif

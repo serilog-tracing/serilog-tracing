@@ -17,10 +17,6 @@
     <Description>An experimental Serilog extension for producing and capturing hierarchical traces.</Description>
   </PropertyGroup>
   
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-    <DefineConstants>$(DefineConstants);FEATURE_ACTIVITY_STOPPED</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Include="..\..\assets\icon.png" Pack="true" PackagePath="" Visible="false" />
     <None Include="..\..\README.md" Pack="true" PackagePath="\" Visible="false" />
