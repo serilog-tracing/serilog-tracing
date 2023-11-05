@@ -1,18 +1,52 @@
 ﻿using System.Diagnostics;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 
 namespace SerilogTracing;
 
-public sealed class SerilogActivityListener: IDisposable
+/// <summary>
+/// Configure an activity listener that writes completed spans to a Serilog logger.
+/// </summary>
+public static class SerilogActivityListener
 {
-    readonly ActivityListener _listener;
-
-    internal SerilogActivityListener(ActivityListener listener)
+    /// <summary>
+    /// Configure and register an activity listener that writes completed spans to a Serilog logger.
+    /// The returned listener will continue writing spans through the Serilog logger until it is disposed.
+    /// </summary>
+    /// <returns>The configured, registered activity listener.</returns>
+    public static ActivityListener Create(Action<SerilogActivityListenerOptions>? configure = null)
     {
-        _listener = listener;
-    }
+        var options = new SerilogActivityListenerOptions();
+        configure?.Invoke(options);
+        
+        // Don't capture or observe changes to the options object.
+        var localLogger = options.Logger;
+        ILogger GetLogger() => localLogger ?? Log.Logger;
+        
+        var listener = new ActivityListener();
+        listener.Sample = options.Sample;
+        listener.SampleUsingParentId = options.SampleUsingParentId;
+        listener.ShouldListenTo = source => 
+            string.IsNullOrEmpty(source.Name) ? GetLogger().IsEnabled(LogEventLevel.Fatal) :
+                GetLogger().ForContext(Constants.SourceContextPropertyName, source.Name).IsEnabled(LogEventLevel.Fatal);
 
-    public void Dispose()
-    {
-        _listener.Dispose();
+        listener.ActivityStopped += activity =>
+        {
+            if (ActivityUtil.TryGetLoggerActivity(activity, out _))
+                return; // `LoggerActivity` completion writes these to the activity-specific logger.
+            
+            var activityLogger = GetLogger().ForContext(Constants.SourceContextPropertyName, activity.Source.Name);
+
+            var level = ActivityUtil.GetCompletionLevel(activity);
+            if (!activityLogger.IsEnabled(level))
+                return;
+
+            activityLogger.Write(ActivityUtil.ActivityToLogEvent(activityLogger, activity));
+        };
+        
+        ActivitySource.AddActivityListener(listener);
+
+        return listener;
     }
 }

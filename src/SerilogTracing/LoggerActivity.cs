@@ -5,9 +5,16 @@ using Serilog.Parsing;
 
 namespace SerilogTracing;
 
+/// <summary>
+/// An activity associated with a particular Serilog <see cref="ILogger"/>. When the activity
+/// is completed, a span will be written through the logger. The activity also wraps an underlying
+/// <see cref="System.Diagnostics.Activity"/> object that mirrors the properties of the
+/// <see cref="LoggerActivity"/>, if any <c>System.Diagnostics</c> activity listeners are configured.
+/// </summary>
+/// <remarks><see cref="LoggerActivity"/> instances are not thread-safe.</remarks>
 public sealed class LoggerActivity : IDisposable
 {
-    public static LoggerActivity None { get; } = new(new LoggerConfiguration().CreateLogger(), null, new(Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>());
+    internal static LoggerActivity None { get; } = new(new LoggerConfiguration().CreateLogger(), null, new(Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>());
 
     IEnumerable<LogEventProperty> _captures;
     
@@ -34,19 +41,34 @@ public sealed class LoggerActivity : IDisposable
     }
 
     ILogger Logger { get; }
+
+    internal MessageTemplate MessageTemplate { get; }
+    internal DateTime StartTimestamp { get; }
+    internal IEnumerable<LogEventProperty> Captures => _captures;
+    internal Exception? Exception { get; private set; }
+    internal LogEventLevel? CompletionLevel { get; private set; }
+    internal TimeSpan Duration { get; private set; }
+
+    internal ActivityTraceId? TraceId => Activity?.TraceId;
+    internal ActivitySpanId? SpanId => Activity?.SpanId;
+    internal ActivitySpanId? ParentSpanId => Activity?.ParentSpanId;
+
+    /// <summary>
+    /// The <see cref="Activity"/> that represents the current <see cref="LoggerActivity"/> for
+    /// <c>System.Diagnostics</c>, if any listeners are configured.
+    /// </summary>
     public Activity? Activity { get; }
-    public MessageTemplate MessageTemplate { get; }
-    public IEnumerable<LogEventProperty> Captures => _captures;
-    public Exception? Exception { get; private set; }
-    public LogEventLevel? CompletionLevel { get; private set; }
 
-    public DateTime StartTimestamp { get; }
-    public TimeSpan Duration { get; private set; }
-
-    public ActivityTraceId? TraceId => Activity?.TraceId;
-    public ActivitySpanId? SpanId => Activity?.SpanId;
-    public ActivitySpanId? ParentSpanId => Activity?.ParentSpanId;
-
+    /// <summary>
+    /// Add a property to the activity. This will be recorded in the emitted span.
+    /// </summary>
+    /// <remarks>If <see cref="Activity"/> is not null, the property value will also be
+    /// attached to it as a tag. Note that when <see cref="destructureObjects"/> is specified,
+    /// the property value will be converted to a tag value using <see cref="Object.ToString"/>.</remarks>
+    /// <param name="propertyName">The name of the property to add.</param>
+    /// <param name="value">The value of the property.</param>
+    /// <param name="destructureObjects">If <c langword="true">true</c>, Serilog's capturing
+    /// logic will be used to serialize the object into a structured value.</param>
     public void AddProperty(string propertyName, object? value, bool destructureObjects = false)
     {
         if (Logger.BindProperty(propertyName, value, destructureObjects, out var property))
@@ -62,6 +84,16 @@ public sealed class LoggerActivity : IDisposable
         Activity?.AddTag(propertyName, destructureObjects ? value?.ToString() : value);
     }
     
+    /// <summary>
+    /// Complete the activity, emitting a span to the underlying logger.
+    /// </summary>
+    /// <param name="level">The log event level to associate with the span.</param>
+    /// <param name="exception">An exception to associate with the span, if any.</param>
+    /// <remarks>Serilog levels will be reflected on the wrapped activity using
+    /// corresponding <see cref="ActivityStatusCode"/> values. Exceptions are reflected using
+    /// activity events. Once <see cref="Complete"/> has been called, subsequent calls will be
+    /// ignored.
+    /// </remarks>
     public void Complete(
         LogEventLevel level = LogEventLevel.Information,
         Exception? exception = null)
@@ -86,6 +118,10 @@ public sealed class LoggerActivity : IDisposable
         Logger.Write(ActivityUtil.ActivityToLogEvent(Logger, this));
     }
     
+    /// <summary>
+    /// Dispose the activity. This will call <see cref="Complete"/>, if the activity has not already been
+    /// completed.
+    /// </summary>
     public void Dispose()
     {
         Complete();

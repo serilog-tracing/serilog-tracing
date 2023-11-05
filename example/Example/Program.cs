@@ -27,9 +27,7 @@ Log.Logger = new LoggerConfiguration()
             "{ {@t, @mt, @l: if @l = 'Information' then undefined() else @l, @x, @sp, @tr, @ps: @p['@ps'], @st: @p['@st'], @ra: {service: {name: 'Example'}}, ..rest()} }\n"))
     .CreateLogger();
 
-using var _ = new ActivityListenerConfiguration()
-    .SetLogger(Log.Logger)
-    .CreateActivityListener();
+using var _ = SerilogActivityListener.Create();
 
 var log = Log.ForContext(typeof(Program));
 

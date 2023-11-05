@@ -1,6 +1,7 @@
 ﻿namespace SerilogTracing;
 
-public class TextException(string? message,
+class TextException(
+    string? message,
     string? type,
     string? toString) : Exception(message ?? type)
 {
