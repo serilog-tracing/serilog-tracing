@@ -63,7 +63,7 @@ public sealed class LoggerActivity : IDisposable
     /// Add a property to the activity. This will be recorded in the emitted span.
     /// </summary>
     /// <remarks>If <see cref="Activity"/> is not null, the property value will also be
-    /// attached to it as a tag. Note that when <see cref="destructureObjects"/> is specified,
+    /// attached to it as a tag. Note that when <paramref name="destructureObjects"/> is specified,
     /// the property value will be converted to a tag value using <see cref="Object.ToString"/>.</remarks>
     /// <param name="propertyName">The name of the property to add.</param>
     /// <param name="value">The value of the property.</param>
