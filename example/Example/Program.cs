@@ -35,7 +35,7 @@ const int a = 1, b = 2;
 using var activity = log.StartActivity("Compute sum of {A} and {B}", a, b);
 try
 {
-    Log.Warning("Applying fudge factor");
+    log.Warning("Applying fudge factor");
     
     const int fudgeFactor = 17;
     activity.AddProperty("FudgeFactor", fudgeFactor);
