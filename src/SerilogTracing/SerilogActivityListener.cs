@@ -22,21 +22,24 @@ public static class SerilogActivityListener
         
         // Don't capture or observe changes to the options object.
         var localLogger = options.Logger;
-        ILogger GetLogger() => localLogger ?? Log.Logger;
+
+        ILogger GetLogger(string name)
+        {
+            var logger = localLogger ?? Log.Logger;
+            return !string.IsNullOrWhiteSpace(name) ? logger.ForContext(Constants.SourceContextPropertyName, name) : logger;
+        }
         
         var listener = new ActivityListener();
         listener.Sample = options.Sample;
         listener.SampleUsingParentId = options.SampleUsingParentId;
-        listener.ShouldListenTo = source => 
-            string.IsNullOrEmpty(source.Name) ? GetLogger().IsEnabled(LogEventLevel.Fatal) :
-                GetLogger().ForContext(Constants.SourceContextPropertyName, source.Name).IsEnabled(LogEventLevel.Fatal);
+        listener.ShouldListenTo = source => GetLogger(source.Name).IsEnabled(LogEventLevel.Fatal);
 
         listener.ActivityStopped += activity =>
         {
             if (ActivityUtil.TryGetLoggerActivity(activity, out _))
                 return; // `LoggerActivity` completion writes these to the activity-specific logger.
-            
-            var activityLogger = GetLogger().ForContext(Constants.SourceContextPropertyName, activity.Source.Name);
+
+            var activityLogger = GetLogger(activity.Source.Name);
 
             var level = ActivityUtil.GetCompletionLevel(activity);
             if (!activityLogger.IsEnabled(level))
