@@ -12,8 +12,8 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>serilog;tracing</PackageTags>
-<!--    <SignAssembly>true</SignAssembly>-->
-<!--    <AssemblyOriginatorKeyFile>../../assets/SerilogTracing.snk</AssemblyOriginatorKeyFile>-->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../../assets/SerilogTracing.snk</AssemblyOriginatorKeyFile>
     <Description>An experimental Serilog extension for producing and capturing hierarchical traces.</Description>
   </PropertyGroup>
   
