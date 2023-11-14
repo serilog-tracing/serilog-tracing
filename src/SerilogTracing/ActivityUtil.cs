@@ -9,6 +9,8 @@ namespace SerilogTracing;
 static class ActivityUtil
 {
     const string SelfPropertyName = "SerilogTracing.LoggerActivity.Self";
+    const string SpanStartTimestampPropertyName = "SpanStartTimestamp";
+    const string ParentSpanIdPropertyName = "ParentSpanId";
 
     public static void SetLoggerActivity(Activity activity, LoggerActivity loggerActivity)
     {
@@ -79,10 +81,10 @@ static class ActivityUtil
             }
         }
 
-        properties["@st"] = new LogEventProperty("@st", new ScalarValue(start));
+        properties[SpanStartTimestampPropertyName] = new LogEventProperty(SpanStartTimestampPropertyName, new ScalarValue(start));
         if (parentSpanId != null && parentSpanId.Value != default)
         {
-            properties["@ps"] = new LogEventProperty("@ps", new ScalarValue(parentSpanId.Value.ToString()));
+            properties[ParentSpanIdPropertyName] = new LogEventProperty(ParentSpanIdPropertyName, new ScalarValue(parentSpanId.Value.ToString()));
         }
 
         var evt = new LogEvent(

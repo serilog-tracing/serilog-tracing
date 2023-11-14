@@ -12,8 +12,8 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>serilog;tracing</PackageTags>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../assets/SerilogTracing.snk</AssemblyOriginatorKeyFile>
+<!--    <SignAssembly>true</SignAssembly>-->
+<!--    <AssemblyOriginatorKeyFile>../../assets/SerilogTracing.snk</AssemblyOriginatorKeyFile>-->
     <Description>An experimental Serilog extension for producing and capturing hierarchical traces.</Description>
   </PropertyGroup>
   
@@ -21,7 +21,8 @@
     <None Include="..\..\assets\icon.png" Pack="true" PackagePath="" Visible="false" />
     <None Include="..\..\README.md" Pack="true" PackagePath="\" Visible="false" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-    <PackageReference Include="Serilog" Version="3.1.0-dev-02078" />
+    <PackageReference Include="Serilog" Version="3.1.0" />
+    <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
   </ItemGroup>
 
 </Project>
