@@ -2,29 +2,16 @@
 using Example;
 using Serilog;
 using Serilog.Events;
-using Serilog.Expressions;
-using Serilog.Templates;
 using Serilog.Templates.Themes;
 using SerilogTracing;
 
 Console.OutputEncoding = new UTF8Encoding(false);
 
 Log.Logger = new LoggerConfiguration()
+    .Enrich.WithProperty("Application", "Example")
     .MinimumLevel.Override("System.Net.Http", LevelAlias.Off)
-    .WriteTo.Console(
-        formatter: new ExpressionTemplate(
-            "[{@t:HH:mm:ss} {@l:u3}] " +
-            "{#if @p['@ps'] is not null}\u251c {#else if @p['@st'] is not null}\u2514\u2500 {#else if @sp is not null}\u2502 {#end}" +
-            "{@m}" +
-            "{#if @p['@st'] is not null} ({duration(@p['@st'], @t):0.000} ms){#end}" +
-            "\n" +
-            "{@x}",
-            theme: TemplateTheme.Code,
-            nameResolver: new StaticMemberNameResolver(typeof(TemplateFunctions))))
-    .WriteTo.Seq(
-        "http://localhost:5341",
-        payloadFormatter: new ExpressionTemplate(
-            "{ {@t, @mt, @l: if @l = 'Information' then undefined() else @l, @x, @sp, @tr, @ps: @p['@ps'], @st: @p['@st'], @ra: {service: {name: 'Example'}}, ..rest()} }\n"))
+    .WriteTo.Console(formatter: Formatting.CreateTextFormatter(TemplateTheme.Code))
+    .WriteTo.Seq("http://localhost:5341", payloadFormatter: Formatting.CreateJsonFormatter())
     .CreateLogger();
 
 using var _ = SerilogActivityListener.Create();
