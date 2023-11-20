@@ -99,3 +99,7 @@ other `ActivityListener`s, instead marking the activities as from the generic `S
 richer source names, use the generic overload of the `StartActivity` extension method.
  * _Serilog.Sinks.OpenTelemetry_, which should be a useful output for _SerilogTracing_, doesn't yet
 include any support for emitting spans over OTLP.
+ * No mechanism has been considered nor implemented for suppressing instrumentation during operations, e.g. sinks may themselves trigger creation of new spans.
+ * Activity baggage is ignored.
+ * Activity properties are ignored, no enrichment of generated spans from non-tag activity information has been implemented.
+
