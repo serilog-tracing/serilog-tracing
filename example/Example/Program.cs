@@ -9,9 +9,8 @@ Console.OutputEncoding = new UTF8Encoding(false);
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", "Example")
-    .MinimumLevel.Override("System.Net.Http", LevelAlias.Off)
     .WriteTo.Console(formatter: Formatting.CreateTextFormatter(TemplateTheme.Code))
-    .WriteTo.Seq("http://localhost:5341", payloadFormatter: Formatting.CreateJsonFormatter())
+    .WriteTo.Seq("http://localhost:5341", payloadFormatter: Formatting.CreateJsonFormatter(), messageHandler: new SocketsHttpHandler { ActivityHeadersPropagator = null })
     .CreateLogger();
 
 using var _ = SerilogActivityListener.Create();
