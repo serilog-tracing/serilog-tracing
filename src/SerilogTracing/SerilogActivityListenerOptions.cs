@@ -1,22 +1,12 @@
 ﻿using System.Diagnostics;
-using Serilog;
 
 namespace SerilogTracing;
 
 /// <summary>
-/// Options for <see cref="SerilogActivityListener"/> configuration.
+/// Options for <see cref="LoggerConfigurationTracingExtensions"/> configuration.
 /// </summary>
 public class SerilogActivityListenerOptions
 {
-    /// <summary>
-    /// Set the logger to write spans to. By default, the static <see cref="Log"/> class
-    /// will be used.
-    /// </summary>
-    /// <param name="value">The logger that will receive spans.</param>
-    /// <remarks>If the method is called multiple times, the last logger to be
-    /// specified will be used.</remarks>
-    public ILogger? Logger { get; set; }
-
     /// <summary>
     /// Set the sampling level for the listener. The <see cref="ActivityContext"/> supplied to
     /// the callback will contain the current trace id, and if the activity has a known parent
