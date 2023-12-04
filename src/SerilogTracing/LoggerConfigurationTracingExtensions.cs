@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -21,7 +20,7 @@ public static class LoggerConfigurationTracingExtensions
         var listener = new ActivityListener();
         var disposeProxy = new DisposeProxy(listener);
         var logger = loggerConfiguration
-            .Destructure.With(disposeProxy)
+            .WriteTo.Sink(disposeProxy)
             .CreateLogger();
         
         var options = new SerilogActivityListenerOptions();
@@ -55,15 +54,12 @@ public static class LoggerConfigurationTracingExtensions
         return logger;
     }
 
-    sealed class DisposeProxy(IDisposable disposable) : IDestructuringPolicy, IDisposable
+    sealed class DisposeProxy(IDisposable disposable) : ILogEventSink, IDisposable
     {
         public void Dispose() => disposable.Dispose();
 
-        bool IDestructuringPolicy.TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory,
-            [NotNullWhen(true)] out LogEventPropertyValue? result)
+        void ILogEventSink.Emit(LogEvent logEvent)
         {
-            result = null;
-            return false;
         }
     }
 }

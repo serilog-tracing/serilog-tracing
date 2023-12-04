@@ -105,4 +105,4 @@ include any support for emitting spans over OTLP.
    sinks may themselves trigger creation of new spans, if steps aren't taken to prevent it.
  * Activity baggage is ignored.
  * Activity properties are ignored, no enrichment of generated spans from non-tag activity information has been implemented.
-
+ * Because the API hooks logger creation, it doesn't currently sit well alongside `CreateBootstrapLogger`.
