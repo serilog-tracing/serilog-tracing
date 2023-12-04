@@ -8,28 +8,29 @@ namespace SerilogTracing;
 /// <summary>
 /// Configure an activity listener that writes completed spans to a Serilog logger.
 /// </summary>
-public static class SerilogActivityListener
+public static class LoggerConfigurationTracingExtensions
 {
     /// <summary>
     /// Configure and register an activity listener that writes completed spans to a Serilog logger.
     /// The returned listener will continue writing spans through the Serilog logger until it is disposed.
     /// </summary>
-    /// <returns>The configured, registered activity listener.</returns>
-    public static ActivityListener Create(Action<SerilogActivityListenerOptions>? configure = null)
+    /// <returns>The logger.</returns>
+    public static Logger CreateTracingLogger(this LoggerConfiguration loggerConfiguration, Action<SerilogActivityListenerOptions>? configure = null)
     {
+        var listener = new ActivityListener();
+        var disposeProxy = new DisposeProxy(listener);
+        var logger = loggerConfiguration
+            .WriteTo.Sink(disposeProxy)
+            .CreateLogger();
+        
         var options = new SerilogActivityListenerOptions();
         configure?.Invoke(options);
         
-        // Don't capture or observe changes to the options object.
-        var localLogger = options.Logger;
-
         ILogger GetLogger(string name)
         {
-            var logger = localLogger ?? Log.Logger;
             return !string.IsNullOrWhiteSpace(name) ? logger.ForContext(Constants.SourceContextPropertyName, name) : logger;
         }
         
-        var listener = new ActivityListener();
         listener.Sample = options.Sample;
         listener.SampleUsingParentId = options.SampleUsingParentId;
         listener.ShouldListenTo = source => GetLogger(source.Name).IsEnabled(LogEventLevel.Fatal);
@@ -50,6 +51,15 @@ public static class SerilogActivityListener
         
         ActivitySource.AddActivityListener(listener);
 
-        return listener;
+        return logger;
+    }
+
+    sealed class DisposeProxy(IDisposable disposable) : ILogEventSink, IDisposable
+    {
+        public void Dispose() => disposable.Dispose();
+
+        void ILogEventSink.Emit(LogEvent logEvent)
+        {
+        }
     }
 }
