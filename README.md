@@ -84,6 +84,11 @@ Activities are represented by `LoggerActivity` instances.
 
 `LoggerActivity.Complete()` accepts optional `LogEventLevel` and `Exception` arguments.
 
+## Displaying output
+
+Use the formatters provides by `Serilog.Tracing.Formatting.DefaultFormatting` to pretty-print spans as text, or 
+serialize to JSON.
+
 ## Configuring the activity listener
 
 Activity sources can be enabled and disabled using the standard `MinimumLevel.Override()` mechanism.
