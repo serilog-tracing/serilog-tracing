@@ -4,13 +4,14 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Templates.Themes;
 using SerilogTracing;
+using SerilogTracing.Formatting;
 
 Console.OutputEncoding = new UTF8Encoding(false);
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", "Example")
-    .WriteTo.Console(formatter: Formatting.CreateTextFormatter(TemplateTheme.Code))
-    .WriteTo.Seq("http://localhost:5341", payloadFormatter: Formatting.CreateJsonFormatter(), messageHandler: new SocketsHttpHandler { ActivityHeadersPropagator = null })
+    .WriteTo.Console(formatter: DefaultFormatting.CreateTextFormatter(TemplateTheme.Code))
+    .WriteTo.Seq("http://localhost:5341", payloadFormatter: DefaultFormatting.CreateJsonFormatter(), messageHandler: new SocketsHttpHandler { ActivityHeadersPropagator = null })
     .CreateTracingLogger();
 
 var log = Log.ForContext(typeof(Program));

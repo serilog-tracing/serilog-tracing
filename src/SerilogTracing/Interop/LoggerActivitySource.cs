@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 
-namespace SerilogTracing;
+namespace SerilogTracing.Interop;
 
-static class SerilogActivitySource<T>
+static class LoggerActivitySource<T>
 {
     static readonly string Name = typeof(T).FullName ?? "Serilog";
 

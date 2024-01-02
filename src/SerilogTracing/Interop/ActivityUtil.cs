@@ -4,7 +4,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Parsing;
 
-namespace SerilogTracing;
+namespace SerilogTracing.Interop;
 
 static class ActivityUtil
 {
@@ -115,7 +115,7 @@ static class ActivityUtil
         return new ActivityEvent("exception", DateTimeOffset.Now, tags);
     }
 
-    public static Exception? ExceptionFromEvents(Activity activity)
+    internal static Exception? ExceptionFromEvents(Activity activity)
     {
         var first = activity.Events.FirstOrDefault(e => e.Name == "exception");
         if (first.Name != "exception")

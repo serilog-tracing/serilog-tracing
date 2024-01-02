@@ -1,5 +1,7 @@
 ﻿using Serilog;
 using Serilog.Core;
+using SerilogTracing.Interop;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace SerilogTracing;
@@ -38,7 +40,7 @@ public static class LoggerTracingExtensions
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
     public static LoggerActivity StartActivity<TSource>(this ILogger logger, string messageTemplate, params object?[] propertyValues)
     {
-        var activity = SerilogActivitySource<TSource>.Instance.StartActivity(messageTemplate);
+        var activity = LoggerActivitySource<TSource>.Instance.StartActivity(messageTemplate);
 
         if (!logger.BindMessageTemplate(messageTemplate, propertyValues, out var parsedTemplate, out var captures))
             return LoggerActivity.None;

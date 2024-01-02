@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SerilogTracing\SerilogTracing.csproj" />
+    <ProjectReference Include="../../src/SerilogTracing/SerilogTracing.csproj" />
   </ItemGroup>
 
 </Project>
