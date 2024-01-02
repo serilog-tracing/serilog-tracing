@@ -17,7 +17,7 @@ public class SerilogActivityListenerOptions
     /// <remarks>If the method is called multiple times, the last sampling callback to be
     /// specified will be used.</remarks>
     /// <seealso cref="ActivityListener.Sample"/>
-    public SampleActivity<ActivityContext> Sample { get; set; }= delegate { return ActivitySamplingResult.AllData; };
+    public SampleActivity<ActivityContext> Sample { get; set; } = delegate { return ActivitySamplingResult.AllData; };
 
     /// <summary>
     /// Set the sampling level for the listener. The string supplied to

@@ -1,4 +1,4 @@
-﻿namespace SerilogTracing;
+﻿namespace SerilogTracing.Interop;
 
 class TextException(
     string? message,

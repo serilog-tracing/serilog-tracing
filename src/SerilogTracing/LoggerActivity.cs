@@ -2,6 +2,7 @@
 using Serilog;
 using Serilog.Events;
 using Serilog.Parsing;
+using SerilogTracing.Interop;
 
 namespace SerilogTracing;
 
