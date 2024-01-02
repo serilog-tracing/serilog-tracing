@@ -1,8 +1,10 @@
 # SerilogTracing
 
-> ⚠ This project isn't ready to check out just yet, please drop by again soon.
 
-An experimental Serilog extension for producing and capturing hierarchical traces.
+An **experimental** Serilog extension for producing and capturing hierarchical traces.
+
+This is the logical successor to [SerilogTimings](https://github.com/nblumhardt/serilog-timings), which provides very 
+similar functionality, but emits plain log events rather than hierarchical traces.
 
 ## What is _SerilogTracing_?
 
@@ -93,11 +95,8 @@ serialize to JSON.
 
 Activity sources can be enabled and disabled using the standard `MinimumLevel.Override()` mechanism.
 
-## Status and known limitations
+## Status
 
 This project is experimental. It's not a part of Serilog, not maintained by the Serilog maintainers, and might not
 evolve in any particular way: there's currently no plan to integrate this functionality directly into Serilog. (Having
 said that, this project _is_ a vehicle to explore those possibilities).
-
-Other limitations generally stem from the project's immaturity or implementation state: if you run into something that
-you think could be improved, please feel free to open a ticket or propose a PR.
