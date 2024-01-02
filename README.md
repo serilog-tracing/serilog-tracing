@@ -1,6 +1,5 @@
 # SerilogTracing
 
-
 An **experimental** Serilog extension for producing and capturing hierarchical traces.
 
 This is the logical successor to [SerilogTimings](https://github.com/nblumhardt/serilog-timings), which provides very 
