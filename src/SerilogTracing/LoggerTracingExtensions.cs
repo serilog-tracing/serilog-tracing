@@ -24,11 +24,11 @@ public static class LoggerTracingExtensions
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
     public static LoggerActivity StartActivity(this ILogger logger, string messageTemplate, params object?[] propertyValues)
     {
-        var activity = LoggerActivitySource.Instance.StartActivity(messageTemplate);
-
         if (!logger.BindMessageTemplate(messageTemplate, propertyValues, out var parsedTemplate, out var captures))
             return LoggerActivity.None;
             
+        var activity = LoggerActivitySource.Instance.StartActivity(messageTemplate);
+        
         return new LoggerActivity(logger, activity, parsedTemplate, captures);
     }
 }

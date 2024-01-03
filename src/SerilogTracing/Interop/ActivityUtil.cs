@@ -3,14 +3,13 @@ using System.Diagnostics.CodeAnalysis;
 using Serilog;
 using Serilog.Events;
 using Serilog.Parsing;
+using static SerilogTracing.Core.Constants;
 
 namespace SerilogTracing.Interop;
 
 static class ActivityUtil
 {
     const string SelfPropertyName = "SerilogTracing.LoggerActivity.Self";
-    const string SpanStartTimestampPropertyName = "SpanStartTimestamp";
-    const string ParentSpanIdPropertyName = "ParentSpanId";
 
     public static void SetLoggerActivity(Activity activity, LoggerActivity loggerActivity)
     {
@@ -84,7 +83,7 @@ static class ActivityUtil
         properties[SpanStartTimestampPropertyName] = new LogEventProperty(SpanStartTimestampPropertyName, new ScalarValue(start));
         if (parentSpanId != null && parentSpanId.Value != default)
         {
-            properties[ParentSpanIdPropertyName] = new LogEventProperty(ParentSpanIdPropertyName, new ScalarValue(parentSpanId.Value.ToString()));
+            properties[ParentSpanIdPropertyName] = new LogEventProperty(ParentSpanIdPropertyName, new ScalarValue(parentSpanId.Value));
         }
 
         var evt = new LogEvent(
