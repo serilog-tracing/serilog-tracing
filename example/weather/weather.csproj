@@ -8,12 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.0" />
-    <PackageReference Include="Serilog.Sinks.Seq" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="serilog" Version="3.1.1" />
+    <PackageReference Include="serilog.sinks.console" Version="5.0.0" />
+    <PackageReference Include="serilog.sinks.seq" Version="6.0.0" />
     <ProjectReference Include="../../src/SerilogTracing/SerilogTracing.csproj" />
   </ItemGroup>
 
