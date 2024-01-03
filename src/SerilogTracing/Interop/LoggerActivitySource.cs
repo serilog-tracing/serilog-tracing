@@ -2,9 +2,9 @@
 
 namespace SerilogTracing.Interop;
 
-static class LoggerActivitySource<T>
+static class LoggerActivitySource
 {
-    static readonly string Name = typeof(T).FullName ?? "Serilog";
+    const string Name = "Serilog";
 
     // ReSharper disable once StaticMemberInGenericType
     public static ActivitySource Instance { get; } = new(Name, null);
