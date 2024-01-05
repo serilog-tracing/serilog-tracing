@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using Serilog;
 using Serilog.Core;
+using Serilog.Debugging;
 using Serilog.Events;
+using SerilogTracing.Instrumentation;
 using SerilogTracing.Interop;
 
 namespace SerilogTracing;
@@ -18,8 +20,10 @@ public static class LoggerConfigurationTracingExtensions
     /// <returns>The logger.</returns>
     public static Logger CreateTracingLogger(this LoggerConfiguration loggerConfiguration, Action<SerilogActivityListenerOptions>? configure = null)
     {
-        var listener = new ActivityListener();
-        var disposeProxy = new DisposeProxy(listener);
+        var activityListener = new ActivityListener();
+        var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
+        var disposeProxy = new DisposeProxy(activityListener, diagnosticListenerSubscription);
+        
         var logger = loggerConfiguration
             .WriteTo.Sink(disposeProxy)
             .CreateLogger();
@@ -32,11 +36,11 @@ public static class LoggerConfigurationTracingExtensions
             return !string.IsNullOrWhiteSpace(name) ? logger.ForContext(Constants.SourceContextPropertyName, name) : logger;
         }
         
-        listener.Sample = options.Sample;
-        listener.SampleUsingParentId = options.SampleUsingParentId;
-        listener.ShouldListenTo = source => GetLogger(source.Name).IsEnabled(LogEventLevel.Fatal);
+        activityListener.Sample = options.Sample;
+        activityListener.SampleUsingParentId = options.SampleUsingParentId;
+        activityListener.ShouldListenTo = source => GetLogger(source.Name).IsEnabled(LogEventLevel.Fatal);
 
-        listener.ActivityStopped += activity =>
+        activityListener.ActivityStopped += activity =>
         {
             if (ActivityUtil.TryGetLoggerActivity(activity, out _))
                 return; // `LoggerActivity` completion writes these to the activity-specific logger.
@@ -50,14 +54,27 @@ public static class LoggerConfigurationTracingExtensions
             activityLogger.Write(ActivityUtil.ActivityToLogEvent(activityLogger, activity));
         };
         
-        ActivitySource.AddActivityListener(listener);
+        ActivitySource.AddActivityListener(activityListener);
 
         return logger;
     }
 
-    sealed class DisposeProxy(IDisposable disposable) : ILogEventSink, IDisposable
+    sealed class DisposeProxy(params IDisposable[] disposables) : ILogEventSink, IDisposable
     {
-        public void Dispose() => disposable.Dispose();
+        public void Dispose()
+        {
+            foreach (var disposable in disposables)
+            {
+                try
+                {
+                    disposable.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    SelfLog.WriteLine("TracingLogger: exception in dispose" + Environment.NewLine + ex);
+                }
+            }
+        }
 
         void ILogEventSink.Emit(LogEvent logEvent)
         {

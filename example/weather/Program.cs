@@ -41,3 +41,4 @@ finally
 {
     await Log.CloseAndFlushAsync();
 }
+
