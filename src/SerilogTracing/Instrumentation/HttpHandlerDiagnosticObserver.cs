@@ -34,10 +34,11 @@ sealed class HttpHandlerDiagnosticObserver : IObserver<KeyValuePair<string,objec
         {
             var request = GetRequest(value.Value);
             if (request == null) return;
-            
+
+            // Enrichment mechanism should make this customizable.
+
             activity.DisplayName = $"HTTP {request.Method} {request.RequestUri}";
             
-            // Need to consider how much of the URI is reasonable to emit.
             activity.AddTag("RequestUri", request.RequestUri);
             activity.AddTag("RequestMethod", request.Method);
             
