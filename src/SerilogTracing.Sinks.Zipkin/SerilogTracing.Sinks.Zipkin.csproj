@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SerilogTracing\SerilogTracing.csproj" />
+        <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
+        <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="4.0.0-*" />
+    </ItemGroup>
+
+</Project>
