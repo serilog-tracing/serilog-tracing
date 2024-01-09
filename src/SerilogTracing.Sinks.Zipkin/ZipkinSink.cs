@@ -7,7 +7,7 @@ using SerilogTracing.Core;
 
 namespace SerilogTracing.Sinks.Zipkin;
 
-public class ZipkinSink: IBatchedLogEventSink
+class ZipkinSink: IBatchedLogEventSink
 {
     readonly Encoding _encoding = new UTF8Encoding(false);
     readonly HttpClient _client;
@@ -24,7 +24,7 @@ public class ZipkinSink: IBatchedLogEventSink
             tags: rest()
         }
     }
-    """, nameResolver: new StaticMemberNameResolver(typeof(Operators)));
+    """, nameResolver: new StaticMemberNameResolver(typeof(UserDefinedFunctions)));
     
     public ZipkinSink(Uri endpoint)
     {

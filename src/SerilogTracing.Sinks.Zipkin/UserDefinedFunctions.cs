@@ -4,7 +4,7 @@ using Serilog.Events;
 namespace SerilogTracing.Sinks.Zipkin;
 
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
-static class Operators
+static class UserDefinedFunctions
 {
     static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     

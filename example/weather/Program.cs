@@ -1,6 +1,5 @@
 ﻿using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.PeriodicBatching;
 using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Formatting;
@@ -13,7 +12,7 @@ Log.Logger = new LoggerConfiguration()
         "http://localhost:5341",
         payloadFormatter: DefaultFormatting.CreateJsonFormatter(),
         messageHandler: new SocketsHttpHandler { ActivityHeadersPropagator = null })
-    .WriteTo.Sink(new PeriodicBatchingSink(new ZipkinSink(new Uri("http://localhost:9411")), new PeriodicBatchingSinkOptions()))
+    .WriteTo.Zipkin("http://localhost:9411")
     .CreateTracingLogger();
 
 if (args.Length != 1)
