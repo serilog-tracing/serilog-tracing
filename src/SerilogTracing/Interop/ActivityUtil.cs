@@ -10,6 +10,7 @@ namespace SerilogTracing.Interop;
 static class ActivityUtil
 {
     const string SelfPropertyName = "SerilogTracing.LoggerActivity.Self";
+    const string MessageTemplateOverridePropertyName = "SerilogTracing.LoggerActivity.MessageTemplate";
 
     public static void SetLoggerActivity(Activity activity, LoggerActivity loggerActivity)
     {
@@ -25,6 +26,23 @@ static class ActivityUtil
         }
 
         loggerActivity = null;
+        return false;
+    }
+
+    public static void SetMessageTemplateOverride(Activity activity, MessageTemplate messageTemplate)
+    {
+        activity.SetCustomProperty(MessageTemplateOverridePropertyName, messageTemplate);
+    }
+    
+    public static bool TryGetMessageTemplateOverride(Activity activity, [NotNullWhen(true)] out MessageTemplate? messageTemplate)
+    {
+        if (activity.GetCustomProperty(MessageTemplateOverridePropertyName) is MessageTemplate customPropertyValue)
+        {
+            messageTemplate = customPropertyValue;
+            return true;
+        }
+
+        messageTemplate = null;
         return false;
     }
 
@@ -47,7 +65,8 @@ static class ActivityUtil
         var start = activity.StartTimeUtc;
         var end = start + activity.Duration;
         var level = activity.Status == ActivityStatusCode.Error ? LogEventLevel.Error : LogEventLevel.Information;
-        var template = new MessageTemplate(new[] { new TextToken(activity.DisplayName) });
+        TryGetMessageTemplateOverride(activity, out var messageTemplate);
+        var template = messageTemplate ?? new MessageTemplate(new[] { new TextToken(activity.DisplayName) });
         var exception = ExceptionFromEvents(activity);
         var captures = new Dictionary<string, LogEventProperty>();
         return ActivityToLogEvent(logger, activity, start, end, activity.TraceId, activity.SpanId, activity.ParentSpanId, level, exception, template, captures);
