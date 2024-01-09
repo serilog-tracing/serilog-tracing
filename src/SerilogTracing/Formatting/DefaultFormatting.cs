@@ -26,17 +26,4 @@ public static class DefaultFormatting
             theme: theme,
             nameResolver: new TracingFunctionsNameResolver());
     }
-
-    /// <summary>
-    /// Produces a JSON format based on the one used by Serilog.Formatting.Compact, which is also compatible with the format
-    /// accepted by Seq.
-    /// </summary>
-    /// <param name="theme">Optional template theme to apply, useful only for ANSI console output.</param>
-    /// <returns>The formatter.</returns>
-    public static ITextFormatter CreateJsonFormatter(TemplateTheme? theme = null)
-    {
-        return new ExpressionTemplate(
-            "{ {@t, @mt, @l: if @l = 'Information' then undefined() else @l, @x, @sp, @tr, @ps: ParentSpanId, @st: SpanStartTimestamp, ..rest()} }\n",
-            theme: theme);
-    }
 }
