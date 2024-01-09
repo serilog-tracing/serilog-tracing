@@ -38,9 +38,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "weather", "example\weather\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Sinks.Zipkin", "src\SerilogTracing.Sinks.Zipkin\SerilogTracing.Sinks.Zipkin.csproj", "{5DBE6610-CCF2-41B9-9592-033B24B79558}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.OpenTelemetry", "src\Serilog.Sinks.OpenTelemetry\Serilog.Sinks.OpenTelemetry.csproj", "{9139D9D6-A7BA-4FB7-B368-C340ACA523BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Sinks.OpenTelemetry", "src\SerilogTracing.Sinks.OpenTelemetry\SerilogTracing.Sinks.OpenTelemetry.csproj", "{9139D9D6-A7BA-4FB7-B368-C340ACA523BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.OpenTelemetry.Tests", "test\Serilog.Sinks.OpenTelemetry.Tests\Serilog.Sinks.OpenTelemetry.Tests.csproj", "{F94303AD-18D0-4A3F-8F35-CA2506E9D8F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Sinks.OpenTelemetry.Tests", "test\SerilogTracing.Sinks.OpenTelemetry.Tests\SerilogTracing.Sinks.OpenTelemetry.Tests.csproj", "{F94303AD-18D0-4A3F-8F35-CA2506E9D8F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
