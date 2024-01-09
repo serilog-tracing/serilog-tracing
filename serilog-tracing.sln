@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{81CA4013-44B
 		Build.ps1 = Build.ps1
 		global.json = global.json
 		Setup.ps1 = Setup.ps1
+		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "example", "example", "{E35D98E8-5F3C-4ABD-8A65-63B6E357DC2F}"
@@ -35,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.WeatherService", "e
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "weather", "example\weather\weather.csproj", "{DA47B450-39F5-4F7B-86B6-615432558136}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Sinks.Zipkin", "src\SerilogTracing.Sinks.Zipkin\SerilogTracing.Sinks.Zipkin.csproj", "{5DBE6610-CCF2-41B9-9592-033B24B79558}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.OpenTelemetry", "src\Serilog.Sinks.OpenTelemetry\Serilog.Sinks.OpenTelemetry.csproj", "{9139D9D6-A7BA-4FB7-B368-C340ACA523BA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.OpenTelemetry.Tests", "test\Serilog.Sinks.OpenTelemetry.Tests\Serilog.Sinks.OpenTelemetry.Tests.csproj", "{F94303AD-18D0-4A3F-8F35-CA2506E9D8F6}"
@@ -54,6 +57,7 @@ Global
 		{DA47B450-39F5-4F7B-86B6-615432558136} = {E35D98E8-5F3C-4ABD-8A65-63B6E357DC2F}
 		{9139D9D6-A7BA-4FB7-B368-C340ACA523BA} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
 		{F94303AD-18D0-4A3F-8F35-CA2506E9D8F6} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
+		{5DBE6610-CCF2-41B9-9592-033B24B79558} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -72,6 +76,10 @@ Global
 		{DA47B450-39F5-4F7B-86B6-615432558136}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA47B450-39F5-4F7B-86B6-615432558136}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA47B450-39F5-4F7B-86B6-615432558136}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DBE6610-CCF2-41B9-9592-033B24B79558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DBE6610-CCF2-41B9-9592-033B24B79558}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DBE6610-CCF2-41B9-9592-033B24B79558}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DBE6610-CCF2-41B9-9592-033B24B79558}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9139D9D6-A7BA-4FB7-B368-C340ACA523BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9139D9D6-A7BA-4FB7-B368-C340ACA523BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9139D9D6-A7BA-4FB7-B368-C340ACA523BA}.Release|Any CPU.ActiveCfg = Release|Any CPU

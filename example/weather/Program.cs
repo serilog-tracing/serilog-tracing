@@ -3,6 +3,7 @@ using Serilog.Events;
 using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Formatting;
+using SerilogTracing.Sinks.Zipkin;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", typeof(Program).Assembly.GetName().Name)
@@ -11,6 +12,7 @@ Log.Logger = new LoggerConfiguration()
         "http://localhost:5341",
         payloadFormatter: DefaultFormatting.CreateJsonFormatter(),
         messageHandler: new SocketsHttpHandler { ActivityHeadersPropagator = null })
+    .WriteTo.Zipkin("http://localhost:9411")
     .CreateTracingLogger();
 
 if (args.Length != 1)
@@ -41,3 +43,4 @@ finally
 {
     await Log.CloseAndFlushAsync();
 }
+
