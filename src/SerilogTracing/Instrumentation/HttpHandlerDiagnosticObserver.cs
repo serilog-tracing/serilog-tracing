@@ -33,14 +33,24 @@ sealed class HttpHandlerDiagnosticObserver : IObserver<KeyValuePair<string,objec
             activity.OperationName == "System.Net.Http.HttpRequestOut")
         {
             var request = GetRequest(value.Value);
-            if (request == null) return;
+            if (request == null || request.RequestUri == null) return;
 
-            // Enrichment mechanism should make this customizable.
-
-            activity.DisplayName = $"HTTP {request.Method} {request.RequestUri}";
-            ActivityUtil.SetMessageTemplateOverride(activity, MessageTemplateOverride);
+            // The message template and properties will need to be set through a configurable enrichment
+            // mechanism, since the detail/information-leakage trade-off will be different for different
+            // consumers.
             
-            activity.AddTag("RequestUri", request.RequestUri);
+            // For now, stripping any user, query, and fragment should be a reasonable default.
+
+            var uriBuilder = new UriBuilder(request.RequestUri)
+            {
+                Query = null,
+                Fragment = null,
+                UserName = null,
+                Password = null
+            };
+
+            ActivityUtil.SetMessageTemplateOverride(activity, MessageTemplateOverride);
+            activity.AddTag("RequestUri", uriBuilder.Uri);
             activity.AddTag("RequestMethod", request.Method);
         }
         else if (value.Key == "System.Net.Http.HttpRequestOut.Stop")
