@@ -53,6 +53,7 @@ sealed class HttpHandlerDiagnosticObserver : IObserver<KeyValuePair<string,objec
             };
 
             ActivityUtil.SetMessageTemplateOverride(activity, MessageTemplateOverride);
+            activity.DisplayName = MessageTemplateOverride.Text;
             activity.AddTag("RequestUri", uriBuilder.Uri);
             activity.AddTag("RequestMethod", request.Method);
         }
