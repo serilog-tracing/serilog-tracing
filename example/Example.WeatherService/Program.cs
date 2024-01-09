@@ -1,7 +1,10 @@
 using Serilog;
+using Serilog.Sinks.PeriodicBatching;
 using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Formatting;
+using SerilogTracing.Sinks.Zipkin;
+
 // ReSharper disable RedundantSuppressNullableWarningExpression
 
 Log.Logger = new LoggerConfiguration()
@@ -11,6 +14,7 @@ Log.Logger = new LoggerConfiguration()
         "http://localhost:5341",
         payloadFormatter: DefaultFormatting.CreateJsonFormatter(),
         messageHandler: new SocketsHttpHandler { ActivityHeadersPropagator = null })
+    .WriteTo.Sink(new PeriodicBatchingSink(new ZipkinSink(new Uri("http://localhost:9411")), new PeriodicBatchingSinkOptions()))
     .CreateTracingLogger();
 
 Log.Information("Weather service starting up");

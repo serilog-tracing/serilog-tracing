@@ -1,0 +1,10 @@
+<Project>
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>12</LangVersion>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <VersionPrefix>1.0.0</VersionPrefix>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    </PropertyGroup>
+</Project>
