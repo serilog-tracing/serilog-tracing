@@ -38,11 +38,10 @@ sealed class HttpHandlerDiagnosticObserver : IObserver<KeyValuePair<string,objec
             // Enrichment mechanism should make this customizable.
 
             activity.DisplayName = $"HTTP {request.Method} {request.RequestUri}";
+            ActivityUtil.SetMessageTemplateOverride(activity, MessageTemplateOverride);
             
             activity.AddTag("RequestUri", request.RequestUri);
             activity.AddTag("RequestMethod", request.Method);
-            
-            ActivityUtil.SetMessageTemplateOverride(activity, MessageTemplateOverride);
         }
         else if (value.Key == "System.Net.Http.HttpRequestOut.Stop")
         {
