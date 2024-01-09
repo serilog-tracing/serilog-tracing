@@ -10,6 +10,9 @@ sealed class HttpHandlerDiagnosticObserver : IObserver<KeyValuePair<string,objec
     static readonly Func<object, HttpRequestMessage?> GetRequest = CreateAccessor<HttpRequestMessage>(
         "System.Net.Http.DiagnosticsHandler+ActivityStartData, System.Net.Http", "Request");
     
+    static readonly Func<object, TaskStatus> GetRequestTaskStatus = CreateAccessor<TaskStatus>(
+        "System.Net.Http.DiagnosticsHandler+ActivityStopData, System.Net.Http", "RequestTaskStatus");
+    
     static readonly Func<object, HttpResponseMessage?> GetResponse = CreateAccessor<HttpResponseMessage>(
         "System.Net.Http.DiagnosticsHandler+ActivityStopData, System.Net.Http", "Response");
 
@@ -56,13 +59,18 @@ sealed class HttpHandlerDiagnosticObserver : IObserver<KeyValuePair<string,objec
         else if (value.Key == "System.Net.Http.HttpRequestOut.Stop")
         {
             var response = GetResponse(value.Value);
-            if (response == null) return;
-            
-            activity.AddTag("StatusCode", (int)response.StatusCode);
+            activity.AddTag("StatusCode", response != null ? (int)response.StatusCode : null);
+
+            if (activity.Status == ActivityStatusCode.Unset)
+            {
+                var requestTaskStatus = GetRequestTaskStatus(value.Value);
+                if (requestTaskStatus == TaskStatus.Faulted || response is { IsSuccessStatusCode: false })
+                    activity.SetStatus(ActivityStatusCode.Error);
+            }
         }
     }
 
-    static Func<object, T?> CreateAccessor<T>(string typeName, string propertyName)
+    static Func<object, T?> CreateAccessor<T>(string typeName, string propertyName) where T: notnull
     {
         var type = Type.GetType(typeName, throwOnError: true)!;
         var propertyInfo = type.GetProperty(propertyName)!;

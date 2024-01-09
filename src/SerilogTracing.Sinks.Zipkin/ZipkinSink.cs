@@ -26,15 +26,28 @@ class ZipkinSink: IBatchedLogEventSink
     }
     """, nameResolver: new StaticMemberNameResolver(typeof(UserDefinedFunctions)));
     
-    public ZipkinSink(Uri endpoint)
+    public ZipkinSink(Uri endpoint, HttpMessageHandler messageHandler)
     {
-        _client = new HttpClient { BaseAddress = endpoint };
+        _client = new HttpClient(messageHandler) { BaseAddress = endpoint };
     }
         
     public async Task EmitBatchAsync(IEnumerable<LogEvent> batch)
     {
-        // ReSharper disable MethodHasAsyncOverload
-        
+        var content = FormatRequestContent(batch);
+        if (content == null)
+            return;
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/v2/spans")
+        {
+            Content = new StringContent(content, _encoding, "application/json")
+        };
+
+        var response = await _client.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+    }
+
+    string? FormatRequestContent(IEnumerable<LogEvent> batch)
+    {
         var content = new StringWriter();
         content.Write('[');
         
@@ -53,21 +66,10 @@ class ZipkinSink: IBatchedLogEventSink
         }
 
         if (!any)
-        {
-            return;
-        }
+            return null;
         
         content.Write(']');
-        
-        // ReSharper restore MethodHasAsyncOverload
-
-        var request = new HttpRequestMessage(HttpMethod.Post, "api/v2/spans")
-        {
-            Content = new StringContent(content.ToString(), _encoding, "application/json")
-        };
-
-        var response = await _client.SendAsync(request);
-        response.EnsureSuccessStatusCode();
+        return content.ToString();
     }
 
     static bool IsSpan(LogEvent logEvent)
