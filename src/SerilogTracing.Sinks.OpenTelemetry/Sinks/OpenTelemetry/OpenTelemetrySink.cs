@@ -115,6 +115,11 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
         _exporter.Export(request);
     }
 
+    bool IsSpanEvent(LogEvent logEvent)
+    {
+        return false;
+    }
+
     /// <summary>
     /// A no-op for an empty batch.
     /// </summary>

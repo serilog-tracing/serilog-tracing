@@ -16,6 +16,7 @@ using System.Net.Http;
 using Grpc.Core;
 using Grpc.Net.Client;
 using OpenTelemetry.Proto.Collector.Logs.V1;
+using OpenTelemetry.Proto.Collector.Trace.V1;
 
 namespace SerilogTracing.Sinks.OpenTelemetry.Exporters;
 
@@ -25,18 +26,26 @@ namespace SerilogTracing.Sinks.OpenTelemetry.Exporters;
 /// </summary>
 sealed class GrpcExporter : IExporter, IDisposable
 {
-    readonly LogsService.LogsServiceClient _client;
+    readonly string _logsEndpoint;
+    readonly string _tracesEndpoint;
 
-    readonly GrpcChannel _channel;
+    readonly GrpcChannel _logsChannel;
+    readonly GrpcChannel _tracesChannel;
 
+    readonly LogsService.LogsServiceClient _logsClient;
+    readonly TraceService.TraceServiceClient _tracesClient;
+    
     readonly Metadata _headers;
 
     /// <summary>
     /// Creates a new instance of a GrpcExporter that writes an
     /// ExportLogsServiceRequest to a gRPC endpoint.
     /// </summary>
-    /// <param name="endpoint">
+    /// <param name="logsEndpoint">
     /// The full OTLP endpoint to which logs are sent.
+    /// </param>
+    /// <param name="tracesEndpoint">
+    /// The full OTLP endpoint to which traces are sent.
     /// </param>
     /// <param name="headers">
     /// A dictionary containing the request headers.
@@ -44,9 +53,12 @@ sealed class GrpcExporter : IExporter, IDisposable
     /// <param name="httpMessageHandler">
     /// Custom HTTP message handler.
     /// </param>
-    public GrpcExporter(string endpoint, IReadOnlyDictionary<string, string> headers,
+    public GrpcExporter(string logsEndpoint, string tracesEndpoint, IReadOnlyDictionary<string, string> headers,
         HttpMessageHandler? httpMessageHandler = null)
     {
+        _logsEndpoint = string.IsNullOrWhiteSpace(logsEndpoint) ? tracesEndpoint : logsEndpoint;
+        _tracesEndpoint = string.IsNullOrWhiteSpace(tracesEndpoint) ? logsEndpoint : tracesEndpoint;
+        
         var grpcChannelOptions = new GrpcChannelOptions();
         if (httpMessageHandler != null)
         {
@@ -54,8 +66,10 @@ sealed class GrpcExporter : IExporter, IDisposable
             grpcChannelOptions.DisposeHttpClient = true;
         }
         
-        _channel = GrpcChannel.ForAddress(endpoint, grpcChannelOptions);
-        _client = new LogsService.LogsServiceClient(_channel);
+        _logsChannel = GrpcChannel.ForAddress(_logsEndpoint, grpcChannelOptions);
+        _logsClient = new LogsService.LogsServiceClient(_logsChannel);
+        _tracesChannel = GrpcChannel.ForAddress(_tracesEndpoint, grpcChannelOptions);
+        _tracesClient = new TraceService.TraceServiceClient(_logsChannel);
 
         _headers = new Metadata();
         foreach (var header in headers)
@@ -66,16 +80,27 @@ sealed class GrpcExporter : IExporter, IDisposable
 
     public void Dispose()
     {
-        _channel.Dispose();
+        _logsChannel.Dispose();
+        _tracesChannel.Dispose();
     }
 
     public void Export(ExportLogsServiceRequest request)
     {
-        _client.Export(request, _headers);
+        _logsClient.Export(request, _headers);
     }
 
     public Task ExportAsync(ExportLogsServiceRequest request)
     {
-        return _client.ExportAsync(request, _headers).ResponseAsync;
+        return _logsClient.ExportAsync(request, _headers).ResponseAsync;
+    }
+    
+    public void Export(ExportTraceServiceRequest request)
+    {
+        _tracesClient.Export(request, _headers);
+    }
+
+    public Task ExportAsync(ExportTraceServiceRequest request)
+    {
+        return _tracesClient.ExportAsync(request, _headers).ResponseAsync;
     }
 }

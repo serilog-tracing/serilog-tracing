@@ -44,7 +44,8 @@ public static class OpenTelemetryLoggerConfigurationExtensions
         configure(options);
 
         var exporter = Exporter.Create(
-            endpoint: options.Endpoint,
+            logsEndpoint: options.LogsEndpoint,
+            tracesEndpoint: options.TracesEndpoint,
             protocol: options.Protocol,
             headers: new Dictionary<string, string>(options.Headers),
             httpMessageHandler: options.HttpMessageHandler);
@@ -66,8 +67,11 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// <param name="loggerSinkConfiguration">
     /// The `WriteTo` configuration object.
     /// </param>
-    /// <param name="endpoint">
-    /// The full URL of the OTLP exporter endpoint.
+    /// <param name="logsEndpoint">
+    /// The full URL of the OTLP logs exporter endpoint.
+    /// </param>
+    /// <param name="tracesEndpoint">
+    /// The full URL of the OTLP traces exporter endpoint.
     /// </param>
     /// <param name="protocol">
     /// The OTLP protocol to use.
@@ -82,7 +86,8 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// <returns>Logger configuration, allowing configuration to continue.</returns>
     public static LoggerConfiguration OpenTelemetry(
         this LoggerSinkConfiguration loggerSinkConfiguration,
-        string endpoint = OpenTelemetrySinkOptions.DefaultEndpoint,
+        string logsEndpoint = OpenTelemetrySinkOptions.DefaultEndpoint,
+        string tracesEndpoint = OpenTelemetrySinkOptions.DefaultEndpoint,
         OtlpProtocol protocol = OpenTelemetrySinkOptions.DefaultProtocol,
         IDictionary<string, string>? headers = null,
         IDictionary<string, object>? resourceAttributes = null)
@@ -91,7 +96,8 @@ public static class OpenTelemetryLoggerConfigurationExtensions
 
         return loggerSinkConfiguration.OpenTelemetry(options =>
         {
-            options.Endpoint = endpoint;
+            options.LogsEndpoint = logsEndpoint;
+            options.TracesEndpoint = tracesEndpoint;
             options.Protocol = protocol;
             headers?.AddTo(options.Headers);
             resourceAttributes?.AddTo(options.ResourceAttributes);
@@ -116,7 +122,8 @@ public static class OpenTelemetryLoggerConfigurationExtensions
         configure(options);
 
         var exporter = Exporter.Create(
-            endpoint: options.Endpoint,
+            logsEndpoint: options.LogsEndpoint,
+            tracesEndpoint: options.TracesEndpoint,
             protocol: options.Protocol,
             headers: new Dictionary<string, string>(options.Headers),
             httpMessageHandler: options.HttpMessageHandler);
@@ -136,8 +143,11 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// <param name="loggerAuditSinkConfiguration">
     /// The `AuditTo` configuration object.
     /// </param>
-    /// <param name="endpoint">
-    /// The full URL of the OTLP exporter endpoint.
+    /// <param name="logsEndpoint">
+    /// The full URL of the OTLP logs exporter endpoint.
+    /// </param>
+    /// <param name="tracesEndpoint">
+    /// The full URL of the OTLP traces exporter endpoint.
     /// </param>
     /// <param name="protocol">
     /// The OTLP protocol to use.
@@ -152,7 +162,8 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// <returns>Logger configuration, allowing configuration to continue.</returns>
     public static LoggerConfiguration OpenTelemetry(
         this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
-        string endpoint = OpenTelemetrySinkOptions.DefaultEndpoint,
+        string logsEndpoint = OpenTelemetrySinkOptions.DefaultEndpoint,
+        string tracesEndpoint = OpenTelemetrySinkOptions.DefaultEndpoint,
         OtlpProtocol protocol = OpenTelemetrySinkOptions.DefaultProtocol,
         IDictionary<string, string>? headers = null,
         IDictionary<string, object>? resourceAttributes = null)
@@ -161,7 +172,8 @@ public static class OpenTelemetryLoggerConfigurationExtensions
 
         return loggerAuditSinkConfiguration.OpenTelemetry(options =>
         {
-            options.Endpoint = endpoint;
+            options.LogsEndpoint = logsEndpoint;
+            options.TracesEndpoint = tracesEndpoint;
             options.Protocol = protocol;
             headers?.AddTo(options.Headers);
             resourceAttributes?.AddTo(options.ResourceAttributes);
