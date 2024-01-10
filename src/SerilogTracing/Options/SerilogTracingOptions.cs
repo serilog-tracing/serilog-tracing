@@ -8,17 +8,20 @@ namespace SerilogTracing.Options;
 /// </summary>
 public sealed class SerilogTracingOptions
 {
-    private readonly List<IActivityEnricher> _enrichers = new()
+    static readonly List<IActivityEnricher> DefaultEnrichers = new()
     {
         new HttpRequestOutActivityEnricher()
     };
+    
+    readonly List<IActivityEnricher> _enrichers = new();
+    bool _withDefaultEnrichers = true;
 
     internal SerilogTracingOptions()
     {
-        Enrich = new SerilogTracingActivityEnrichmentOptions(this, enricher => _enrichers.Add(enricher));
+        Enrich = new SerilogTracingActivityEnrichmentOptions(this, enricher => _enrichers.Add(enricher), withDefaults => _withDefaultEnrichers = withDefaults);
     }
 
-    internal IReadOnlyList<IActivityEnricher> Enrichers => _enrichers;
+    internal IEnumerable<IActivityEnricher> Enrichers => _withDefaultEnrichers ? DefaultEnrichers.Concat(_enrichers) : _enrichers;
     
     /// <summary>
     /// Set the sampling level for the listener. The <see cref="ActivityContext"/> supplied to

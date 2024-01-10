@@ -9,13 +9,28 @@ public sealed class SerilogTracingActivityEnrichmentOptions
 {
     readonly SerilogTracingOptions _options;
     readonly Action<IActivityEnricher> _addEnricher;
+    readonly Action<bool> _useDefaultEnrichers;
 
     internal SerilogTracingActivityEnrichmentOptions(
         SerilogTracingOptions options,
-        Action<IActivityEnricher> addEnricher)
+        Action<IActivityEnricher> addEnricher,
+        Action<bool> useDefaultEnrichers)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _addEnricher = addEnricher ?? throw new ArgumentNullException(nameof(addEnricher));
+        _useDefaultEnrichers = useDefaultEnrichers ?? throw new ArgumentNullException(nameof(useDefaultEnrichers));
+    }
+
+    /// <summary>
+    /// Whether to use default built-in activity enrichers.
+    /// </summary>
+    /// <param name="withDefaults">If true, default activity enrichers will be used.</param>
+    /// <returns>Configuration object allowing method chaining.</returns>
+    public SerilogTracingOptions WithDefaultActivityEnrichers(bool withDefaults)
+    {
+        _useDefaultEnrichers(withDefaults);
+
+        return _options;
     }
 
     /// <summary>
