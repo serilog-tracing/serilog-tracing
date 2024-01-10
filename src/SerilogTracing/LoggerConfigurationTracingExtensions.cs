@@ -48,7 +48,7 @@ public static class LoggerConfigurationTracingExtensions
 
             var activityLogger = GetLogger(activity.Source.Name);
 
-            var level = ActivityUtil.GetCompletionLevel(activity);
+            var level = activity.GetCompletionLevel();
             if (!activityLogger.IsEnabled(level))
                 return;
 

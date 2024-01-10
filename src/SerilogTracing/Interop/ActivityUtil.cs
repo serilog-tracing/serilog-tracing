@@ -9,15 +9,12 @@ namespace SerilogTracing.Interop;
 
 static class ActivityUtil
 {
-    const string SelfPropertyName = "SerilogTracing.LoggerActivity.Self";
-    const string MessageTemplateOverridePropertyName = "SerilogTracing.LoggerActivity.MessageTemplate";
-
-    public static void SetLoggerActivity(Activity activity, LoggerActivity loggerActivity)
+    internal static void SetLoggerActivity(Activity activity, LoggerActivity loggerActivity)
     {
         activity.SetCustomProperty(SelfPropertyName, loggerActivity);
     }
     
-    public static bool TryGetLoggerActivity(Activity activity, [NotNullWhen(true)] out LoggerActivity? loggerActivity)
+    internal static bool TryGetLoggerActivity(Activity activity, [NotNullWhen(true)] out LoggerActivity? loggerActivity)
     {
         if (activity.GetCustomProperty(SelfPropertyName) is LoggerActivity customPropertyValue)
         {
@@ -28,51 +25,34 @@ static class ActivityUtil
         loggerActivity = null;
         return false;
     }
-
-    public static void SetMessageTemplateOverride(Activity activity, MessageTemplate messageTemplate)
+    
+    internal static LogEvent ActivityToLogEvent(ILogger logger, Activity activity)
     {
-        activity.SetCustomProperty(MessageTemplateOverridePropertyName, messageTemplate);
+        var start = activity.StartTimeUtc;
+        var end = start + activity.Duration;
+        var level = activity.Status == ActivityStatusCode.Error ? LogEventLevel.Error : LogEventLevel.Information;
+        activity.TryGetMessageTemplateOverride(out var messageTemplate);
+        var template = messageTemplate ?? new MessageTemplate(new[] { new TextToken(activity.DisplayName) });
+        var exception = ExceptionFromEvents(activity);
+        var captures = new Dictionary<string, LogEventProperty>();
+        return ActivityToLogEvent(logger, activity, start, end, activity.TraceId, activity.SpanId, activity.ParentSpanId, level, exception, template, captures);
     }
     
-    public static bool TryGetMessageTemplateOverride(Activity activity, [NotNullWhen(true)] out MessageTemplate? messageTemplate)
-    {
-        if (activity.GetCustomProperty(MessageTemplateOverridePropertyName) is MessageTemplate customPropertyValue)
-        {
-            messageTemplate = customPropertyValue;
-            return true;
-        }
-
-        messageTemplate = null;
-        return false;
-    }
-
-    public static LogEvent ActivityToLogEvent(ILogger logger, LoggerActivity loggerActivity)
+    internal static LogEvent ActivityToLogEvent(ILogger logger, LoggerActivity loggerActivity)
     {
         var start = loggerActivity.StartTimestamp;
         var end = start + loggerActivity.Duration;
         var traceId = loggerActivity.TraceId;
         var spanId = loggerActivity.SpanId;
         var parentSpanId = loggerActivity.ParentSpanId;
-        var level = loggerActivity.CompletionLevel ?? (loggerActivity.Activity != null ? GetCompletionLevel(loggerActivity.Activity) : LogEventLevel.Information);
+        var level = loggerActivity.CompletionLevel ?? (loggerActivity.Activity?.GetCompletionLevel() ?? LogEventLevel.Information);
         var template = loggerActivity.MessageTemplate;
         var exception = loggerActivity.Exception ?? (loggerActivity.Activity != null ? ExceptionFromEvents(loggerActivity.Activity) : null);
         var captures = loggerActivity.Captures.ToDictionary(p => p.Name);
         return ActivityToLogEvent(logger, loggerActivity.Activity, start, end, traceId, spanId, parentSpanId, level, exception, template, captures);
     }
 
-    public static LogEvent ActivityToLogEvent(ILogger logger, Activity activity)
-    {
-        var start = activity.StartTimeUtc;
-        var end = start + activity.Duration;
-        var level = activity.Status == ActivityStatusCode.Error ? LogEventLevel.Error : LogEventLevel.Information;
-        TryGetMessageTemplateOverride(activity, out var messageTemplate);
-        var template = messageTemplate ?? new MessageTemplate(new[] { new TextToken(activity.DisplayName) });
-        var exception = ExceptionFromEvents(activity);
-        var captures = new Dictionary<string, LogEventProperty>();
-        return ActivityToLogEvent(logger, activity, start, end, activity.TraceId, activity.SpanId, activity.ParentSpanId, level, exception, template, captures);
-    }
-
-    static LogEvent ActivityToLogEvent(
+    internal static LogEvent ActivityToLogEvent(
         ILogger logger,
         Activity? activity,
         DateTime start,
@@ -116,13 +96,8 @@ static class ActivityUtil
 
         return evt;
     }
-
-    public static LogEventLevel GetCompletionLevel(Activity activity)
-    {
-        return activity.Status == ActivityStatusCode.Error ? LogEventLevel.Error : LogEventLevel.Information;
-    }
     
-    public static ActivityEvent EventFromException(Exception exception)
+    internal static ActivityEvent EventFromException(Exception exception)
     {
         var tags = new ActivityTagsCollection
         {
@@ -133,7 +108,7 @@ static class ActivityUtil
         return new ActivityEvent("exception", DateTimeOffset.Now, tags);
     }
 
-    internal static Exception? ExceptionFromEvents(Activity activity)
+    static Exception? ExceptionFromEvents(Activity activity)
     {
         var first = activity.Events.FirstOrDefault(e => e.Name == "exception");
         if (first.Name != "exception")

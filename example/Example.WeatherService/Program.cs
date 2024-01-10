@@ -13,7 +13,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(DefaultFormatting.CreateTextFormatter(TemplateTheme.Code))
     .WriteTo.SeqTracing("http://localhost:5341")
     .WriteTo.Zipkin("http://localhost:9411")
-    .CreateTracingLogger(options => options.Enrich.WithAspNetCore());
+    .CreateTracingLogger(options => options.Enrich.WithAspNetCoreInstrumentation());
 
 Log.Information("Weather service starting up");
 

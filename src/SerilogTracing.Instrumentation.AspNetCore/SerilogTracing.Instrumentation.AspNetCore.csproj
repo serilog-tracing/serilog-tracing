@@ -7,7 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SerilogTracing\SerilogTracing.csproj" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <ProjectReference Include="..\SerilogTracing\SerilogTracing.csproj" />
     </ItemGroup>
 
 </Project>

@@ -12,7 +12,7 @@ public static class SerilogTracingActivityEnrichmentOptionsExtensions
     /// </summary>
     /// <param name="options"></param>
     /// <returns></returns>
-    public static SerilogTracingOptions WithAspNetCore(this SerilogTracingActivityEnrichmentOptions options)
+    public static SerilogTracingOptions WithAspNetCoreInstrumentation(this SerilogTracingActivityEnrichmentOptions options)
     {
         return options.With<HttpRequestInActivityEnricher>();
     }

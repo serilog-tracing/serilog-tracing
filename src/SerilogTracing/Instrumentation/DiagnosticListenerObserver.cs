@@ -25,7 +25,7 @@ sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDispos
     {
         foreach (var enricher in _enrichers)
         {
-            if (enricher.SubscribeTo(value.Name))
+            if (enricher.ShouldListenTo(value.Name))
             {
                 _subscription.Add(value.Subscribe(new ActivityEnrichmentDiagnosticObserver(enricher)));
             }
