@@ -45,14 +45,14 @@ public class OtlpEventBuilderTests
     {
         var logRecord = new LogRecord();
 
-        OtlpEventBuilder.ProcessMessage(logRecord, Some.SerilogEvent(messageTemplate: ""), OpenTelemetrySinkOptions.DefaultIncludedData, null);
+        OtlpEventBuilder.ProcessMessage((message) => { logRecord.Body = new AnyValue {StringValue = message}; }, Some.SerilogEvent(messageTemplate: ""), OpenTelemetrySinkOptions.DefaultIncludedData, null);
         Assert.Null(logRecord.Body);
 
-        OtlpEventBuilder.ProcessMessage(logRecord, Some.SerilogEvent(messageTemplate: "\t\f "), OpenTelemetrySinkOptions.DefaultIncludedData, null);
+        OtlpEventBuilder.ProcessMessage((message) => { logRecord.Body = new AnyValue {StringValue = message}; }, Some.SerilogEvent(messageTemplate: "\t\f "), OpenTelemetrySinkOptions.DefaultIncludedData, null);
         Assert.Null(logRecord.Body);
 
         const string message = "log message";
-        OtlpEventBuilder.ProcessMessage(logRecord, Some.SerilogEvent(messageTemplate: message), OpenTelemetrySinkOptions.DefaultIncludedData, null);
+        OtlpEventBuilder.ProcessMessage((message) => { logRecord.Body = new AnyValue {StringValue = message}; }, Some.SerilogEvent(messageTemplate: message), OpenTelemetrySinkOptions.DefaultIncludedData, null);
         Assert.NotNull(logRecord.Body);
         Assert.Equal(message, logRecord.Body.StringValue);
     }

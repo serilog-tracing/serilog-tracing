@@ -124,9 +124,8 @@ static class OtlpEventBuilder
     static void ProcessStartTime(Span span, LogEvent logEvent)
     {
         if (logEvent.Properties.TryGetValue(SerilogTracing.Core.Constants.SpanStartTimestampPropertyName,
-                out var sst) && sst is ScalarValue {Value: DateTime})
+                out var sst) && sst is ScalarValue {Value: DateTime start})
         {
-            var start = Convert.ToDateTime(((ScalarValue) sst).Value);
             span.StartTimeUnixNano = PrimitiveConversions.ToUnixNano(start);
         }
     }
