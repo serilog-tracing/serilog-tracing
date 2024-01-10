@@ -119,7 +119,7 @@ public class OtlpEventBuilderTests
             var logRecord = new LogRecord();
             var logEvent = Some.SerilogEvent(Some.TestMessageTemplate, ex: ex);
 
-            OtlpEventBuilder.ProcessException(logRecord, logEvent);
+            OtlpEventBuilder.ProcessException(logRecord.Attributes, logEvent);
 
             var typeKeyValue = PrimitiveConversions.NewStringAttribute(TraceSemanticConventions.AttributeExceptionType, error.GetType().ToString());
             var messageKeyValue = PrimitiveConversions.NewStringAttribute(TraceSemanticConventions.AttributeExceptionMessage, error.Message);

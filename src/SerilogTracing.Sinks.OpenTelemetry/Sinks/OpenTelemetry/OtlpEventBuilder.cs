@@ -15,6 +15,7 @@
 // ReSharper disable PossibleMultipleEnumeration
 
 using System.Globalization;
+using Google.Protobuf.Collections;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Logs.V1;
 using OpenTelemetry.Proto.Trace.V1;
@@ -36,7 +37,7 @@ static class OtlpEventBuilder
         ProcessTimestamp(logRecord, logEvent);
         ProcessMessage((message) => { logRecord.Body = new AnyValue {StringValue = message}; }, logEvent, includedData, formatProvider);
         ProcessLevel(logRecord, logEvent);
-        ProcessException(logRecord, logEvent);
+        ProcessException(logRecord.Attributes, logEvent);
         ProcessIncludedFields(logRecord, logEvent, includedData);
 
         return (logRecord, scopeName);
@@ -51,8 +52,8 @@ static class OtlpEventBuilder
         ProcessStartTime(span, logEvent);
         ProcessMessage((message) => { span.Name = message; }, logEvent, includedData, formatProvider);
         ProcessLevel(span, logEvent);
-        // ProcessException(span, logEvent);
-        // ProcessIncludedFields(span, logEvent, includedData);
+        ProcessException(span.Attributes, logEvent);
+        ProcessIncludedFields(span, logEvent, includedData);
 
         return (span, scopeName);
     }
@@ -130,13 +131,11 @@ static class OtlpEventBuilder
         }
     }
 
-    public static void ProcessException(LogRecord logRecord, LogEvent logEvent)
+    public static void ProcessException(RepeatedField<KeyValue> attrs, LogEvent logEvent)
     {
         var ex = logEvent.Exception;
         if (ex != null)
         {
-            var attrs = logRecord.Attributes;
-
             attrs.Add(PrimitiveConversions.NewStringAttribute(SemanticConventions.AttributeExceptionType, ex.GetType().ToString()));
 
             if (ex.Message != "")
@@ -198,6 +197,59 @@ static class OtlpEventBuilder
                 }
                 
                 logRecord.Attributes.Add(PrimitiveConversions.NewAttribute(
+                    SemanticConventions.AttributeMessageTemplateRenderings,
+                    new AnyValue { ArrayValue = renderings }));
+            }
+        }
+    }
+    
+    static void ProcessIncludedFields(Span span, LogEvent logEvent, IncludedData includedFields)
+    {
+        if ((includedFields & IncludedData.TraceIdField) != IncludedData.None && logEvent.TraceId is {} traceId)
+        {
+            span.TraceId = PrimitiveConversions.ToOpenTelemetryTraceId(traceId.ToHexString());
+        }
+
+        if ((includedFields & IncludedData.SpanIdField) != IncludedData.None && logEvent.SpanId is {} spanId)
+        {
+            span.SpanId = PrimitiveConversions.ToOpenTelemetrySpanId(spanId.ToHexString());
+        }
+
+        if ((includedFields & IncludedData.MessageTemplateTextAttribute) != IncludedData.None)
+        {
+            span.Attributes.Add(PrimitiveConversions.NewAttribute(SemanticConventions.AttributeMessageTemplateText, new()
+            {
+                StringValue = logEvent.MessageTemplate.Text
+            }));
+        }
+
+        if ((includedFields & IncludedData.MessageTemplateMD5HashAttribute) != IncludedData.None)
+        {
+            span.Attributes.Add(PrimitiveConversions.NewAttribute(SemanticConventions.AttributeMessageTemplateMD5Hash, new()
+            {
+                StringValue = PrimitiveConversions.Md5Hash(logEvent.MessageTemplate.Text)
+            }));
+        }
+
+        if ((includedFields & IncludedData.MessageTemplateRenderingsAttribute) != IncludedData.None)
+        {
+            var tokensWithFormat = logEvent.MessageTemplate.Tokens
+                .OfType<PropertyToken>()
+                .Where(pt => pt.Format != null);
+
+            // Better not to allocate an array in the 99.9% of cases where this is false
+            if (tokensWithFormat.Any())
+            {
+                var renderings = new ArrayValue();
+
+                foreach (var propertyToken in tokensWithFormat)
+                {
+                    var space = new StringWriter();
+                    propertyToken.Render(logEvent.Properties, space, CultureInfo.InvariantCulture);
+                    renderings.Values.Add(new AnyValue { StringValue = space.ToString() });
+                }
+                
+                span.Attributes.Add(PrimitiveConversions.NewAttribute(
                     SemanticConventions.AttributeMessageTemplateRenderings,
                     new AnyValue { ArrayValue = renderings }));
             }

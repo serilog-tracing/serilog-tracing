@@ -117,6 +117,20 @@ sealed class HttpExporter : IExporter, IDisposable
         
         response.EnsureSuccessStatusCode();
     }
+    
+    /// <summary>
+    /// Sends the given protobuf request containing OpenTelemetry spans
+    /// to an OTLP/HTTP endpoint.
+    /// </summary>
+    public async Task ExportAsync(ExportTraceServiceRequest request)
+    {
+        var httpRequest = CreateHttpRequestMessage(request);
+
+        // We could consider using HttpCompletionOption.ResponseHeadersRead here.
+        var response = await _client.SendAsync(httpRequest);
+        
+        response.EnsureSuccessStatusCode();
+    }
 
     HttpRequestMessage CreateHttpRequestMessage(ExportLogsServiceRequest request)
     {

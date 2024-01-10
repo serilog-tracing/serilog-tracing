@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using OpenTelemetry.Proto.Collector.Logs.V1;
+using OpenTelemetry.Proto.Collector.Trace.V1;
 
 namespace SerilogTracing.Sinks.OpenTelemetry;
 
@@ -20,4 +21,9 @@ interface IExporter
 {
     void Export(ExportLogsServiceRequest request);
     Task ExportAsync(ExportLogsServiceRequest request);
+    
+    void Export(ExportTraceServiceRequest request);
+    Task ExportAsync(ExportTraceServiceRequest request);
+    
+    
 }

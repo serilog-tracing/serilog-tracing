@@ -89,6 +89,10 @@ serialize to JSON.
 
 Activity sources can be enabled and disabled using the standard `MinimumLevel.Override()` mechanism.
 
+## SerilogTracing.Sinks.OpenTelemetry
+
+SerilogTracing includes a fork of [Serilog.Sinks.OpenTelemetry](https://github.com/serilog/serilog-sinks-opentelemetry). This is necessary (for now) because Serilog.Sinks.OpenTelemetry only handles log signals. SerilogTrace.Sinks.OpenTelemetry also handles trace signals. 
+
 ## What about SerilogTimings?
 
 SerilogTracing is the logical successor to [SerilogTimings](https://github.com/nblumhardt/serilog-timings), which provides very

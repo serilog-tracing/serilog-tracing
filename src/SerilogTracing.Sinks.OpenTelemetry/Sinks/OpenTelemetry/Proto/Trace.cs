@@ -370,7 +370,7 @@ namespace OpenTelemetry.Proto.Trace.V1 {
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    global::OpenTelemetry.Proto.Resource.V1.Resource Resource {
+    public global::OpenTelemetry.Proto.Resource.V1.Resource Resource {
       get { return resource_; }
       set {
         resource_ = value;
@@ -649,7 +649,7 @@ namespace OpenTelemetry.Proto.Trace.V1 {
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    global::OpenTelemetry.Proto.Common.V1.InstrumentationScope Scope {
+    public global::OpenTelemetry.Proto.Common.V1.InstrumentationScope Scope {
       get { return scope_; }
       set {
         scope_ = value;

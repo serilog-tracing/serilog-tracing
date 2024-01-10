@@ -16,6 +16,7 @@ using Google.Protobuf.Collections;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Logs.V1;
 using OpenTelemetry.Proto.Resource.V1;
+using OpenTelemetry.Proto.Trace.V1;
 
 namespace SerilogTracing.Sinks.OpenTelemetry.ProtocolHelpers;
 
@@ -35,6 +36,19 @@ static class RequestTemplateFactory
             Scope = scope
         };
     }
+    
+    public static ScopeSpans CreateScopeSpans(string? scopeName)
+    {
+        var scope = scopeName != null ? new InstrumentationScope
+        {
+            Name = scopeName,
+        } : null;
+
+        return new ScopeSpans()
+        {
+            Scope = scope
+        };
+    }
 
     public static ResourceLogs CreateResourceLogs(IReadOnlyDictionary<string, object> resourceAttributes)
     {
@@ -48,6 +62,20 @@ static class RequestTemplateFactory
         resourceLogs.SchemaUrl = OpenTelemetrySchemaUrl;
 
         return resourceLogs;
+    }
+    
+    public static ResourceSpans CreateResourceSpans(IReadOnlyDictionary<string, object> resourceAttributes)
+    {
+        var resourceSpans = new ResourceSpans();
+
+        var attrs = ToResourceAttributes(resourceAttributes);
+
+        var resource = new Resource();
+        resource.Attributes.AddRange(attrs);
+        resourceSpans.Resource = resource;
+        resourceSpans.SchemaUrl = OpenTelemetrySchemaUrl;
+
+        return resourceSpans;
     }
 
     static RepeatedField<KeyValue> ToResourceAttributes(IReadOnlyDictionary<string, object> resourceAttributes)

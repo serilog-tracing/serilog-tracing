@@ -14,7 +14,9 @@
 
 using System.Net.Http;
 using OpenTelemetry.Proto.Collector.Logs.V1;
+using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Proto.Logs.V1;
+using OpenTelemetry.Proto.Trace.V1;
 using Serilog.Core;
 using Serilog.Events;
 using SerilogTracing.Sinks.OpenTelemetry.ProtocolHelpers;
@@ -26,6 +28,7 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
 {
     readonly IFormatProvider? _formatProvider;
     readonly ResourceLogs _resourceLogsTemplate;
+    readonly ResourceSpans _resourceSpansTemplate;
     readonly IExporter _exporter;
     readonly IncludedData _includedData;
 
@@ -45,6 +48,7 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
         }
 
         _resourceLogsTemplate = RequestTemplateFactory.CreateResourceLogs(resourceAttributes);
+        _resourceSpansTemplate = RequestTemplateFactory.CreateResourceSpans(resourceAttributes);
     }
 
     /// <summary>
@@ -117,13 +121,13 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
 
     void EmitSpan(LogEvent logEvent)
     {
-        var (logRecord, scopeName) = OtlpEventBuilder.ToLogRecord(logEvent, _formatProvider, _includedData);
-        var scopeLogs = RequestTemplateFactory.CreateScopeLogs(scopeName);
-        scopeLogs.LogRecords.Add(logRecord);
-        var resourceLogs = _resourceLogsTemplate.Clone();
-        resourceLogs.ScopeLogs.Add(scopeLogs);
-        var request = new ExportLogsServiceRequest();
-        request.ResourceLogs.Add(resourceLogs);
+        var (span, scopeName) = OtlpEventBuilder.ToSpan(logEvent, _formatProvider, _includedData);
+        var scopeSpans = RequestTemplateFactory.CreateScopeSpans(scopeName);
+        scopeSpans.Spans.Add(span);
+        var resourceSpans = _resourceSpansTemplate.Clone();
+        resourceSpans.ScopeSpans.Add(scopeSpans);
+        var request = new ExportTraceServiceRequest();
+        request.ResourceSpans.Add(resourceSpans);
         _exporter.Export(request);
     }
 
