@@ -21,7 +21,7 @@ public class OpenTelemetrySinkTests
     [Fact]
     public async Task SourceContextNameIsInstrumentationScope()
     {
-        var contextType = typeof(LogRecordBuilderTests);
+        var contextType = typeof(OtlpEventBuilderTests);
         var events = CollectingSink.Collect(log => log.ForContext(contextType).Information("Hello, world!"));
         var request = await ExportAsync(events);
         var resourceLogs = Assert.Single(request.ResourceLogs);

@@ -68,7 +68,7 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
 
         foreach (var logEvent in batch)
         {
-            var (logRecord, scopeName) = LogRecordBuilder.ToLogRecord(logEvent, _formatProvider, _includedData);
+            var (logRecord, scopeName) = OtlpEventBuilder.ToLogRecord(logEvent, _formatProvider, _includedData);
             if (scopeName == null)
             {
                 if (anonymousScope == null)
@@ -105,7 +105,19 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
     /// </summary>
     public void Emit(LogEvent logEvent)
     {
-        var (logRecord, scopeName) = LogRecordBuilder.ToLogRecord(logEvent, _formatProvider, _includedData);
+        if (IsSpan(logEvent))
+        {
+            EmitSpan(logEvent);
+        }
+        else
+        {
+           EmitLog(logEvent);
+        }
+    }
+
+    void EmitSpan(LogEvent logEvent)
+    {
+        var (logRecord, scopeName) = OtlpEventBuilder.ToLogRecord(logEvent, _formatProvider, _includedData);
         var scopeLogs = RequestTemplateFactory.CreateScopeLogs(scopeName);
         scopeLogs.LogRecords.Add(logRecord);
         var resourceLogs = _resourceLogsTemplate.Clone();
@@ -115,9 +127,23 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
         _exporter.Export(request);
     }
 
-    bool IsSpanEvent(LogEvent logEvent)
+    void EmitLog(LogEvent logEvent)
     {
-        return false;
+        var (logRecord, scopeName) = OtlpEventBuilder.ToLogRecord(logEvent, _formatProvider, _includedData);
+        var scopeLogs = RequestTemplateFactory.CreateScopeLogs(scopeName);
+        scopeLogs.LogRecords.Add(logRecord);
+        var resourceLogs = _resourceLogsTemplate.Clone();
+        resourceLogs.ScopeLogs.Add(scopeLogs);
+        var request = new ExportLogsServiceRequest();
+        request.ResourceLogs.Add(resourceLogs);
+        _exporter.Export(request);
+    }
+
+    static bool IsSpan(LogEvent logEvent)
+    {
+        return logEvent is { TraceId: not null, SpanId: not null } &&
+               logEvent.Properties.TryGetValue(SerilogTracing.Core.Constants.SpanStartTimestampPropertyName, out var sst) &&
+               sst is ScalarValue { Value: DateTime };
     }
 
     /// <summary>

@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 using Google.Protobuf;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Logs.V1;
+using OpenTelemetry.Proto.Trace.V1;
 using Serilog.Debugging;
 using Serilog.Events;
 
@@ -46,6 +47,23 @@ static class PrimitiveConversions
             LogEventLevel.Error => SeverityNumber.Error,
             LogEventLevel.Fatal => SeverityNumber.Fatal,
             _ => SeverityNumber.Unspecified
+        };
+    }
+    
+    public static Status ToStatus(LogEventLevel level)
+    {
+        return new Status
+        {
+            Code = level switch
+            {
+                LogEventLevel.Verbose 
+                    or LogEventLevel.Debug
+                    or LogEventLevel.Information
+                    or LogEventLevel.Warning => Status.Types.StatusCode.Ok,
+                LogEventLevel.Error 
+                    or LogEventLevel.Fatal => Status.Types.StatusCode.Error,
+                _ => Status.Types.StatusCode.Unset,
+            }
         };
     }
 

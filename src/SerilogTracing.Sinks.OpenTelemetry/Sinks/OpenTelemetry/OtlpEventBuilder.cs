@@ -17,6 +17,7 @@
 using System.Globalization;
 using OpenTelemetry.Proto.Common.V1;
 using OpenTelemetry.Proto.Logs.V1;
+using OpenTelemetry.Proto.Trace.V1;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Parsing;
@@ -25,23 +26,38 @@ using SerilogTracing.Sinks.OpenTelemetry.ProtocolHelpers;
 
 namespace SerilogTracing.Sinks.OpenTelemetry;
 
-static class LogRecordBuilder
+static class OtlpEventBuilder
 {
     public static (LogRecord logRecord, string? scopeName) ToLogRecord(LogEvent logEvent, IFormatProvider? formatProvider, IncludedData includedData)
     {
         var logRecord = new LogRecord();
 
-        ProcessProperties(logRecord, logEvent, includedData, out var scopeName);
+        ProcessProperties(logRecord.Attributes.Add, logEvent, includedData, out var scopeName);
         ProcessTimestamp(logRecord, logEvent);
-        ProcessMessage(logRecord, logEvent, includedData, formatProvider);
+        ProcessMessage((message) => { logRecord.Body = new AnyValue {StringValue = message}; }, logEvent, includedData, formatProvider);
         ProcessLevel(logRecord, logEvent);
         ProcessException(logRecord, logEvent);
         ProcessIncludedFields(logRecord, logEvent, includedData);
 
         return (logRecord, scopeName);
     }
+    
+    public static (Span span, string? scopeName) ToSpan(LogEvent logEvent, IFormatProvider? formatProvider, IncludedData includedData)
+    {
+        var span = new Span();
+        
+        ProcessProperties(span.Attributes.Add, logEvent, includedData, out var scopeName);
+        ProcessTimestamp(span, logEvent);
+        ProcessStartTime(span, logEvent);
+        ProcessMessage((message) => { span.Name = message; }, logEvent, includedData, formatProvider);
+        ProcessLevel(span, logEvent);
+        // ProcessException(span, logEvent);
+        // ProcessIncludedFields(span, logEvent, includedData);
 
-    public static void ProcessMessage(LogRecord logRecord, LogEvent logEvent, IncludedData includedFields, IFormatProvider? formatProvider)
+        return (span, scopeName);
+    }
+
+    public static void ProcessMessage(Action<string> setBody, LogEvent logEvent, IncludedData includedFields, IFormatProvider? formatProvider)
     {
         if (!includedFields.HasFlag(IncludedData.TemplateBody))
         {
@@ -49,18 +65,12 @@ static class LogRecordBuilder
 
             if (renderedMessage.Trim() != "")
             {
-                logRecord.Body = new AnyValue
-                {
-                    StringValue = renderedMessage
-                };
+                setBody(renderedMessage);
             }
         }
         else if (includedFields.HasFlag(IncludedData.TemplateBody) && logEvent.MessageTemplate.Text.Trim() != "")
         {
-            logRecord.Body = new AnyValue
-            {
-                StringValue = logEvent.MessageTemplate.Text
-            };
+            setBody(logEvent.MessageTemplate.Text);
         }
     }
 
@@ -70,8 +80,13 @@ static class LogRecordBuilder
         logRecord.SeverityText = level.ToString();
         logRecord.SeverityNumber = PrimitiveConversions.ToSeverityNumber(level);
     }
-
-    public static void ProcessProperties(LogRecord logRecord, LogEvent logEvent, IncludedData includedData, out string? scopeName)
+    
+    public static void ProcessLevel(Span span, LogEvent logEvent)
+    {
+        span.Status = PrimitiveConversions.ToStatus(logEvent.Level);
+    }
+    
+    public static void ProcessProperties(Action<KeyValue> adder, LogEvent logEvent, IncludedData includedData, out string? scopeName)
     {
         scopeName = null;
         foreach (var property in logEvent.Properties)
@@ -85,8 +100,13 @@ static class LogRecordBuilder
                 }
             }
 
+            if (property is {Key: SerilogTracing.Core.Constants.SpanStartTimestampPropertyName})
+            {
+                continue;
+            }
+
             var v = PrimitiveConversions.ToOpenTelemetryAnyValue(property.Value);
-            logRecord.Attributes.Add(PrimitiveConversions.NewAttribute(property.Key, v));
+            adder(PrimitiveConversions.NewAttribute(property.Key, v));
         }
     }
 
@@ -94,6 +114,21 @@ static class LogRecordBuilder
     {
         logRecord.TimeUnixNano = PrimitiveConversions.ToUnixNano(logEvent.Timestamp);
         logRecord.ObservedTimeUnixNano = logRecord.TimeUnixNano;
+    }
+    
+    public static void ProcessTimestamp(Span span, LogEvent logEvent)
+    {
+        span.EndTimeUnixNano = PrimitiveConversions.ToUnixNano(logEvent.Timestamp);
+    }
+
+    static void ProcessStartTime(Span span, LogEvent logEvent)
+    {
+        if (logEvent.Properties.TryGetValue(SerilogTracing.Core.Constants.SpanStartTimestampPropertyName,
+                out var sst) && sst is ScalarValue {Value: DateTime})
+        {
+            var start = Convert.ToDateTime(((ScalarValue) sst).Value);
+            span.StartTimeUnixNano = PrimitiveConversions.ToUnixNano(start);
+        }
     }
 
     public static void ProcessException(LogRecord logRecord, LogEvent logEvent)
