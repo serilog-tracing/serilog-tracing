@@ -1,12 +1,25 @@
 ﻿using System.Diagnostics;
+using SerilogTracing.Instrumentation;
 
-namespace SerilogTracing;
+namespace SerilogTracing.Options;
 
 /// <summary>
 /// Options for <see cref="LoggerConfigurationTracingExtensions"/> configuration.
 /// </summary>
-public class SerilogActivityListenerOptions
+public sealed class SerilogTracingOptions
 {
+    private readonly List<IActivityEnricher> _enrichers = new()
+    {
+        new HttpRequestOutActivityEnricher()
+    };
+
+    internal SerilogTracingOptions()
+    {
+        Enrich = new SerilogTracingActivityEnrichmentOptions(this, enricher => _enrichers.Add(enricher));
+    }
+
+    internal IReadOnlyList<IActivityEnricher> Enrichers => _enrichers;
+    
     /// <summary>
     /// Set the sampling level for the listener. The <see cref="ActivityContext"/> supplied to
     /// the callback will contain the current trace id, and if the activity has a known parent
@@ -29,4 +42,9 @@ public class SerilogActivityListenerOptions
     /// specified will be used.</remarks>
     /// <seealso cref="ActivityListener.SampleUsingParentId"/>
     public SampleActivity<string> SampleUsingParentId { get; set; } = delegate { return ActivitySamplingResult.AllData; };
+    
+    /// <summary>
+    /// Configures enrichment of <see cref="Activity">Activities</see>.
+    /// </summary>
+    public SerilogTracingActivityEnrichmentOptions Enrich { get; internal set; }
 }

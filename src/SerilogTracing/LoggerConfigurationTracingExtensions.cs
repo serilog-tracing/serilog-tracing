@@ -5,6 +5,7 @@ using Serilog.Debugging;
 using Serilog.Events;
 using SerilogTracing.Instrumentation;
 using SerilogTracing.Interop;
+using SerilogTracing.Options;
 
 namespace SerilogTracing;
 
@@ -18,19 +19,19 @@ public static class LoggerConfigurationTracingExtensions
     /// The returned listener will continue writing spans through the Serilog logger until it is disposed.
     /// </summary>
     /// <returns>The logger.</returns>
-    public static Logger CreateTracingLogger(this LoggerConfiguration loggerConfiguration, Action<SerilogActivityListenerOptions>? configure = null)
+    public static Logger CreateTracingLogger(this LoggerConfiguration loggerConfiguration, Action<SerilogTracingOptions>? configure = null)
     {
+        var options = new SerilogTracingOptions();
+        configure?.Invoke(options);
+        
         var activityListener = new ActivityListener();
-        var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
+        var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver(options.Enrichers));
         var disposeProxy = new DisposeProxy(activityListener, diagnosticListenerSubscription);
         
         var logger = loggerConfiguration
             .WriteTo.Sink(disposeProxy)
             .CreateLogger();
-        
-        var options = new SerilogActivityListenerOptions();
-        configure?.Invoke(options);
-        
+
         ILogger GetLogger(string name)
         {
             return !string.IsNullOrWhiteSpace(name) ? logger.ForContext(Constants.SourceContextPropertyName, name) : logger;
