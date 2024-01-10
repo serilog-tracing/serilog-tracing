@@ -10,14 +10,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\assets\SerilogTracing.snk</AssemblyOriginatorKeyFile>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DocumentationFile />
+    <DocumentationFile Condition="" />
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DocumentationFile />
   </PropertyGroup>
 
   <ItemGroup>
