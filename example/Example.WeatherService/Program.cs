@@ -2,6 +2,7 @@ using Serilog;
 using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Formatting;
+using SerilogTracing.Sinks.OpenTelemetry;
 using SerilogTracing.Sinks.Seq;
 using SerilogTracing.Sinks.Zipkin;
 
@@ -10,8 +11,9 @@ using SerilogTracing.Sinks.Zipkin;
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", typeof(Program).Assembly.GetName().Name)
     .WriteTo.Console(DefaultFormatting.CreateTextFormatter(TemplateTheme.Code))
-    .WriteTo.SeqTracing("http://localhost:5341")
+    //.WriteTo.SeqTracing("http://localhost:5341")
     .WriteTo.Zipkin("http://localhost:9411")
+    //.WriteTo.OpenTelemetry("http://localhost:5341/ingest/otlp/v1/logs", "http://localhost:5341/ingest/otlp/v1/traces", OtlpProtocol.HttpProtobuf)
     .CreateTracingLogger();
 
 Log.Information("Weather service starting up");

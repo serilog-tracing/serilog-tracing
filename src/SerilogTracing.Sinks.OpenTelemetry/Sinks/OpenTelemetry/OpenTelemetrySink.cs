@@ -66,41 +66,76 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
     public Task EmitBatchAsync(IEnumerable<LogEvent> batch)
     {
         var resourceLogs = _resourceLogsTemplate.Clone();
+        var resourceSpans = _resourceSpansTemplate.Clone();
         
-        var anonymousScope = (ScopeLogs?)null;
-        var namedScopes = (Dictionary<string, ScopeLogs>?)null;
+        var logsAnonymousScope = (ScopeLogs?)null;
+        var traceAnonymousScope = (ScopeSpans?)null;
+        var logsNamedScopes = (Dictionary<string, ScopeLogs>?)null;
+        var spansNamedScopes = (Dictionary<string, ScopeSpans>?)null;
 
         foreach (var logEvent in batch)
         {
-            var (logRecord, scopeName) = OtlpEventBuilder.ToLogRecord(logEvent, _formatProvider, _includedData);
-            if (scopeName == null)
+            if (IsSpan(logEvent))
             {
-                if (anonymousScope == null)
+                var (span, scopeName) = OtlpEventBuilder.ToSpan(logEvent, _formatProvider, _includedData);
+                if (scopeName == null)
                 {
-                    anonymousScope = RequestTemplateFactory.CreateScopeLogs(null);
-                    resourceLogs.ScopeLogs.Add(anonymousScope);
-                }
+                    if (traceAnonymousScope == null)
+                    {
+                        traceAnonymousScope = RequestTemplateFactory.CreateScopeSpans(null);
+                        resourceSpans.ScopeSpans.Add(traceAnonymousScope);
+                    }
                 
-                anonymousScope.LogRecords.Add(logRecord);
+                    traceAnonymousScope.Spans.Add(span);
+                }
+                else
+                {
+                    spansNamedScopes ??= new Dictionary<string, ScopeSpans>();
+                    if (!spansNamedScopes.TryGetValue(scopeName, out var namedScope))
+                    {
+                        namedScope = RequestTemplateFactory.CreateScopeSpans(scopeName);
+                        spansNamedScopes.Add(scopeName, namedScope);
+                        resourceSpans.ScopeSpans.Add(namedScope);
+                    }
+                
+                    namedScope.Spans.Add(span);
+                }
             }
             else
             {
-                namedScopes ??= new Dictionary<string, ScopeLogs>();
-                if (!namedScopes.TryGetValue(scopeName, out var namedScope))
+                var (logRecord, scopeName) = OtlpEventBuilder.ToLogRecord(logEvent, _formatProvider, _includedData);
+                if (scopeName == null)
                 {
-                    namedScope = RequestTemplateFactory.CreateScopeLogs(scopeName);
-                    namedScopes.Add(scopeName, namedScope);
-                    resourceLogs.ScopeLogs.Add(namedScope);
-                }
+                    if (logsAnonymousScope == null)
+                    {
+                        logsAnonymousScope = RequestTemplateFactory.CreateScopeLogs(null);
+                        resourceLogs.ScopeLogs.Add(logsAnonymousScope);
+                    }
                 
-                namedScope.LogRecords.Add(logRecord);
+                    logsAnonymousScope.LogRecords.Add(logRecord);
+                }
+                else
+                {
+                    logsNamedScopes ??= new Dictionary<string, ScopeLogs>();
+                    if (!logsNamedScopes.TryGetValue(scopeName, out var namedScope))
+                    {
+                        namedScope = RequestTemplateFactory.CreateScopeLogs(scopeName);
+                        logsNamedScopes.Add(scopeName, namedScope);
+                        resourceLogs.ScopeLogs.Add(namedScope);
+                    }
+                
+                    namedScope.LogRecords.Add(logRecord);
+                }
             }
         }
 
-        var request = new ExportLogsServiceRequest();
-        request.ResourceLogs.Add(resourceLogs);
-        
-        return _exporter.ExportAsync(request);
+        var logsRequest = new ExportLogsServiceRequest();
+        logsRequest.ResourceLogs.Add(resourceLogs);
+
+        var spansRequest = new ExportTraceServiceRequest();
+        spansRequest.ResourceSpans.Add(resourceSpans);
+
+        return Task.WhenAll(_exporter.ExportAsync(logsRequest), _exporter.ExportAsync(spansRequest));
     }
 
     /// <summary>
