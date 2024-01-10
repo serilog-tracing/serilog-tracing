@@ -3,15 +3,13 @@ using Serilog.Events;
 using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Formatting;
+using SerilogTracing.Sinks.Seq;
 using SerilogTracing.Sinks.Zipkin;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", typeof(Program).Assembly.GetName().Name)
     .WriteTo.Console(DefaultFormatting.CreateTextFormatter(TemplateTheme.Code))
-    .WriteTo.Seq(
-        "http://localhost:5341",
-        payloadFormatter: DefaultFormatting.CreateJsonFormatter(),
-        messageHandler: new SocketsHttpHandler { ActivityHeadersPropagator = null })
+    .WriteTo.SeqTracing("http://localhost:5341")
     .WriteTo.Zipkin("http://localhost:9411")
     .CreateTracingLogger();
 

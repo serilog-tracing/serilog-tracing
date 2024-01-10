@@ -7,7 +7,7 @@
     <ItemGroup>
         <ProjectReference Include="..\SerilogTracing\SerilogTracing.csproj" />
         <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
-        <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="4.0.0-*" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="6.0.0" />
     </ItemGroup>
 
 </Project>

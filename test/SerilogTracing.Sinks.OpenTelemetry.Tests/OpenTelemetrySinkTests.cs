@@ -53,6 +53,6 @@ public class OpenTelemetrySinkTests
         var exporter = new CollectingExporter();
         var sink = new OpenTelemetrySink(exporter, null, new Dictionary<string, object>(), OpenTelemetrySinkOptions.DefaultIncludedData);
         await sink.EmitBatchAsync(events);
-        return Assert.Single(exporter.Requests);
+        return Assert.Single(exporter.LogsServiceRequests);
     }
 }

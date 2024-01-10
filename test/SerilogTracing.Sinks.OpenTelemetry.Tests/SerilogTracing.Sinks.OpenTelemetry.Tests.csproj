@@ -12,6 +12,14 @@
     <AssemblyOriginatorKeyFile>..\..\assets\SerilogTracing.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DocumentationFile />
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile />
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\SerilogTracing.Sinks.OpenTelemetry\SerilogTracing.Sinks.OpenTelemetry.csproj" />
   </ItemGroup>
