@@ -80,7 +80,7 @@ public sealed class HttpRequestOutActivityEnricher: IActivityEnricher
         "System.Net.Http.DiagnosticsHandler+ActivityStopData, System.Net.Http", "Response");
 
     static readonly MessageTemplate MessageTemplateOverride =
-        new MessageTemplateParser().Parse("HTTP {RequestMethod} {RequestUri}");
+        new MessageTemplateParser().Parse("HTTP {RequestMethod} {RequestUri} Out");
     
     static Func<object, T?> CreateAccessor<T>(string typeName, string propertyName) where T: notnull
     {
