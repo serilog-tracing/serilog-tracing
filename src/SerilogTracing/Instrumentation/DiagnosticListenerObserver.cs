@@ -27,7 +27,7 @@ sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDispos
         {
             if (enricher.ShouldListenTo(value.Name))
             {
-                _subscription.Add(value.Subscribe(new ActivityEnrichmentDiagnosticObserver(enricher)));
+                _subscription.Add(value.Subscribe(new DiagnosticEventObserver(enricher)));
             }
         }
     }

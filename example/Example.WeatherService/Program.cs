@@ -1,8 +1,7 @@
 using Serilog;
 using Serilog.Templates.Themes;
 using SerilogTracing;
-using SerilogTracing.Formatting;
-using SerilogTracing.Instrumentation.AspNetCore;
+using SerilogTracing.Expressions;
 using SerilogTracing.Sinks.Seq;
 using SerilogTracing.Sinks.Zipkin;
 
@@ -10,10 +9,12 @@ using SerilogTracing.Sinks.Zipkin;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", typeof(Program).Assembly.GetName().Name)
-    .WriteTo.Console(DefaultFormatting.CreateTextFormatter(TemplateTheme.Code))
+    .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
     .WriteTo.SeqTracing("http://localhost:5341")
     .WriteTo.Zipkin("http://localhost:9411")
-    .CreateTracingLogger(options => options.Instrument.WithAspNetCoreInstrumentation());
+    .CreateLogger();
+
+using var _ = new TracingConfiguration().EnableTracing();
 
 Log.Information("Weather service starting up");
 

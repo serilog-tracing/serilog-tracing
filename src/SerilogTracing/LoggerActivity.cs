@@ -1,7 +1,10 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Serilog;
 using Serilog.Events;
 using Serilog.Parsing;
+using SerilogTracing.Core;
+using SerilogTracing.Instrumentation;
 using SerilogTracing.Interop;
 
 namespace SerilogTracing;
@@ -17,8 +20,6 @@ public sealed class LoggerActivity : IDisposable
 {
     internal static LoggerActivity None { get; } = new(new LoggerConfiguration().CreateLogger(), null, new(Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>());
 
-    IEnumerable<LogEventProperty> _captures;
-    
     internal LoggerActivity(
         ILogger logger,
         Activity? activity,
@@ -28,11 +29,11 @@ public sealed class LoggerActivity : IDisposable
         Logger = logger;
         Activity = activity;
         MessageTemplate = messageTemplate;
-        _captures = captures;
+        Captures = captures;
 
         if (activity != null)
         {
-            ActivityUtil.SetLoggerActivity(activity, this);
+            SetLoggerActivity(activity, this);
             StartTimestamp = activity.StartTimeUtc;
         }
         else
@@ -45,7 +46,8 @@ public sealed class LoggerActivity : IDisposable
 
     internal MessageTemplate MessageTemplate { get; }
     internal DateTime StartTimestamp { get; }
-    internal IEnumerable<LogEventProperty> Captures => _captures;
+    internal IEnumerable<LogEventProperty> Captures { get; }
+
     internal Exception? Exception { get; private set; }
     internal LogEventLevel? CompletionLevel { get; private set; }
     internal TimeSpan Duration { get; private set; }
@@ -72,9 +74,9 @@ public sealed class LoggerActivity : IDisposable
     /// logic will be used to serialize the object into a structured value.</param>
     public void AddProperty(string propertyName, object? value, bool destructureObjects = false)
     {
-        if (Logger.BindProperty(propertyName, value, destructureObjects, out var property))
+        if (Activity != null && Logger.BindProperty(propertyName, value, destructureObjects, out var property))
         {
-            Activity?.SetLogEventProperty(property);
+            ActivityInstrumentation.SetLogEventProperty(Activity, property);
         }
     }
     
@@ -106,7 +108,11 @@ public sealed class LoggerActivity : IDisposable
         if (exception != null)
         {
             Exception = exception;
-            Activity?.TrySetException(exception);
+
+            if (Activity != null)
+            {
+                ActivityInstrumentation.TrySetException(Activity, exception);
+            }
         }
 
         Activity?.SetStatus(level <= LogEventLevel.Warning ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
@@ -114,7 +120,24 @@ public sealed class LoggerActivity : IDisposable
 
         Duration = Activity?.Duration ?? DateTime.UtcNow - StartTimestamp;
         
-        Logger.Write(ActivityUtil.ActivityToLogEvent(Logger, this));
+        Logger.Write(ActivityConvert.ActivityToLogEvent(Logger, this));
+    }
+    
+    internal static void SetLoggerActivity(Activity activity, LoggerActivity loggerActivity)
+    {
+        activity.SetCustomProperty(Constants.SelfPropertyName, loggerActivity);
+    }
+    
+    internal static bool TryGetLoggerActivity(Activity activity, [NotNullWhen(true)] out LoggerActivity? loggerActivity)
+    {
+        if (activity.GetCustomProperty(Constants.SelfPropertyName) is LoggerActivity customPropertyValue)
+        {
+            loggerActivity = customPropertyValue;
+            return true;
+        }
+
+        loggerActivity = null;
+        return false;
     }
     
     /// <summary>

@@ -1,20 +1,18 @@
-﻿using SerilogTracing.Options;
-
-namespace SerilogTracing.Instrumentation.AspNetCore;
+﻿namespace SerilogTracing.Instrumentation.AspNetCore;
 
 /// <summary>
 /// 
 /// </summary>
-public static class SerilogTracingActivityEnrichmentOptionsExtensions
+public static class InstrumentationOptionsExtensions
 {
     /// <summary>
     /// 
     /// </summary>
     /// <param name="options"></param>
     /// <returns></returns>
-    public static SerilogTracingOptions WithAspNetCoreInstrumentation(this SerilogTracingActivityInstrumentationOptions options)
+    public static ActivityListenerOptions WithAspNetCoreRequests(this InstrumentationOptions options)
     {
-        return options.WithAspNetCoreInstrumentation(_ => { });
+        return options.WithAspNetCoreRequests(_ => { });
     }
 
     /// <summary>
@@ -23,8 +21,8 @@ public static class SerilogTracingActivityEnrichmentOptionsExtensions
     /// <param name="options"></param>
     /// <param name="with"></param>
     /// <returns></returns>
-    public static SerilogTracingOptions WithAspNetCoreInstrumentation(
-        this SerilogTracingActivityInstrumentationOptions options, Action<HttpRequestInActivityEnricherOptions> with)
+    public static ActivityListenerOptions WithAspNetCoreRequests(
+        this InstrumentationOptions options, Action<HttpRequestInActivityEnricherOptions> with)
     {
         var httpOptions = new HttpRequestInActivityEnricherOptions();
         with.Invoke(httpOptions);

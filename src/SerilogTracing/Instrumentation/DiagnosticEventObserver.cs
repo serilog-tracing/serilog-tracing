@@ -2,9 +2,9 @@
 
 namespace SerilogTracing.Instrumentation;
 
-sealed class ActivityEnrichmentDiagnosticObserver: IObserver<KeyValuePair<string,object?>>
+sealed class DiagnosticEventObserver: IObserver<KeyValuePair<string,object?>>
 {
-    internal ActivityEnrichmentDiagnosticObserver(IActivityInstrumentor instrumentor)
+    internal DiagnosticEventObserver(IActivityInstrumentor instrumentor)
     {
         _instrumentor = instrumentor;
     }

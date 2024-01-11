@@ -1,19 +1,17 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Serilog.Events;
 using Serilog.Parsing;
-using SerilogTracing.Interop;
 
 namespace SerilogTracing.Instrumentation.AspNetCore;
 
 /// <summary>
-/// An activity enricher that populates the current activity with context from incoming HTTP requests.
+/// An activity instrumentor that populates the current activity with context from incoming HTTP requests.
 /// </summary>
 public sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
 {
     /// <summary>
-    /// Create an instance of the enricher.
+    /// Create an instance of the instrumentor.
     /// </summary>
     public HttpRequestInActivityInstrumentor(HttpRequestInActivityEnricherOptions options)
     {
@@ -40,27 +38,27 @@ public sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Start":
                 if (eventArgs is not HttpContext start) return;
                 
-                activity.SetMessageTemplateOverride(_messageTemplateOverride);
+                ActivityInstrumentation.SetMessageTemplateOverride(activity, _messageTemplateOverride);
                 activity.DisplayName = _messageTemplateOverride.Text;
                 
-                activity.SetLogEventProperties(_getRequestProperties(start.Request));
+                ActivityInstrumentation.SetLogEventProperties(activity, _getRequestProperties(start.Request));
 
                 break;
             case "Microsoft.AspNetCore.Diagnostics.UnhandledException":
                 var eventType = eventArgs.GetType();
 
-                var ex = eventType.GetProperty("exception")?.GetValue(eventArgs) as Exception;
-                var ctxt = eventType.GetProperty("httpContext")?.GetValue(eventArgs) as HttpContext;
+                var exception = eventType.GetProperty("exception")?.GetValue(eventArgs) as Exception;
+                var httpContext = eventType.GetProperty("httpContext")?.GetValue(eventArgs) as HttpContext;
 
-                if (ex is null || ctxt is null) return;
+                if (exception is null || httpContext is null) return;
 
-                activity.TrySetException(ex);
+                ActivityInstrumentation.TrySetException(activity, exception);
                 
                 break;
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Stop":
                 if (eventArgs is not HttpContext stop) return;
                 
-                activity.SetLogEventProperties(_getResponseProperties(stop.Response));
+                ActivityInstrumentation.SetLogEventProperties(activity, _getResponseProperties(stop.Response));
 
                 break;
         }

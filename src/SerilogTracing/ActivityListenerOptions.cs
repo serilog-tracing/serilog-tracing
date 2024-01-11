@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
 using SerilogTracing.Instrumentation;
 
-namespace SerilogTracing.Options;
+namespace SerilogTracing;
 
 /// <summary>
-/// Options for <see cref="LoggerConfigurationTracingExtensions"/> configuration.
+/// Options for <see cref="TracingConfiguration"/> configuration.
 /// </summary>
-public sealed class SerilogTracingOptions
+public class ActivityListenerOptions
 {
     static readonly List<IActivityInstrumentor> DefaultInstrumentors = new()
     {
@@ -16,9 +16,9 @@ public sealed class SerilogTracingOptions
     readonly List<IActivityInstrumentor> _instrumentors = new();
     bool _withDefaultInstrumentors = true;
 
-    internal SerilogTracingOptions()
+    internal ActivityListenerOptions()
     {
-        Instrument = new SerilogTracingActivityInstrumentationOptions(this, instrumentor => _instrumentors.Add(instrumentor), withDefaults => _withDefaultInstrumentors = withDefaults);
+        Instrument = new InstrumentationOptions(this, instrumentor => _instrumentors.Add(instrumentor), withDefaults => _withDefaultInstrumentors = withDefaults);
     }
 
     internal IEnumerable<IActivityInstrumentor> Instrumentors => _withDefaultInstrumentors ? DefaultInstrumentors.Concat(_instrumentors) : _instrumentors;
@@ -49,5 +49,5 @@ public sealed class SerilogTracingOptions
     /// <summary>
     /// Configures enrichment of <see cref="Activity">Activities</see>.
     /// </summary>
-    public SerilogTracingActivityInstrumentationOptions Instrument { get; internal set; }
+    public InstrumentationOptions Instrument { get; internal set; }
 }

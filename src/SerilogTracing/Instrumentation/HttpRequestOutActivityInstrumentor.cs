@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Serilog.Events;
 using Serilog.Parsing;
-using SerilogTracing.Interop;
 
 namespace SerilogTracing.Instrumentation;
 
@@ -47,7 +46,7 @@ public sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
                     Password = null
                 };
 
-                activity.SetMessageTemplateOverride(MessageTemplateOverride);
+                ActivityInstrumentation.SetMessageTemplateOverride(activity, MessageTemplateOverride);
                 activity.DisplayName = MessageTemplateOverride.Text;
                 activity.AddTag("RequestUri", uriBuilder.Uri);
                 activity.AddTag("RequestMethod", request.Method);
