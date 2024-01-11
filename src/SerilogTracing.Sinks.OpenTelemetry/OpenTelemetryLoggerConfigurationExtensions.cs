@@ -27,6 +27,9 @@ namespace Serilog;
 /// </summary>
 public static class OpenTelemetryLoggerConfigurationExtensions
 {
+    static HttpMessageHandler CreateSilentHttpMessageHandler() =>
+        new SocketsHttpHandler { ActivityHeadersPropagator = null };
+
     /// <summary>
     /// Send log events to an OTLP exporter.
     /// </summary>
@@ -48,7 +51,7 @@ public static class OpenTelemetryLoggerConfigurationExtensions
             tracesEndpoint: options.TracesEndpoint,
             protocol: options.Protocol,
             headers: new Dictionary<string, string>(options.Headers),
-            httpMessageHandler: options.HttpMessageHandler);
+            httpMessageHandler: options.HttpMessageHandler ?? CreateSilentHttpMessageHandler());
 
         var openTelemetrySink = new OpenTelemetrySink(
             exporter: exporter,
