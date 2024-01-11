@@ -14,6 +14,7 @@
 
 // ReSharper disable PossibleMultipleEnumeration
 
+using System.Diagnostics;
 using System.Globalization;
 using Google.Protobuf.Collections;
 using OpenTelemetry.Proto.Common.V1;
@@ -54,6 +55,7 @@ static class OtlpEventBuilder
         ProcessLevel(span, logEvent);
         ProcessException(span.Attributes, logEvent);
         ProcessIncludedFields(span, logEvent, includedData);
+        ProcessParentSpanId(span, logEvent);
 
         return (span, scopeName);
     }
@@ -102,6 +104,12 @@ static class OtlpEventBuilder
             }
 
             if (property is {Key: SerilogTracing.Core.Constants.SpanStartTimestampPropertyName})
+            {
+                continue;
+            }
+
+            if (property is 
+                {Key: SerilogTracing.Core.Constants.ParentSpanIdPropertyName})
             {
                 continue;
             }
@@ -214,7 +222,7 @@ static class OtlpEventBuilder
         {
             span.SpanId = PrimitiveConversions.ToOpenTelemetrySpanId(spanId.ToHexString());
         }
-
+        
         if ((includedFields & IncludedData.MessageTemplateTextAttribute) != IncludedData.None)
         {
             span.Attributes.Add(PrimitiveConversions.NewAttribute(SemanticConventions.AttributeMessageTemplateText, new()
@@ -253,6 +261,15 @@ static class OtlpEventBuilder
                     SemanticConventions.AttributeMessageTemplateRenderings,
                     new AnyValue { ArrayValue = renderings }));
             }
+        }
+    }
+    
+    public static void ProcessParentSpanId(Span span, LogEvent logEvent)
+    {
+        if (logEvent.Properties.TryGetValue(SerilogTracing.Core.Constants.ParentSpanIdPropertyName, out var ps) &&
+            ps is ScalarValue { Value: ActivitySpanId psId })
+        {
+            span.ParentSpanId = PrimitiveConversions.ToOpenTelemetrySpanId(psId.ToHexString());
         }
     }
 }
