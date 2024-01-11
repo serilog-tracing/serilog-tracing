@@ -15,7 +15,10 @@ public sealed class HttpRequestInActivityEnricher: IActivityEnricher
     /// <summary>
     /// Create an instance of the enricher.
     /// </summary>
-    public HttpRequestInActivityEnricher() {}
+    public HttpRequestInActivityEnricher(HttpRequestInActivityEnricherOptions options)
+    {
+        
+    }
 
     /// <inheritdoc cref="IActivityEnricher.ShouldListenTo"/>
     public bool ShouldListenTo(string listenerName)
@@ -35,9 +38,9 @@ public sealed class HttpRequestInActivityEnricher: IActivityEnricher
                 activity.DisplayName = MessageTemplateOverride.Text;
 
                 activity.SetTag("RequestMethod", ctxt.Request.Method);
-                activity.SetTag("RequestUri", ctxt.Request.GetDisplayUrl());
+                activity.SetTag("RequestPath", ctxt.Request.GetEncodedPathAndQuery());
                 activity.SetTag("StatusCode", null);
-                    
+
                 break;
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Stop":
                 activity.SetTag("StatusCode", ctxt.Response.StatusCode);
@@ -48,5 +51,5 @@ public sealed class HttpRequestInActivityEnricher: IActivityEnricher
     }
 
     static readonly MessageTemplate MessageTemplateOverride =
-        new MessageTemplateParser().Parse("HTTP {RequestMethod} {RequestUri} In");
+        new MessageTemplateParser().Parse("HTTP {RequestMethod} {RequestPath}");
 }

@@ -32,7 +32,9 @@ try
         using var activity = Log.Logger.StartActivity("Look up forecast for postcode {Postcode}", postcode);
         var forecast = forecastByPostcode[postcode];
         activity.AddProperty("Forecast", forecast);
-        return forecast;
+
+        throw new Exception("lol");
+        //return forecast;
     });
 
     app.Run();
