@@ -34,8 +34,8 @@ static class ActivityUtil
         activity.TryGetMessageTemplateOverride(out var messageTemplate);
         var template = messageTemplate ?? new MessageTemplate(new[] { new TextToken(activity.DisplayName) });
         var exception = ExceptionFromEvents(activity);
-        var captures = new Dictionary<string, LogEventProperty>();
-        return ActivityToLogEvent(logger, activity, start, end, activity.TraceId, activity.SpanId, activity.ParentSpanId, level, exception, template, captures);
+        var properties = activity.GetLogEventProperties().ToDictionary(p => p.Name);
+        return ActivityToLogEvent(logger, activity, start, end, activity.TraceId, activity.SpanId, activity.ParentSpanId, level, exception, template, properties);
     }
     
     internal static LogEvent ActivityToLogEvent(ILogger logger, LoggerActivity loggerActivity)
@@ -48,8 +48,8 @@ static class ActivityUtil
         var level = loggerActivity.CompletionLevel ?? (loggerActivity.Activity?.GetCompletionLevel() ?? LogEventLevel.Information);
         var template = loggerActivity.MessageTemplate;
         var exception = loggerActivity.Exception ?? (loggerActivity.Activity != null ? ExceptionFromEvents(loggerActivity.Activity) : null);
-        var captures = loggerActivity.Captures.ToDictionary(p => p.Name);
-        return ActivityToLogEvent(logger, loggerActivity.Activity, start, end, traceId, spanId, parentSpanId, level, exception, template, captures);
+        var properties = loggerActivity.Captures.Concat(loggerActivity.Activity?.GetLogEventProperties() ?? Enumerable.Empty<LogEventProperty>()).ToDictionary(p => p.Name);
+        return ActivityToLogEvent(logger, loggerActivity.Activity, start, end, traceId, spanId, parentSpanId, level, exception, template, properties);
     }
 
     internal static LogEvent ActivityToLogEvent(
@@ -105,10 +105,10 @@ static class ActivityUtil
             ["exception.type"] = exception.GetType().FullName,
             ["exception.message"] = exception.Message
         };
-        return new ActivityEvent("exception", DateTimeOffset.Now, tags);
+        return new ActivityEvent(ExceptionEventName, DateTimeOffset.Now, tags);
     }
 
-    static Exception? ExceptionFromEvents(Activity activity)
+    internal static Exception? ExceptionFromEvents(Activity activity)
     {
         var first = activity.Events.FirstOrDefault(e => e.Name == "exception");
         if (first.Name != "exception")
@@ -117,5 +117,30 @@ static class ActivityUtil
             first.Tags.FirstOrDefault(t => t.Key == "exception.message").Value as string,
             first.Tags.FirstOrDefault(t => t.Key == "exception.type").Value as string,
             first.Tags.FirstOrDefault(t => t.Key == "exception.stacktrace").Value as string);
+    }
+    
+    internal static bool TryGetLogEventPropertyCollection(Activity activity, [NotNullWhen(true)] out Dictionary<string, LogEventProperty>? properties)
+    {
+        if (activity.GetCustomProperty(LogEventPropertyCollectionName) is Dictionary<string, LogEventProperty> existing)
+        {
+            properties = existing;
+            return true;
+        }
+
+        properties = null;
+        return false;
+    }
+
+    internal static Dictionary<string, LogEventProperty> GetOrInitLogEventPropertyCollection(Activity activity)
+    {
+        if (TryGetLogEventPropertyCollection(activity, out var existing))
+        {
+            return existing;
+        }
+
+        var added = new Dictionary<string, LogEventProperty>();
+        activity.SetCustomProperty(LogEventPropertyCollectionName, added);
+
+        return added;
     }
 }

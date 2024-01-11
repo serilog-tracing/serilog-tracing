@@ -25,7 +25,7 @@ public static class LoggerConfigurationTracingExtensions
         configure?.Invoke(options);
         
         var activityListener = new ActivityListener();
-        var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver(options.Enrichers.ToArray()));
+        var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver(options.Instrumentors.ToArray()));
         var disposeProxy = new DisposeProxy(activityListener, diagnosticListenerSubscription);
         
         var logger = loggerConfiguration

@@ -4,12 +4,12 @@ namespace SerilogTracing.Instrumentation;
 
 sealed class ActivityEnrichmentDiagnosticObserver: IObserver<KeyValuePair<string,object?>>
 {
-    internal ActivityEnrichmentDiagnosticObserver(IActivityEnricher enricher)
+    internal ActivityEnrichmentDiagnosticObserver(IActivityInstrumentor instrumentor)
     {
-        _enricher = enricher;
+        _instrumentor = instrumentor;
     }
     
-    IActivityEnricher _enricher;
+    IActivityInstrumentor _instrumentor;
     
     public void OnCompleted()
     {
@@ -26,6 +26,6 @@ sealed class ActivityEnrichmentDiagnosticObserver: IObserver<KeyValuePair<string
         if (value.Value == null || Activity.Current == null) return;
         var activity = Activity.Current;
         
-        _enricher.EnrichActivity(activity, value.Key, value.Value);
+        _instrumentor.InstrumentActivity(activity, value.Key, value.Value);
     }
 }

@@ -8,22 +8,22 @@ namespace SerilogTracing.Instrumentation;
 /// <summary>
 /// An activity enricher that populates the current activity with context from outgoing HTTP requests.
 /// </summary>
-public sealed class HttpRequestOutActivityEnricher: IActivityEnricher
+public sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
 {
     /// <summary>
     /// Create an instance of the enricher.
     /// </summary>
-    public HttpRequestOutActivityEnricher()
+    public HttpRequestOutActivityInstrumentor()
     {}
     
-    /// <inheritdoc cref="IActivityEnricher.ShouldListenTo"/>
+    /// <inheritdoc cref="IActivityInstrumentor.ShouldListenTo"/>
     public bool ShouldListenTo(string listenerName)
     {
         return listenerName == "HttpHandlerDiagnosticListener";
     }
 
-    /// <inheritdoc cref="IActivityEnricher.ShouldListenTo"/>
-    public void EnrichActivity(Activity activity, string eventName, object eventArgs)
+    /// <inheritdoc cref="IActivityInstrumentor.ShouldListenTo"/>
+    public void InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
         switch (eventName)
         {

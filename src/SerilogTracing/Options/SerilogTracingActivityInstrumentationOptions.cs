@@ -5,20 +5,20 @@ namespace SerilogTracing.Options;
 /// <summary>
 /// Controls enrichment configuration.
 /// </summary>
-public sealed class SerilogTracingActivityEnrichmentOptions
+public sealed class SerilogTracingActivityInstrumentationOptions
 {
     readonly SerilogTracingOptions _options;
-    readonly Action<IActivityEnricher> _addEnricher;
-    readonly Action<bool> _useDefaultEnrichers;
+    readonly Action<IActivityInstrumentor> _addInstrumentor;
+    readonly Action<bool> _useDefaultInstrumentors;
 
-    internal SerilogTracingActivityEnrichmentOptions(
+    internal SerilogTracingActivityInstrumentationOptions(
         SerilogTracingOptions options,
-        Action<IActivityEnricher> addEnricher,
+        Action<IActivityInstrumentor> addEnricher,
         Action<bool> useDefaultEnrichers)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
-        _addEnricher = addEnricher ?? throw new ArgumentNullException(nameof(addEnricher));
-        _useDefaultEnrichers = useDefaultEnrichers ?? throw new ArgumentNullException(nameof(useDefaultEnrichers));
+        _addInstrumentor = addEnricher ?? throw new ArgumentNullException(nameof(addEnricher));
+        _useDefaultInstrumentors = useDefaultEnrichers ?? throw new ArgumentNullException(nameof(useDefaultEnrichers));
     }
 
     /// <summary>
@@ -26,9 +26,9 @@ public sealed class SerilogTracingActivityEnrichmentOptions
     /// </summary>
     /// <param name="withDefaults">If true, default activity enrichers will be used.</param>
     /// <returns>Configuration object allowing method chaining.</returns>
-    public SerilogTracingOptions WithDefaultActivityEnrichers(bool withDefaults)
+    public SerilogTracingOptions WithDefaultInstrumentation(bool withDefaults)
     {
-        _useDefaultEnrichers(withDefaults);
+        _useDefaultInstrumentors(withDefaults);
 
         return _options;
     }
@@ -37,26 +37,26 @@ public sealed class SerilogTracingActivityEnrichmentOptions
     /// Specifies one or more enrichers that may add properties dynamically to
     /// log events.
     /// </summary>
-    /// <param name="enrichers">Enrichers to apply to all events passing through
+    /// <param name="instrumentors">Enrichers to apply to all events passing through
     /// the logger.</param>
     /// <returns>Configuration object allowing method chaining.</returns>
-    /// <exception cref="ArgumentNullException">When <paramref name="enrichers"/> is <code>null</code></exception>
-    /// <exception cref="ArgumentException">When any element of <paramref name="enrichers"/> is <code>null</code></exception>
-    public SerilogTracingOptions With(params IActivityEnricher[] enrichers)
+    /// <exception cref="ArgumentNullException">When <paramref name="instrumentors"/> is <code>null</code></exception>
+    /// <exception cref="ArgumentException">When any element of <paramref name="instrumentors"/> is <code>null</code></exception>
+    public SerilogTracingOptions With(params IActivityInstrumentor[] instrumentors)
     {
-        if (enrichers == null)
+        if (instrumentors == null)
         {
-            throw new ArgumentNullException(nameof(enrichers));
+            throw new ArgumentNullException(nameof(instrumentors));
         }
 
-        foreach (var activityEnricher in enrichers)
+        foreach (var instrumentor in instrumentors)
         {
-            if (activityEnricher == null)
+            if (instrumentor == null)
             {
-                throw new ArgumentNullException(nameof(enrichers));
+                throw new ArgumentNullException(nameof(instrumentor));
             }
 
-            _addEnricher(activityEnricher);
+            _addInstrumentor(instrumentor);
         }
         
         return _options;
@@ -70,7 +70,7 @@ public sealed class SerilogTracingActivityEnrichmentOptions
     /// the logger.</typeparam>
     /// <returns>Configuration object allowing method chaining.</returns>
     public SerilogTracingOptions With<TEnricher>()
-        where TEnricher : IActivityEnricher, new()
+        where TEnricher : IActivityInstrumentor, new()
     {
         return With(new TEnricher());
     }

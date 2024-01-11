@@ -42,6 +42,57 @@ public static class ActivityExtensions
     /// 
     /// </summary>
     /// <param name="activity"></param>
+    /// <param name="property"></param>
+    public static void SetLogEventProperty(this Activity activity, LogEventProperty property)
+    {
+        if (property.Value is ScalarValue sv)
+        {
+            activity.SetTag(property.Name, sv.Value);
+        }
+        
+        ActivityUtil.GetOrInitLogEventPropertyCollection(activity).Add(property.Name, property);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="activity"></param>
+    /// <returns></returns>
+    public static IEnumerable<LogEventProperty> GetLogEventProperties(this Activity activity)
+    {
+        return ActivityUtil.TryGetLogEventPropertyCollection(activity, out var existing) ? existing.Values : Enumerable.Empty<LogEventProperty>();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="activity"></param>
+    /// <param name="exception"></param>
+    public static bool TrySetException(this Activity activity, Exception exception)
+    {
+        if (activity.Events.Any(e => e.Name == Constants.ExceptionEventName)) return false;
+        
+        activity.AddEvent(ActivityUtil.EventFromException(exception));
+        return true;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="activity"></param>
+    /// <param name="exception"></param>
+    /// <returns></returns>
+    public static bool TryGetException(this Activity activity, [NotNullWhen(true)] out Exception? exception)
+    {
+        exception = ActivityUtil.ExceptionFromEvents(activity);
+
+        return exception != null;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="activity"></param>
     /// <returns></returns>
     public static LogEventLevel GetCompletionLevel(this Activity activity)
     {

@@ -12,7 +12,7 @@ public static class SerilogTracingActivityEnrichmentOptionsExtensions
     /// </summary>
     /// <param name="options"></param>
     /// <returns></returns>
-    public static SerilogTracingOptions WithAspNetCoreInstrumentation(this SerilogTracingActivityEnrichmentOptions options)
+    public static SerilogTracingOptions WithAspNetCoreInstrumentation(this SerilogTracingActivityInstrumentationOptions options)
     {
         return options.WithAspNetCoreInstrumentation(_ => { });
     }
@@ -24,11 +24,11 @@ public static class SerilogTracingActivityEnrichmentOptionsExtensions
     /// <param name="with"></param>
     /// <returns></returns>
     public static SerilogTracingOptions WithAspNetCoreInstrumentation(
-        this SerilogTracingActivityEnrichmentOptions options, Action<HttpRequestInActivityEnricherOptions> with)
+        this SerilogTracingActivityInstrumentationOptions options, Action<HttpRequestInActivityEnricherOptions> with)
     {
         var httpOptions = new HttpRequestInActivityEnricherOptions();
         with.Invoke(httpOptions);
         
-        return options.With(new HttpRequestInActivityEnricher(httpOptions));
+        return options.With(new HttpRequestInActivityInstrumentor(httpOptions));
     }
 }

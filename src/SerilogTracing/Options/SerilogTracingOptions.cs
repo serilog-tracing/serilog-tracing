@@ -8,20 +8,20 @@ namespace SerilogTracing.Options;
 /// </summary>
 public sealed class SerilogTracingOptions
 {
-    static readonly List<IActivityEnricher> DefaultEnrichers = new()
+    static readonly List<IActivityInstrumentor> DefaultInstrumentors = new()
     {
-        new HttpRequestOutActivityEnricher()
+        new HttpRequestOutActivityInstrumentor()
     };
     
-    readonly List<IActivityEnricher> _enrichers = new();
-    bool _withDefaultEnrichers = true;
+    readonly List<IActivityInstrumentor> _instrumentors = new();
+    bool _withDefaultInstrumentors = true;
 
     internal SerilogTracingOptions()
     {
-        Enrich = new SerilogTracingActivityEnrichmentOptions(this, enricher => _enrichers.Add(enricher), withDefaults => _withDefaultEnrichers = withDefaults);
+        Instrument = new SerilogTracingActivityInstrumentationOptions(this, instrumentor => _instrumentors.Add(instrumentor), withDefaults => _withDefaultInstrumentors = withDefaults);
     }
 
-    internal IEnumerable<IActivityEnricher> Enrichers => _withDefaultEnrichers ? DefaultEnrichers.Concat(_enrichers) : _enrichers;
+    internal IEnumerable<IActivityInstrumentor> Instrumentors => _withDefaultInstrumentors ? DefaultInstrumentors.Concat(_instrumentors) : _instrumentors;
     
     /// <summary>
     /// Set the sampling level for the listener. The <see cref="ActivityContext"/> supplied to
@@ -49,5 +49,5 @@ public sealed class SerilogTracingOptions
     /// <summary>
     /// Configures enrichment of <see cref="Activity">Activities</see>.
     /// </summary>
-    public SerilogTracingActivityEnrichmentOptions Enrich { get; internal set; }
+    public SerilogTracingActivityInstrumentationOptions Instrument { get; internal set; }
 }

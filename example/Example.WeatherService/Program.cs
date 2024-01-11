@@ -13,7 +13,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(DefaultFormatting.CreateTextFormatter(TemplateTheme.Code))
     .WriteTo.SeqTracing("http://localhost:5341")
     .WriteTo.Zipkin("http://localhost:9411")
-    .CreateTracingLogger(options => options.Enrich.WithAspNetCoreInstrumentation());
+    .CreateTracingLogger(options => options.Instrument.WithAspNetCoreInstrumentation());
 
 Log.Information("Weather service starting up");
 
@@ -33,8 +33,7 @@ try
         var forecast = forecastByPostcode[postcode];
         activity.AddProperty("Forecast", forecast);
 
-        throw new Exception("lol");
-        //return forecast;
+        return forecast;
     });
 
     app.Run();

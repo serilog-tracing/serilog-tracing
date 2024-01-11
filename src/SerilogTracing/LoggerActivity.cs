@@ -74,15 +74,8 @@ public sealed class LoggerActivity : IDisposable
     {
         if (Logger.BindProperty(propertyName, value, destructureObjects, out var property))
         {
-            // May be best to split storage across the initial `IEnumerable` and a lazily-allocated
-            // `List` to avoid this without copying `captures` in the constructor.
-            _captures = _captures.Concat(new[] { property });
+            Activity?.SetLogEventProperty(property);
         }
-
-        // In cases where `destructureObjects` is `true`, it's unlikely that the value will
-        // be an immutable scalar suitable for using with `AddTag()`, so we avoid surprises
-        // and stringify it in those cases.
-        Activity?.AddTag(propertyName, destructureObjects ? value?.ToString() : value);
     }
     
     /// <summary>
@@ -113,7 +106,7 @@ public sealed class LoggerActivity : IDisposable
         if (exception != null)
         {
             Exception = exception;
-            Activity?.AddEvent(ActivityUtil.EventFromException(exception));
+            Activity?.TrySetException(exception);
         }
 
         Activity?.SetStatus(level <= LogEventLevel.Warning ? ActivityStatusCode.Ok : ActivityStatusCode.Error);

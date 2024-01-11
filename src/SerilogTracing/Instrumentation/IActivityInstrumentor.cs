@@ -5,7 +5,7 @@ namespace SerilogTracing.Instrumentation;
 /// <summary>
 /// 
 /// </summary>
-public interface IActivityEnricher
+public interface IActivityInstrumentor
 {
     /// <summary>
     /// Whether the enricher should subscribe to events from the given <see cref="DiagnosticListener"/>.
@@ -20,5 +20,5 @@ public interface IActivityEnricher
     /// <param name="activity">The activity to enrich.</param>
     /// <param name="eventName">The name of the event.</param>
     /// <param name="eventArgs">The value of the event.</param>
-    void EnrichActivity(Activity activity, string eventName, object eventArgs);
+    void InstrumentActivity(Activity activity, string eventName, object eventArgs);
 }

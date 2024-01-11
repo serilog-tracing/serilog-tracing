@@ -4,12 +4,12 @@ namespace SerilogTracing.Instrumentation;
 
 sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDisposable
 {
-    internal DiagnosticListenerObserver(IReadOnlyList<IActivityEnricher> enrichers)
+    internal DiagnosticListenerObserver(IReadOnlyList<IActivityInstrumentor> enrichers)
     {
         _enrichers = enrichers;
     }
 
-    IReadOnlyList<IActivityEnricher> _enrichers;
+    IReadOnlyList<IActivityInstrumentor> _enrichers;
     
     List<IDisposable?> _subscription = new();
     
