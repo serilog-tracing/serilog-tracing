@@ -10,19 +10,15 @@ using SerilogTracing.Sinks.Zipkin;
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", typeof(Program).Assembly.GetName().Name)
     .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
-    //.WriteTo.SeqTracing("http://localhost:5341")
+    .WriteTo.SeqTracing("http://localhost:5341")
     .WriteTo.Zipkin("http://localhost:9411")
     .WriteTo.OpenTelemetry("http://localhost:5341/ingest/otlp/v1/logs", "http://localhost:5341/ingest/otlp/v1/traces", OtlpProtocol.HttpProtobuf, null, new Dictionary<string, object>()
     {
         { "service.name", typeof(Program).Assembly.GetName().Name ?? "unknown_service" }
     })
-    // .WriteTo.OpenTelemetry(options =>
-    // {
-    //     options.LogsEndpoint = "http://localhost:5341/ingest/otlp/v1/logs";
-    //     options.TracesEndpoint = "http://localhost:5341/ingest/otlp/v1/traces";
-    //     options.Protocol = OtlpProtocol.HttpProtobuf;
-    // })
-    .CreateTracingLogger();
+    .CreateLogger();
+
+using var _ = new TracingConfiguration().EnableTracing();
 
 if (args.Length != 1)
 {

@@ -9,31 +9,27 @@ using SerilogTracing.Interop;
 namespace SerilogTracing;
 
 /// <summary>
-/// Configure an activity listener that writes completed spans to a Serilog logger.
+/// Configure integration between SerilogTracing and the .NET tracing infrastructure.
 /// </summary>
-public static class LoggerConfigurationTracingExtensions
+public class TracingConfiguration
 {
     /// <summary>
-    /// Configure and register an activity listener that writes completed spans to a Serilog logger.
-    /// The returned listener will continue writing spans through the Serilog logger until it is disposed.
+    /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
     /// </summary>
-    /// <returns>The logger.</returns>
-    public static Logger CreateTracingLogger(this LoggerConfiguration loggerConfiguration, Action<SerilogActivityListenerOptions>? configure = null)
+    /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
+    public IDisposable EnableTracing(ILogger? logger = null, Action<ActivityListenerOptions>? configure = null)
     {
         var activityListener = new ActivityListener();
         var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
-        var disposeProxy = new DisposeProxy(activityListener, diagnosticListenerSubscription);
+        var disposeProxy = new DisposeProxy(diagnosticListenerSubscription, activityListener);
         
-        var logger = loggerConfiguration
-            .WriteTo.Sink(disposeProxy)
-            .CreateLogger();
-        
-        var options = new SerilogActivityListenerOptions();
+        var options = new ActivityListenerOptions();
         configure?.Invoke(options);
         
         ILogger GetLogger(string name)
         {
-            return !string.IsNullOrWhiteSpace(name) ? logger.ForContext(Constants.SourceContextPropertyName, name) : logger;
+            var instance = logger ?? Log.Logger;
+            return !string.IsNullOrWhiteSpace(name) ? instance.ForContext(Constants.SourceContextPropertyName, name) : instance;
         }
         
         activityListener.Sample = options.Sample;
@@ -56,10 +52,10 @@ public static class LoggerConfigurationTracingExtensions
         
         ActivitySource.AddActivityListener(activityListener);
 
-        return logger;
+        return disposeProxy;
     }
 
-    sealed class DisposeProxy(params IDisposable[] disposables) : ILogEventSink, IDisposable
+    sealed class DisposeProxy(params IDisposable[] disposables) : IDisposable
     {
         public void Dispose()
         {
@@ -74,10 +70,6 @@ public static class LoggerConfigurationTracingExtensions
                     SelfLog.WriteLine("TracingLogger: exception in dispose" + Environment.NewLine + ex);
                 }
             }
-        }
-
-        void ILogEventSink.Emit(LogEvent logEvent)
-        {
         }
     }
 }
