@@ -3,9 +3,9 @@
 namespace SerilogTracing;
 
 /// <summary>
-/// Options for <see cref="LoggerConfigurationTracingExtensions"/> configuration.
+/// Options for <see cref="TracingConfiguration"/> configuration.
 /// </summary>
-public class SerilogActivityListenerOptions
+public class ActivityListenerOptions
 {
     /// <summary>
     /// Set the sampling level for the listener. The <see cref="ActivityContext"/> supplied to
