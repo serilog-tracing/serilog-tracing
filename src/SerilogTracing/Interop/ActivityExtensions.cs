@@ -45,12 +45,27 @@ public static class ActivityExtensions
     /// <param name="property"></param>
     public static void SetLogEventProperty(this Activity activity, LogEventProperty property)
     {
-        if (property.Value is ScalarValue sv)
+        activity.SetLogEventProperties(Enumerable.Repeat(property, 1));
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="activity"></param>
+    /// <param name="properties"></param>
+    public static void SetLogEventProperties(this Activity activity, IEnumerable<LogEventProperty> properties)
+    {
+        var collection = ActivityUtil.GetOrInitLogEventPropertyCollection(activity);
+
+        foreach (var property in properties)
         {
-            activity.SetTag(property.Name, sv.Value);
-        }
+            if (property.Value is ScalarValue sv)
+            {
+                activity.SetTag(property.Name, sv.Value);
+            }
         
-        ActivityUtil.GetOrInitLogEventPropertyCollection(activity).Add(property.Name, property);
+            collection.Add(property.Name, property);
+        }
     }
 
     /// <summary>
