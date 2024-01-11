@@ -27,7 +27,7 @@ public static class LoggerTracingExtensions
         if (!logger.BindMessageTemplate(messageTemplate, propertyValues, out var parsedTemplate, out var captures))
             return LoggerActivity.None;
             
-        var activity = LoggerActivitySource.Instance.StartActivity(messageTemplate);
+        var activity = LoggerActivitySource.StartActivity(messageTemplate);
         
         return new LoggerActivity(logger, activity, parsedTemplate, captures);
     }

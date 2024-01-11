@@ -12,7 +12,9 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
     .WriteTo.SeqTracing("http://localhost:5341")
     .WriteTo.Zipkin("http://localhost:9411")
-    .CreateTracingLogger();
+    .CreateLogger();
+
+using var _ = new TracingConfiguration().EnableTracing();
 
 Log.Information("Weather service starting up");
 
