@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\SerilogTracing.Expressions\SerilogTracing.Expressions.csproj" />
     <ProjectReference Include="..\..\src\SerilogTracing\SerilogTracing.csproj" />
   </ItemGroup>
 

@@ -4,6 +4,7 @@ using Serilog.Expressions;
 using Serilog.Sinks.PeriodicBatching;
 using Serilog.Templates;
 using SerilogTracing.Core;
+using SerilogTracing.Expressions;
 
 namespace SerilogTracing.Sinks.Zipkin;
 
@@ -18,13 +19,13 @@ class ZipkinSink: IBatchedLogEventSink
             traceId: @tr,
             parentId: ParentSpanId,
             name: @mt,
-            timestamp: Micros(SpanStartTimestamp),
-            duration: Micros(@t) - Micros(SpanStartTimestamp),
+            timestamp: Microseconds(FromUnixEpoch(SpanStartTimestamp)),
+            duration: Microseconds(Elapsed()),
             localEndpoint: {serviceName: Application},
             tags: rest()
         }
     }
-    """, nameResolver: new StaticMemberNameResolver(typeof(UserDefinedFunctions)));
+    """, nameResolver: new TracingNameResolver());
     
     public ZipkinSink(Uri endpoint, HttpMessageHandler messageHandler)
     {

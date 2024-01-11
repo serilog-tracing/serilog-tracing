@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Sinks.OpenTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Sinks.Seq", "src\SerilogTracing.Sinks.Seq\SerilogTracing.Sinks.Seq.csproj", "{57AB5445-432E-4148-97BC-9953D5C162BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Expressions", "src\SerilogTracing.Expressions\SerilogTracing.Expressions.csproj", "{586FD369-EF68-49E0-B827-A35218E1E4E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,7 @@ Global
 		{F94303AD-18D0-4A3F-8F35-CA2506E9D8F6} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
 		{5DBE6610-CCF2-41B9-9592-033B24B79558} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
 		{57AB5445-432E-4148-97BC-9953D5C162BD} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
+		{586FD369-EF68-49E0-B827-A35218E1E4E5} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -95,5 +98,9 @@ Global
 		{57AB5445-432E-4148-97BC-9953D5C162BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57AB5445-432E-4148-97BC-9953D5C162BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57AB5445-432E-4148-97BC-9953D5C162BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{586FD369-EF68-49E0-B827-A35218E1E4E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{586FD369-EF68-49E0-B827-A35218E1E4E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{586FD369-EF68-49E0-B827-A35218E1E4E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{586FD369-EF68-49E0-B827-A35218E1E4E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

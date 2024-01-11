@@ -1,5 +1,6 @@
 version: '{build}'
 skip_tags: true
+test: off
 image: Visual Studio 2022
 install:
     - pwsh: ./Setup.ps1
