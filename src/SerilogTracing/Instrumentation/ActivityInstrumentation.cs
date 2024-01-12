@@ -56,35 +56,40 @@ public static class ActivityInstrumentation
     /// <param name="property">The property to assign.</param>
     public static void SetLogEventProperty(Activity activity, LogEventProperty property)
     {
-        SetLogEventProperties(activity, Enumerable.Repeat(property, 1));
+        SetLogEventProperty(activity, property, GetOrInitLogEventPropertyCollection(activity));
     }
 
     /// <summary>
     /// Set multiple <see cref="LogEventProperty">log event properties</see>, overwriting any previously set values
     /// with the same names.
     ///
-    /// This method behaves like multiple calls to <see cref="ActivityInstrumentation.SetLogEventProperty"/>, but
+    /// This method behaves like multiple calls to <see cref="ActivityInstrumentation.SetLogEventProperty(Activity, LogEventProperty)"/>, but
     /// is more efficient.
     /// </summary>
     /// <param name="activity">The activity to instrument.</param>
     /// <param name="properties">The properties to assign.</param>
-    public static void SetLogEventProperties(Activity activity, IEnumerable<LogEventProperty> properties)
+    public static void SetLogEventProperties(Activity activity, params LogEventProperty[] properties)
     {
         var collection = GetOrInitLogEventPropertyCollection(activity);
 
         foreach (var property in properties)
         {
-            if (property.Value is ScalarValue sv)
-            {
-                activity.SetTag(property.Name, sv.Value);
-            }
-        
-            collection.Add(property.Name, property);
+            SetLogEventProperty(activity, property, collection);
         }
     }
 
+    static void SetLogEventProperty(Activity activity, LogEventProperty property, Dictionary<string, LogEventProperty> collection)
+    {
+        if (property.Value is ScalarValue sv)
+        {
+            activity.SetTag(property.Name, sv.Value);
+        }
+
+        collection.Add(property.Name, property);
+    }
+
     /// <summary>
-    /// Get all <see cref="LogEventProperty">log event properties</see> set on the activity by <see cref="ActivityInstrumentation.SetLogEventProperty"/>.
+    /// Get all <see cref="LogEventProperty">log event properties</see> set on the activity by <see cref="ActivityInstrumentation.SetLogEventProperty(Activity, LogEventProperty)"/>.
     ///
     /// This method won't include tags on the activity.
     /// </summary>
