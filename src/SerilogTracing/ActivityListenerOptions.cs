@@ -47,7 +47,7 @@ public class ActivityListenerOptions
     public SampleActivity<string> SampleUsingParentId { get; set; } = delegate { return ActivitySamplingResult.AllData; };
     
     /// <summary>
-    /// Configures enrichment of <see cref="Activity">Activities</see>.
+    /// Configures instrumentation of <see cref="Activity">activities</see>.
     /// </summary>
     public InstrumentationOptions Instrument { get; internal set; }
 }

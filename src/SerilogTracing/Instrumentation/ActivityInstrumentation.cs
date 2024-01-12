@@ -6,26 +6,32 @@ using SerilogTracing.Core;
 namespace SerilogTracing.Instrumentation;
 
 /// <summary>
-/// 
+/// Utilities for <see cref="IActivityInstrumentor">activity instrumentors</see> to enrich
+/// <see cref="Activity">activities</see> for <see cref="Serilog.ILogger">loggers</see>.
 /// </summary>
 public static class ActivityInstrumentation
 {
     /// <summary>
-    /// 
+    /// Associate a <see cref="MessageTemplate"/> with the given <see cref="Activity"/>, without changing the
+    /// <see cref="Activity.DisplayName"/>.
+    ///
+    /// The message template will be assigned to a custom property on the activity, overwriting any previously set value
+    /// with the same name.
     /// </summary>
-    /// <param name="activity"></param>
-    /// <param name="messageTemplate"></param>
+    /// <param name="activity">The activity to instrument.</param>
+    /// <param name="messageTemplate">The message template to assign.</param>
     public static void SetMessageTemplateOverride(Activity activity, MessageTemplate messageTemplate)
     {
         activity.SetCustomProperty(Constants.MessageTemplateOverridePropertyName, messageTemplate);
     }
     
     /// <summary>
-    /// 
+    /// Get a <see cref="MessageTemplate"/> previously associated with the given <see cref="Activity"/> by
+    /// <see cref="ActivityInstrumentation.SetMessageTemplateOverride"/>.
     /// </summary>
-    /// <param name="activity"></param>
-    /// <param name="messageTemplate"></param>
-    /// <returns></returns>
+    /// <param name="activity">The activity containing the message template.</param>
+    /// <param name="messageTemplate">The assigned message template, if any.</param>
+    /// <returns>True when the activity contains a message template.</returns>
     public static bool TryGetMessageTemplateOverride(Activity activity, [NotNullWhen(true)] out MessageTemplate? messageTemplate)
     {
         if (activity.GetCustomProperty(Constants.MessageTemplateOverridePropertyName) is MessageTemplate customPropertyValue)
@@ -39,20 +45,29 @@ public static class ActivityInstrumentation
     }
 
     /// <summary>
-    /// 
+    /// Set a <see cref="LogEventProperty"/> on the given <see cref="Activity"/>, overwriting any previously set value
+    /// with the same name.
+    ///
+    /// Properties are added to a collection in a custom property on the activity.
+    /// If the property value is a <see cref="ScalarValue"/> then it will also set a tag on the activity, making
+    /// it visible to outside instrumentation.
     /// </summary>
-    /// <param name="activity"></param>
-    /// <param name="property"></param>
+    /// <param name="activity">The activity to instrument.</param>
+    /// <param name="property">The property to assign.</param>
     public static void SetLogEventProperty(Activity activity, LogEventProperty property)
     {
         SetLogEventProperties(activity, Enumerable.Repeat(property, 1));
     }
 
     /// <summary>
-    /// 
+    /// Set multiple <see cref="LogEventProperty">log event properties</see>, overwriting any previously set values
+    /// with the same names.
+    ///
+    /// This method behaves like multiple calls to <see cref="ActivityInstrumentation.SetLogEventProperty"/>, but
+    /// is more efficient.
     /// </summary>
-    /// <param name="activity"></param>
-    /// <param name="properties"></param>
+    /// <param name="activity">The activity to instrument.</param>
+    /// <param name="properties">The properties to assign.</param>
     public static void SetLogEventProperties(Activity activity, IEnumerable<LogEventProperty> properties)
     {
         var collection = GetOrInitLogEventPropertyCollection(activity);
@@ -69,10 +84,12 @@ public static class ActivityInstrumentation
     }
 
     /// <summary>
-    /// 
+    /// Get all <see cref="LogEventProperty">log event properties</see> set on the activity by <see cref="ActivityInstrumentation.SetLogEventProperty"/>.
+    ///
+    /// This method won't include tags on the activity.
     /// </summary>
-    /// <param name="activity"></param>
-    /// <returns></returns>
+    /// <param name="activity">The activity containing the properties.</param>
+    /// <returns>A collection of properties set on the activity.</returns>
     public static IEnumerable<LogEventProperty> GetLogEventProperties(Activity activity)
     {
         return TryGetLogEventPropertyCollection(activity, out var existing) ? existing.Values : Enumerable.Empty<LogEventProperty>();
@@ -104,10 +121,15 @@ public static class ActivityInstrumentation
     }
 
     /// <summary>
-    /// 
+    /// Try associate an <see cref="Exception"/> with the activity.
+    ///
+    /// The exception will be stored as an event with the current timestamp, using the conventional
+    /// name "exception".
+    ///
+    /// This method won't overwrite any previously set exception.
     /// </summary>
-    /// <param name="activity"></param>
-    /// <param name="exception"></param>
+    /// <param name="activity">The activity to instrument.</param>
+    /// <param name="exception">True if the exception was set on the event.</param>
     public static bool TrySetException(Activity activity, Exception exception)
     {
         if (activity.Events.Any(e => e.Name == Constants.ExceptionEventName)) return false;
@@ -128,10 +150,11 @@ public static class ActivityInstrumentation
     }
 
     /// <summary>
-    /// 
+    /// Try get an exception previously associated with the activity using the conventional event name "exception".
     /// </summary>
-    /// <param name="activity"></param>
-    /// <param name="exception"></param>
+    /// <param name="activity">The activity containing the exception.</param>
+    /// <param name="exception">True if an exception event is present on the activity. The type of the returned
+    /// exception is not guaranteed to match the one originally set on the activity.</param>
     /// <returns></returns>
     public static bool TryGetException(Activity activity, [NotNullWhen(true)] out Exception? exception)
     {
@@ -161,10 +184,12 @@ public static class ActivityInstrumentation
     }
 
     /// <summary>
-    /// 
+    /// Compute a <see cref="LogEventLevel"/> based on the status of the activity.
     /// </summary>
-    /// <param name="activity"></param>
-    /// <returns></returns>
+    /// <param name="activity">The activity.</param>
+    /// <returns>A <see cref="LogEventLevel"/> based on <see cref="Activity.Status"/>. If the status is
+    /// <see cref="ActivityStatusCode.Error"/> then the completion value will be <see cref="LogEventLevel.Error"/>.
+    /// Otherwise it'll be <see cref="LogEventLevel.Information"/>.</returns>
     public static LogEventLevel GetCompletionLevel(Activity activity)
     {
         return activity.Status == ActivityStatusCode.Error ? LogEventLevel.Error : LogEventLevel.Information;

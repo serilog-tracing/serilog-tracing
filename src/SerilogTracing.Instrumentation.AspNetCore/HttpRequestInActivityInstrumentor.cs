@@ -13,7 +13,7 @@ public sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
     /// <summary>
     /// Create an instance of the instrumentor.
     /// </summary>
-    public HttpRequestInActivityInstrumentor(HttpRequestInActivityEnricherOptions options)
+    public HttpRequestInActivityInstrumentor(HttpRequestInActivityInstrumentorOptions options)
     {
         _getRequestProperties = options.GetRequestProperties;
         _getResponseProperties = options.GetResponseProperties;

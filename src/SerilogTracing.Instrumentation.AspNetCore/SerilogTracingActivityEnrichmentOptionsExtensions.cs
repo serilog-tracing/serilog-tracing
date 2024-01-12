@@ -1,14 +1,13 @@
 ﻿namespace SerilogTracing.Instrumentation.AspNetCore;
 
 /// <summary>
-/// 
+/// Support ASP.NET Core instrumentation.
 /// </summary>
 public static class InstrumentationOptionsExtensions
 {
     /// <summary>
-    /// 
+    /// Add instrumentation for ASP.NET Core requests.
     /// </summary>
-    /// <param name="options"></param>
     /// <returns></returns>
     public static ActivityListenerOptions WithAspNetCoreRequests(this InstrumentationOptions options)
     {
@@ -16,15 +15,15 @@ public static class InstrumentationOptionsExtensions
     }
 
     /// <summary>
-    /// 
+    /// Add instrumentation for ASP.NET Core requests.
     /// </summary>
     /// <param name="options"></param>
-    /// <param name="with"></param>
-    /// <returns></returns>
+    /// <param name="with">A callback to configure the instrumentation.</param>
+    /// <returns>Configuration object allowing method chaining.</returns>
     public static ActivityListenerOptions WithAspNetCoreRequests(
-        this InstrumentationOptions options, Action<HttpRequestInActivityEnricherOptions> with)
+        this InstrumentationOptions options, Action<HttpRequestInActivityInstrumentorOptions> with)
     {
-        var httpOptions = new HttpRequestInActivityEnricherOptions();
+        var httpOptions = new HttpRequestInActivityInstrumentorOptions();
         with.Invoke(httpOptions);
         
         return options.With(new HttpRequestInActivityInstrumentor(httpOptions));

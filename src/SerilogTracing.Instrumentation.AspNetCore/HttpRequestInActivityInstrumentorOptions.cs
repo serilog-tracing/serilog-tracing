@@ -5,9 +5,9 @@ using Serilog.Events;
 namespace SerilogTracing.Instrumentation.AspNetCore;
 
 /// <summary>
-/// 
+/// Configuration for a <see cref="HttpRequestInActivityInstrumentor"/>.
 /// </summary>
-public sealed class HttpRequestInActivityEnricherOptions
+public sealed class HttpRequestInActivityInstrumentorOptions
 {
     const string DefaultRequestCompletionMessageTemplate =
         "HTTP {RequestMethod} {RequestPath}";
@@ -26,30 +26,31 @@ public sealed class HttpRequestInActivityEnricherOptions
         };
 
     /// <summary>
-    /// 
+    /// Construct a default set of options.
     /// </summary>
-    public HttpRequestInActivityEnricherOptions()
+    public HttpRequestInActivityInstrumentorOptions()
     {
         MessageTemplate = DefaultRequestCompletionMessageTemplate;
         GetRequestProperties = DefaultGetRequestProperties;
         GetResponseProperties = DefaultGetResponseProperties;
     }
     
-     /// <summary>
-    /// 
+    /// <summary>
+    /// The message template to associate with request activities.
     /// </summary>
-    /// <value>
-    /// The message template.
-    /// </value>
     public string MessageTemplate { get; set; }
 
     /// <summary>
-    /// A function to specify the values of the MessageTemplateProperties.
+    /// A function to populate properties on the activity from an incoming request.
+    ///
+    /// This closure will be invoked at the start of the request pipeline.
     /// </summary>
     public Func<HttpRequest, IEnumerable<LogEventProperty>> GetRequestProperties { get; set; }
     
     /// <summary>
-    /// A function to specify the values of the MessageTemplateProperties.
+    /// A function to populate properties on the activity from an outgoing response.
+    ///
+    /// This closure will be invoked at the end of the request pipeline.
     /// </summary>
     public Func<HttpResponse, IEnumerable<LogEventProperty>> GetResponseProperties { get; set; }
 }
