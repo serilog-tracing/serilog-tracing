@@ -133,7 +133,7 @@ public static class OpenTelemetryLoggerConfigurationExtensions
             tracesEndpoint: options.TracesEndpoint,
             protocol: options.Protocol,
             headers: new Dictionary<string, string>(options.Headers),
-            httpMessageHandler: options.HttpMessageHandler);
+            httpMessageHandler: options.HttpMessageHandler ?? CreateSilentHttpMessageHandler());
 
         var sink = new OpenTelemetrySink(
             exporter: exporter,
@@ -173,8 +173,8 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// <returns>Logger configuration, allowing configuration to continue.</returns>
     public static LoggerConfiguration OpenTelemetry(
         this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
-        string logsEndpoint = OpenTelemetrySinkOptions.DefaultEndpoint,
-        string tracesEndpoint = OpenTelemetrySinkOptions.DefaultEndpoint,
+        string? logsEndpoint,
+        string? tracesEndpoint,
         OtlpProtocol protocol = OpenTelemetrySinkOptions.DefaultProtocol,
         IDictionary<string, string>? headers = null,
         IDictionary<string, object>? resourceAttributes = null)
