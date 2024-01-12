@@ -41,7 +41,7 @@ public sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
                 ActivityInstrumentation.SetMessageTemplateOverride(activity, _messageTemplateOverride);
                 activity.DisplayName = _messageTemplateOverride.Text;
                 
-                ActivityInstrumentation.SetLogEventProperties(activity, _getRequestProperties(start.Request));
+                ActivityInstrumentation.SetLogEventProperties(activity, _getRequestProperties(start.Request).ToArray());
 
                 break;
             case "Microsoft.AspNetCore.Diagnostics.UnhandledException":
@@ -58,7 +58,7 @@ public sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Stop":
                 if (eventArgs is not HttpContext stop) return;
                 
-                ActivityInstrumentation.SetLogEventProperties(activity, _getResponseProperties(stop.Response));
+                ActivityInstrumentation.SetLogEventProperties(activity, _getResponseProperties(stop.Response).ToArray());
 
                 break;
         }
