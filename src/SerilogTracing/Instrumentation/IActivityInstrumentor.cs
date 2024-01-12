@@ -3,7 +3,7 @@
 namespace SerilogTracing.Instrumentation;
 
 /// <summary>
-/// 
+/// Instrument <see cref="Activity">activities</see>.
 /// </summary>
 public interface IActivityInstrumentor
 {
