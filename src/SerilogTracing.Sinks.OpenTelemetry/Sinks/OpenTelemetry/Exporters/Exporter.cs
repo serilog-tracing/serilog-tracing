@@ -19,8 +19,8 @@ namespace SerilogTracing.Sinks.OpenTelemetry.Exporters;
 static class Exporter
 {
     public static IExporter Create(
-        string logsEndpoint,
-        string tracesEndpoint,
+        string? logsEndpoint,
+        string? tracesEndpoint,
         OtlpProtocol protocol,
         IReadOnlyDictionary<string, string> headers,
         HttpMessageHandler? httpMessageHandler)

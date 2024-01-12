@@ -51,7 +51,7 @@ public class OpenTelemetrySinkTests
     static async Task<ExportLogsServiceRequest> ExportAsync(IEnumerable<LogEvent> events)
     {
         var exporter = new CollectingExporter();
-        var sink = new OpenTelemetrySink(exporter, null, new Dictionary<string, object>(), OpenTelemetrySinkOptions.DefaultIncludedData);
+        var sink = new OpenTelemetrySink(exporter, null, new Dictionary<string, object>(), OpenTelemetrySinkOptions.DefaultIncludedData, isLogsEnabled: true, isTracesEnabled: true);
         await sink.EmitBatchAsync(events);
         return Assert.Single(exporter.LogsServiceRequests);
     }

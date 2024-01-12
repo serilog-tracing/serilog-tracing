@@ -34,11 +34,11 @@ public class OpenTelemetrySinkOptions
     /// <summary>
     /// The URL of the OTLP exporter logs endpoint.
     /// </summary>
-    public string LogsEndpoint { get; set; } = DefaultEndpoint;
+    public string? LogsEndpoint { get; set; } = DefaultEndpoint;
     /// <summary>
     /// The URL of the OTLP exporter traces endpoint.
     /// </summary>
-    public string TracesEndpoint { get; set; } = DefaultEndpoint;
+    public string? TracesEndpoint { get; set; } = DefaultEndpoint;
 
     /// <summary>
     /// A custom HTTP message handler. To suppress tracing of HTTP requests from the sink, set the handler to

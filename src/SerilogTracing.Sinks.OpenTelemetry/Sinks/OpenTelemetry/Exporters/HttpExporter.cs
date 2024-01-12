@@ -25,8 +25,8 @@ namespace SerilogTracing.Sinks.OpenTelemetry.Exporters;
 /// </summary>
 sealed class HttpExporter : IExporter, IDisposable
 {
-    readonly string _logsEndpoint;
-    readonly string _tracesEndpoint;
+    readonly string? _logsEndpoint;
+    readonly string? _tracesEndpoint;
     readonly HttpClient _client;
 
     /// <summary>
@@ -46,7 +46,7 @@ sealed class HttpExporter : IExporter, IDisposable
     /// <param name="httpMessageHandler">
     /// Custom HTTP message handler.
     /// </param>
-    public HttpExporter(string logsEndpoint, string tracesEndpoint, IReadOnlyDictionary<string, string> headers, HttpMessageHandler? httpMessageHandler = null)
+    public HttpExporter(string? logsEndpoint, string? tracesEndpoint, IReadOnlyDictionary<string, string> headers, HttpMessageHandler? httpMessageHandler = null)
     {
         _logsEndpoint = logsEndpoint;
         _tracesEndpoint = tracesEndpoint;

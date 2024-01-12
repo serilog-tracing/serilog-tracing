@@ -26,14 +26,11 @@ namespace SerilogTracing.Sinks.OpenTelemetry.Exporters;
 /// </summary>
 sealed class GrpcExporter : IExporter, IDisposable
 {
-    readonly string _logsEndpoint;
-    readonly string _tracesEndpoint;
+    readonly GrpcChannel? _logsChannel;
+    readonly GrpcChannel? _tracesChannel;
 
-    readonly GrpcChannel _logsChannel;
-    readonly GrpcChannel _tracesChannel;
-
-    readonly LogsService.LogsServiceClient _logsClient;
-    readonly TraceService.TraceServiceClient _tracesClient;
+    readonly LogsService.LogsServiceClient? _logsClient;
+    readonly TraceService.TraceServiceClient? _tracesClient;
     
     readonly Metadata _headers;
 
@@ -42,10 +39,10 @@ sealed class GrpcExporter : IExporter, IDisposable
     /// ExportLogsServiceRequest to a gRPC endpoint.
     /// </summary>
     /// <param name="logsEndpoint">
-    /// The full OTLP endpoint to which logs are sent.
+    /// The gRPC endpoint to which logs are sent.
     /// </param>
     /// <param name="tracesEndpoint">
-    /// The full OTLP endpoint to which traces are sent.
+    /// The gRPC endpoint to which traces are sent.
     /// </param>
     /// <param name="headers">
     /// A dictionary containing the request headers.
@@ -53,23 +50,27 @@ sealed class GrpcExporter : IExporter, IDisposable
     /// <param name="httpMessageHandler">
     /// Custom HTTP message handler.
     /// </param>
-    public GrpcExporter(string logsEndpoint, string tracesEndpoint, IReadOnlyDictionary<string, string> headers,
+    public GrpcExporter(string? logsEndpoint, string? tracesEndpoint, IReadOnlyDictionary<string, string> headers,
         HttpMessageHandler? httpMessageHandler = null)
     {
-        _logsEndpoint = string.IsNullOrWhiteSpace(logsEndpoint) ? tracesEndpoint : logsEndpoint;
-        _tracesEndpoint = string.IsNullOrWhiteSpace(tracesEndpoint) ? logsEndpoint : tracesEndpoint;
-        
         var grpcChannelOptions = new GrpcChannelOptions();
         if (httpMessageHandler != null)
         {
             grpcChannelOptions.HttpClient = new HttpClient(httpMessageHandler);
             grpcChannelOptions.DisposeHttpClient = true;
         }
-        
-        _logsChannel = GrpcChannel.ForAddress(_logsEndpoint, grpcChannelOptions);
-        _logsClient = new LogsService.LogsServiceClient(_logsChannel);
-        _tracesChannel = GrpcChannel.ForAddress(_tracesEndpoint, grpcChannelOptions);
-        _tracesClient = new TraceService.TraceServiceClient(_logsChannel);
+
+        if (logsEndpoint != null)
+        {
+            _logsChannel = GrpcChannel.ForAddress(logsEndpoint, grpcChannelOptions);
+            _logsClient = new LogsService.LogsServiceClient(_logsChannel);
+        }
+
+        if (tracesEndpoint != null)
+        {
+            _tracesChannel = GrpcChannel.ForAddress(tracesEndpoint, grpcChannelOptions);
+            _tracesClient = new TraceService.TraceServiceClient(_logsChannel);
+        }
 
         _headers = new Metadata();
         foreach (var header in headers)
@@ -80,27 +81,27 @@ sealed class GrpcExporter : IExporter, IDisposable
 
     public void Dispose()
     {
-        _logsChannel.Dispose();
-        _tracesChannel.Dispose();
+        _logsChannel?.Dispose();
+        _tracesChannel?.Dispose();
     }
 
     public void Export(ExportLogsServiceRequest request)
     {
-        _logsClient.Export(request, _headers);
+        _logsClient?.Export(request, _headers);
     }
 
     public Task ExportAsync(ExportLogsServiceRequest request)
     {
-        return _logsClient.ExportAsync(request, _headers).ResponseAsync;
+        return _logsClient?.ExportAsync(request, _headers).ResponseAsync ?? Task.CompletedTask;
     }
     
     public void Export(ExportTraceServiceRequest request)
     {
-        _tracesClient.Export(request, _headers);
+        _tracesClient?.Export(request, _headers);
     }
 
     public Task ExportAsync(ExportTraceServiceRequest request)
     {
-        return _tracesClient.ExportAsync(request, _headers).ResponseAsync;
+        return _tracesClient?.ExportAsync(request, _headers).ResponseAsync ?? Task.CompletedTask;
     }
 }

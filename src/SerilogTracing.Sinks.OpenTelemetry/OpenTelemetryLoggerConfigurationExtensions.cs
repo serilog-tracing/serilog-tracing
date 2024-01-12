@@ -57,7 +57,9 @@ public static class OpenTelemetryLoggerConfigurationExtensions
             exporter: exporter,
             formatProvider: options.FormatProvider,
             resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
-            includedData: options.IncludedData);
+            includedData: options.IncludedData,
+            isLogsEnabled: options.LogsEndpoint != null,
+            isTracesEnabled: options.TracesEndpoint != null);
 
         var sink = new PeriodicBatchingSink(openTelemetrySink, options.BatchingOptions);
 
@@ -71,10 +73,12 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// The `WriteTo` configuration object.
     /// </param>
     /// <param name="logsEndpoint">
-    /// The full URL of the OTLP logs exporter endpoint.
+    /// The full URL of the OTLP logs exporter endpoint. A null value indicates that
+    /// this sink should not process logs.
     /// </param>
     /// <param name="tracesEndpoint">
-    /// The full URL of the OTLP traces exporter endpoint.
+    /// The full URL of the OTLP traces exporter endpoint. A null value indicates that
+    /// this sink should not process traces.
     /// </param>
     /// <param name="protocol">
     /// The OTLP protocol to use.
@@ -89,8 +93,8 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// <returns>Logger configuration, allowing configuration to continue.</returns>
     public static LoggerConfiguration OpenTelemetry(
         this LoggerSinkConfiguration loggerSinkConfiguration,
-        string logsEndpoint = OpenTelemetrySinkOptions.DefaultEndpoint,
-        string tracesEndpoint = OpenTelemetrySinkOptions.DefaultEndpoint,
+        string? logsEndpoint,
+        string? tracesEndpoint,
         OtlpProtocol protocol = OpenTelemetrySinkOptions.DefaultProtocol,
         IDictionary<string, string>? headers = null,
         IDictionary<string, object>? resourceAttributes = null)
@@ -135,7 +139,9 @@ public static class OpenTelemetryLoggerConfigurationExtensions
             exporter: exporter,
             formatProvider: options.FormatProvider,
             resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
-            includedData: options.IncludedData);
+            includedData: options.IncludedData,
+            isLogsEnabled: options.LogsEndpoint != null,
+            isTracesEnabled: options.TracesEndpoint != null);
 
         return loggerAuditSinkConfiguration.Sink(sink, options.RestrictedToMinimumLevel, options.LevelSwitch);
     }
@@ -147,10 +153,12 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// The `AuditTo` configuration object.
     /// </param>
     /// <param name="logsEndpoint">
-    /// The full URL of the OTLP logs exporter endpoint.
+    /// The full URL of the OTLP logs exporter endpoint. A null value indicates that
+    /// this sink should not process logs.
     /// </param>
     /// <param name="tracesEndpoint">
-    /// The full URL of the OTLP traces exporter endpoint.
+    /// The full URL of the OTLP traces exporter endpoint. A null value indicates that
+    /// this sink should not process traces.
     /// </param>
     /// <param name="protocol">
     /// The OTLP protocol to use.

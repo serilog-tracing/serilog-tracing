@@ -31,16 +31,23 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
     readonly ResourceSpans _resourceSpansTemplate;
     readonly IExporter _exporter;
     readonly IncludedData _includedData;
+    readonly bool _isLogsEnabled;
+    readonly bool _isTracesEnabled;
 
     public OpenTelemetrySink(
         IExporter exporter,
         IFormatProvider? formatProvider,
         IReadOnlyDictionary<string, object> resourceAttributes,
-        IncludedData includedData)
+        IncludedData includedData,
+        bool isLogsEnabled,
+        bool isTracesEnabled
+        )
     {
         _exporter = exporter;
         _formatProvider = formatProvider;
         _includedData = includedData;
+        _isLogsEnabled = isLogsEnabled;
+        _isTracesEnabled = isTracesEnabled;
 
         if ((includedData & IncludedData.SpecRequiredResourceAttributes) == IncludedData.SpecRequiredResourceAttributes)
         {
@@ -65,6 +72,11 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
     /// </summary>
     public Task EmitBatchAsync(IEnumerable<LogEvent> batch)
     {
+        if (!_isLogsEnabled && !_isTracesEnabled)
+        {
+            return Task.CompletedTask;
+        }
+        
         var resourceLogs = _resourceLogsTemplate.Clone();
         var resourceSpans = _resourceSpansTemplate.Clone();
         
@@ -75,7 +87,7 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
 
         foreach (var logEvent in batch)
         {
-            if (IsSpan(logEvent))
+            if (IsSpan(logEvent) && _isTracesEnabled)
             {
                 var (span, scopeName) = OtlpEventBuilder.ToSpan(logEvent, _formatProvider, _includedData);
                 if (scopeName == null)
@@ -101,7 +113,7 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
                     namedScope.Spans.Add(span);
                 }
             }
-            else
+            else if (_isLogsEnabled)
             {
                 var (logRecord, scopeName) = OtlpEventBuilder.ToLogRecord(logEvent, _formatProvider, _includedData);
                 if (scopeName == null)
@@ -129,13 +141,23 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
             }
         }
 
-        var logsRequest = new ExportLogsServiceRequest();
-        logsRequest.ResourceLogs.Add(resourceLogs);
+        var exportTasks = new List<Task>();
 
-        var spansRequest = new ExportTraceServiceRequest();
-        spansRequest.ResourceSpans.Add(resourceSpans);
+        if (_isLogsEnabled && resourceLogs.ScopeLogs.Any(sl => sl.LogRecords.Any()))
+        {
+            var logsRequest = new ExportLogsServiceRequest();
+            logsRequest.ResourceLogs.Add(resourceLogs);
+            exportTasks.Add(_exporter.ExportAsync(logsRequest));
+        }
 
-        return Task.WhenAll(_exporter.ExportAsync(logsRequest), _exporter.ExportAsync(spansRequest));
+        if (_isTracesEnabled && resourceSpans.ScopeSpans.Any(ss => ss.Spans.Any()))
+        {
+            var spansRequest = new ExportTraceServiceRequest();
+            spansRequest.ResourceSpans.Add(resourceSpans);
+            exportTasks.Add(_exporter.ExportAsync(spansRequest));
+        }
+
+        return Task.WhenAll(exportTasks);
     }
 
     /// <summary>
@@ -144,11 +166,16 @@ class OpenTelemetrySink : IBatchedLogEventSink, ILogEventSink, IDisposable
     /// </summary>
     public void Emit(LogEvent logEvent)
     {
-        if (IsSpan(logEvent))
+        if (!_isLogsEnabled && !_isTracesEnabled)
+        {
+            return;
+        }
+        
+        if (IsSpan(logEvent) && _isTracesEnabled)
         {
             EmitSpan(logEvent);
         }
-        else
+        else if (_isLogsEnabled)
         {
            EmitLog(logEvent);
         }
