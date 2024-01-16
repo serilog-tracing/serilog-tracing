@@ -2,6 +2,7 @@ using Serilog;
 using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Expressions;
+using SerilogTracing.Sinks.OpenTelemetry;
 using SerilogTracing.Sinks.Seq;
 using SerilogTracing.Sinks.Zipkin;
 
@@ -12,6 +13,10 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
     .WriteTo.SeqTracing("http://localhost:5341")
     .WriteTo.Zipkin("http://localhost:9411")
+    .WriteTo.OpenTelemetry("http://localhost:5341/ingest/otlp/v1/logs", "http://localhost:5341/ingest/otlp/v1/traces", OtlpProtocol.HttpProtobuf, null, new Dictionary<string, object>()
+    {
+        { "service.name", typeof(Program).Assembly.GetName().Name ?? "unknown_service" }
+    })
     .CreateLogger();
 
 using var _ = new TracingConfiguration().EnableTracing();

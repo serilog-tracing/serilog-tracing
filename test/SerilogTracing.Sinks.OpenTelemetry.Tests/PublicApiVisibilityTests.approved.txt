@@ -1,0 +1,50 @@
+namespace Serilog
+{
+    public static class OpenTelemetryLoggerConfigurationExtensions
+    {
+        public static Serilog.LoggerConfiguration OpenTelemetry(this Serilog.Configuration.LoggerAuditSinkConfiguration loggerAuditSinkConfiguration, System.Action<SerilogTracing.Sinks.OpenTelemetry.OpenTelemetrySinkOptions> configure) { }
+        public static Serilog.LoggerConfiguration OpenTelemetry(this Serilog.Configuration.LoggerSinkConfiguration loggerSinkConfiguration, System.Action<SerilogTracing.Sinks.OpenTelemetry.BatchedOpenTelemetrySinkOptions> configure) { }
+        public static Serilog.LoggerConfiguration OpenTelemetry(this Serilog.Configuration.LoggerAuditSinkConfiguration loggerAuditSinkConfiguration, string? logsEndpoint, string? tracesEndpoint, SerilogTracing.Sinks.OpenTelemetry.OtlpProtocol protocol = 0, System.Collections.Generic.IDictionary<string, string>? headers = null, System.Collections.Generic.IDictionary<string, object>? resourceAttributes = null) { }
+        public static Serilog.LoggerConfiguration OpenTelemetry(this Serilog.Configuration.LoggerSinkConfiguration loggerSinkConfiguration, string? logsEndpoint, string? tracesEndpoint, SerilogTracing.Sinks.OpenTelemetry.OtlpProtocol protocol = 0, System.Collections.Generic.IDictionary<string, string>? headers = null, System.Collections.Generic.IDictionary<string, object>? resourceAttributes = null) { }
+    }
+}
+namespace SerilogTracing.Sinks.OpenTelemetry
+{
+    public class BatchedOpenTelemetrySinkOptions : SerilogTracing.Sinks.OpenTelemetry.OpenTelemetrySinkOptions
+    {
+        public BatchedOpenTelemetrySinkOptions() { }
+        public Serilog.Sinks.PeriodicBatching.PeriodicBatchingSinkOptions BatchingOptions { get; }
+    }
+    [System.Flags]
+    public enum IncludedData
+    {
+        None = 0,
+        MessageTemplateTextAttribute = 1,
+        MessageTemplateMD5HashAttribute = 2,
+        TraceIdField = 4,
+        SpanIdField = 8,
+        SpecRequiredResourceAttributes = 16,
+        TemplateBody = 32,
+        MessageTemplateRenderingsAttribute = 64,
+        SourceContextAttribute = 128,
+    }
+    public class OpenTelemetrySinkOptions
+    {
+        public OpenTelemetrySinkOptions() { }
+        public System.IFormatProvider? FormatProvider { get; set; }
+        public System.Collections.Generic.IDictionary<string, string> Headers { get; set; }
+        public System.Net.Http.HttpMessageHandler? HttpMessageHandler { get; set; }
+        public SerilogTracing.Sinks.OpenTelemetry.IncludedData IncludedData { get; set; }
+        public Serilog.Core.LoggingLevelSwitch? LevelSwitch { get; set; }
+        public string? LogsEndpoint { get; set; }
+        public SerilogTracing.Sinks.OpenTelemetry.OtlpProtocol Protocol { get; set; }
+        public System.Collections.Generic.IDictionary<string, object> ResourceAttributes { get; set; }
+        public Serilog.Events.LogEventLevel RestrictedToMinimumLevel { get; set; }
+        public string? TracesEndpoint { get; set; }
+    }
+    public enum OtlpProtocol
+    {
+        Grpc = 0,
+        HttpProtobuf = 1,
+    }
+}

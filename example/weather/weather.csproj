@@ -11,9 +11,10 @@
     <PackageReference Include="serilog" Version="3.1.1" />
     <PackageReference Include="serilog.sinks.console" Version="5.0.0" />
     <ProjectReference Include="../../src/SerilogTracing/SerilogTracing.csproj" />
-    <ProjectReference Include="../../src/SerilogTracing.Expressions/SerilogTracing.Expressions.csproj" />
+    <ProjectReference Include="../../src/SerilogTracing.Sinks.OpenTelemetry/SerilogTracing.Sinks.OpenTelemetry.csproj" />
     <ProjectReference Include="../../src/SerilogTracing.Sinks.Seq/SerilogTracing.Sinks.Seq.csproj" />
     <ProjectReference Include="../../src/SerilogTracing.Sinks.Zipkin/SerilogTracing.Sinks.Zipkin.csproj" />
+    <ProjectReference Include="../../src/SerilogTracing.Expressions/SerilogTracing.Expressions.csproj" />
   </ItemGroup>
 
 </Project>
