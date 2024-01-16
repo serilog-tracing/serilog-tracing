@@ -24,13 +24,13 @@ public sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
     readonly Func<HttpResponse, IEnumerable<LogEventProperty>> _getResponseProperties;
     readonly MessageTemplate _messageTemplateOverride;
 
-    /// <inheritdoc cref="IActivityInstrumentor.ShouldListenTo"/>
-    public bool ShouldListenTo(string listenerName)
+    /// <inheritdoc cref="IActivityInstrumentor.ShouldSubscribeTo"/>
+    public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
-        return listenerName == "Microsoft.AspNetCore";
+        return diagnosticListenerName == "Microsoft.AspNetCore";
     }
 
-    /// <inheritdoc cref="IActivityInstrumentor.ShouldListenTo"/>
+    /// <inheritdoc cref="IActivityInstrumentor.ShouldSubscribeTo"/>
     public void InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
         switch (eventName)

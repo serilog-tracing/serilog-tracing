@@ -15,13 +15,13 @@ public sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
     public HttpRequestOutActivityInstrumentor()
     {}
     
-    /// <inheritdoc cref="IActivityInstrumentor.ShouldListenTo"/>
-    public bool ShouldListenTo(string listenerName)
+    /// <inheritdoc cref="IActivityInstrumentor.ShouldSubscribeTo"/>
+    public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
-        return listenerName == "HttpHandlerDiagnosticListener";
+        return diagnosticListenerName == "HttpHandlerDiagnosticListener";
     }
 
-    /// <inheritdoc cref="IActivityInstrumentor.ShouldListenTo"/>
+    /// <inheritdoc cref="IActivityInstrumentor.ShouldSubscribeTo"/>
     public void InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
         switch (eventName)

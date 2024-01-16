@@ -2,6 +2,7 @@ using Serilog;
 using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Expressions;
+using SerilogTracing.Instrumentation.AspNetCore;
 using SerilogTracing.Sinks.OpenTelemetry;
 using SerilogTracing.Sinks.Seq;
 using SerilogTracing.Sinks.Zipkin;
@@ -19,7 +20,9 @@ Log.Logger = new LoggerConfiguration()
     })
     .CreateLogger();
 
-using var _ = new TracingConfiguration().EnableTracing();
+using var _ = new TracingConfiguration()
+    .Instrument.AspNetCoreRequests()
+    .EnableTracing();
 
 Log.Information("Weather service starting up");
 

@@ -4,14 +4,13 @@ namespace SerilogTracing.Instrumentation;
 
 sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDisposable
 {
-    internal DiagnosticListenerObserver(IReadOnlyList<IActivityInstrumentor> enrichers)
+    internal DiagnosticListenerObserver(IReadOnlyList<IActivityInstrumentor> instrumentors)
     {
-        _enrichers = enrichers;
+        _instrumentors = instrumentors;
     }
 
-    IReadOnlyList<IActivityInstrumentor> _enrichers;
-    
-    List<IDisposable?> _subscription = new();
+    readonly IReadOnlyList<IActivityInstrumentor> _instrumentors;
+    readonly List<IDisposable?> _subscription = [];
     
     public void OnCompleted()
     {
@@ -23,11 +22,11 @@ sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDispos
 
     public void OnNext(DiagnosticListener value)
     {
-        foreach (var enricher in _enrichers)
+        foreach (var instrumentor in _instrumentors)
         {
-            if (enricher.ShouldListenTo(value.Name))
+            if (instrumentor.ShouldSubscribeTo(value.Name))
             {
-                _subscription.Add(value.Subscribe(new DiagnosticEventObserver(enricher)));
+                _subscription.Add(value.Subscribe(new DiagnosticEventObserver(instrumentor)));
             }
         }
     }
