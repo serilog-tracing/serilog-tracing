@@ -7,18 +7,19 @@ namespace SerilogTracing;
 /// </summary>
 public sealed class InstrumentationOptions
 {
-    readonly ActivityListenerOptions _options;
-    readonly Action<IActivityInstrumentor> _addInstrumentor;
-    readonly Action<bool> _useDefaultInstrumentors;
-
-    internal InstrumentationOptions(
-        ActivityListenerOptions options,
-        Action<IActivityInstrumentor> addInstrumentor,
-        Action<bool> useDefaultInstrumentors)
+    readonly TracingConfiguration _tracingConfiguration;
+    readonly List<IActivityInstrumentor> _instrumentors = [];
+    bool _withDefaultInstrumentors = true;
+    
+    static IEnumerable<IActivityInstrumentor> GetDefaultInstrumentors() => [new HttpRequestOutActivityInstrumentor()];
+    
+    internal IEnumerable<IActivityInstrumentor> GetInstrumentors() =>
+        _withDefaultInstrumentors ?
+            GetDefaultInstrumentors().Concat(_instrumentors) : _instrumentors;
+    
+    internal InstrumentationOptions(TracingConfiguration tracingConfiguration)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        _addInstrumentor = addInstrumentor ?? throw new ArgumentNullException(nameof(addInstrumentor));
-        _useDefaultInstrumentors = useDefaultInstrumentors ?? throw new ArgumentNullException(nameof(useDefaultInstrumentors));
+        _tracingConfiguration = tracingConfiguration;
     }
 
     /// <summary>
@@ -26,11 +27,10 @@ public sealed class InstrumentationOptions
     /// </summary>
     /// <param name="withDefaults">If true, default activity instrumentors will be used.</param>
     /// <returns>Configuration object allowing method chaining.</returns>
-    public ActivityListenerOptions WithDefaultInstrumentation(bool withDefaults)
+    public TracingConfiguration WithDefaultInstrumentation(bool withDefaults)
     {
-        _useDefaultInstrumentors(withDefaults);
-
-        return _options;
+        _withDefaultInstrumentors = withDefaults;
+        return _tracingConfiguration;
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public sealed class InstrumentationOptions
     /// <returns>Configuration object allowing method chaining.</returns>
     /// <exception cref="ArgumentNullException">When <paramref name="instrumentors"/> is <code>null</code></exception>
     /// <exception cref="ArgumentException">When any element of <paramref name="instrumentors"/> is <code>null</code></exception>
-    public ActivityListenerOptions With(params IActivityInstrumentor[] instrumentors)
+    public TracingConfiguration With(params IActivityInstrumentor[] instrumentors)
     {
         if (instrumentors == null)
         {
@@ -56,10 +56,10 @@ public sealed class InstrumentationOptions
                 throw new ArgumentNullException(nameof(instrumentors));
             }
 
-            _addInstrumentor(instrumentor);
+            _instrumentors.Add(instrumentor);
         }
         
-        return _options;
+        return _tracingConfiguration;
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public sealed class InstrumentationOptions
     /// <typeparam name="TInstrumentor">Instrumentor type to apply to all events passing through
     /// the logger.</typeparam>
     /// <returns>Configuration object allowing method chaining.</returns>
-    public ActivityListenerOptions With<TInstrumentor>()
+    public TracingConfiguration With<TInstrumentor>()
         where TInstrumentor : IActivityInstrumentor, new()
     {
         return With(new TInstrumentor());

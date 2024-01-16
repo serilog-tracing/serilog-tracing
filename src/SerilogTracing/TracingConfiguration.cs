@@ -14,6 +14,19 @@ namespace SerilogTracing;
 public class TracingConfiguration
 {
     /// <summary>
+    /// Construct a new <see cref="TracingConfiguration"/>.
+    /// </summary>
+    public TracingConfiguration()
+    {
+        Instrument = new InstrumentationOptions(this);
+    }
+
+    /// <summary>
+    /// Configures instrumentation of <see cref="Activity">activities</see>.
+    /// </summary>
+    public InstrumentationOptions Instrument { get; private set; }
+    
+    /// <summary>
     /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
     /// </summary>
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
@@ -21,9 +34,10 @@ public class TracingConfiguration
     {
         var options = new ActivityListenerOptions();
         configure?.Invoke(options);
-        
+
+        var instrumentors = Instrument.GetInstrumentors().ToArray();
         var activityListener = new ActivityListener();
-        var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver(options.Instrumentors.ToArray()));
+        var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver(instrumentors));
         var disposeProxy = new DisposeProxy(diagnosticListenerSubscription, activityListener);
 
         ILogger GetLogger(string name)
