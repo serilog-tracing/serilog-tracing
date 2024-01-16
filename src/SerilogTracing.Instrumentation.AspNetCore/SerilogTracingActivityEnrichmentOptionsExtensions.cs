@@ -9,23 +9,23 @@ public static class InstrumentationOptionsExtensions
     /// Add instrumentation for ASP.NET Core requests.
     /// </summary>
     /// <returns></returns>
-    public static TracingConfiguration WithAspNetCoreRequests(this InstrumentationOptions options)
+    public static TracingConfiguration WithAspNetCoreRequests(this TracingInstrumentationConfiguration configuration)
     {
-        return options.WithAspNetCoreRequests(_ => { });
+        return configuration.WithAspNetCoreRequests(_ => { });
     }
 
     /// <summary>
     /// Add instrumentation for ASP.NET Core requests.
     /// </summary>
-    /// <param name="options"></param>
+    /// <param name="configuration"></param>
     /// <param name="with">A callback to configure the instrumentation.</param>
     /// <returns>Configuration object allowing method chaining.</returns>
     public static TracingConfiguration WithAspNetCoreRequests(
-        this InstrumentationOptions options, Action<HttpRequestInActivityInstrumentorOptions> with)
+        this TracingInstrumentationConfiguration configuration, Action<HttpRequestInActivityInstrumentorOptions> with)
     {
         var httpOptions = new HttpRequestInActivityInstrumentorOptions();
         with.Invoke(httpOptions);
         
-        return options.With(new HttpRequestInActivityInstrumentor(httpOptions));
+        return configuration.With(new HttpRequestInActivityInstrumentor(httpOptions));
     }
 }

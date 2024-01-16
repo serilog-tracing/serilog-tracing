@@ -3,9 +3,9 @@
 namespace SerilogTracing;
 
 /// <summary>
-/// Controls enrichment configuration.
+/// Controls instrumentation configuration.
 /// </summary>
-public sealed class InstrumentationOptions
+public sealed class TracingInstrumentationConfiguration
 {
     readonly TracingConfiguration _tracingConfiguration;
     readonly List<IActivityInstrumentor> _instrumentors = [];
@@ -17,7 +17,7 @@ public sealed class InstrumentationOptions
         _withDefaultInstrumentors ?
             GetDefaultInstrumentors().Concat(_instrumentors) : _instrumentors;
     
-    internal InstrumentationOptions(TracingConfiguration tracingConfiguration)
+    internal TracingInstrumentationConfiguration(TracingConfiguration tracingConfiguration)
     {
         _tracingConfiguration = tracingConfiguration;
     }

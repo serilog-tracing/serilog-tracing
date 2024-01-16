@@ -18,23 +18,26 @@ public class TracingConfiguration
     /// </summary>
     public TracingConfiguration()
     {
-        Instrument = new InstrumentationOptions(this);
+        Instrument = new TracingInstrumentationConfiguration(this);
+        Sample = new TracingSamplingConfiguration(this);
     }
 
     /// <summary>
     /// Configures instrumentation of <see cref="Activity">activities</see>.
     /// </summary>
-    public InstrumentationOptions Instrument { get; private set; }
+    public TracingInstrumentationConfiguration Instrument { get; }
+    
+    /// <summary>
+    /// Configures sampling.
+    /// </summary>
+    public TracingSamplingConfiguration Sample { get; }
     
     /// <summary>
     /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
     /// </summary>
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
-    public IDisposable EnableTracing(ILogger? logger = null, Action<ActivityListenerOptions>? configure = null)
+    public IDisposable EnableTracing(ILogger? logger = null)
     {
-        var options = new ActivityListenerOptions();
-        configure?.Invoke(options);
-
         var instrumentors = Instrument.GetInstrumentors().ToArray();
         var activityListener = new ActivityListener();
         var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver(instrumentors));
@@ -45,9 +48,8 @@ public class TracingConfiguration
             var instance = logger ?? Log.Logger;
             return !string.IsNullOrWhiteSpace(name) ? instance.ForContext(Constants.SourceContextPropertyName, name) : instance;
         }
-        
-        activityListener.Sample = options.Sample;
-        activityListener.SampleUsingParentId = options.SampleUsingParentId;
+
+        Sample.ConfigureSampling(activityListener);
         activityListener.ShouldListenTo = source => GetLogger(source.Name).IsEnabled(LogEventLevel.Fatal);
 
         activityListener.ActivityStopped += activity =>
