@@ -21,7 +21,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 using var _ = new TracingConfiguration()
-    .Instrument.WithAspNetCoreRequests()
+    .Instrument.FromAspNetCoreRequests()
     .EnableTracing();
 
 Log.Information("Weather service starting up");
