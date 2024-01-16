@@ -19,13 +19,13 @@ public class TracingConfiguration
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
     public IDisposable EnableTracing(ILogger? logger = null, Action<ActivityListenerOptions>? configure = null)
     {
-        var activityListener = new ActivityListener();
-        var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
-        var disposeProxy = new DisposeProxy(diagnosticListenerSubscription, activityListener);
-        
         var options = new ActivityListenerOptions();
         configure?.Invoke(options);
         
+        var activityListener = new ActivityListener();
+        var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver(options.Instrumentors.ToArray()));
+        var disposeProxy = new DisposeProxy(diagnosticListenerSubscription, activityListener);
+
         ILogger GetLogger(string name)
         {
             var instance = logger ?? Log.Logger;
@@ -38,16 +38,16 @@ public class TracingConfiguration
 
         activityListener.ActivityStopped += activity =>
         {
-            if (ActivityUtil.TryGetLoggerActivity(activity, out _))
+            if (LoggerActivity.TryGetLoggerActivity(activity, out _))
                 return; // `LoggerActivity` completion writes these to the activity-specific logger.
 
             var activityLogger = GetLogger(activity.Source.Name);
 
-            var level = ActivityUtil.GetCompletionLevel(activity);
+            var level = ActivityInstrumentation.GetCompletionLevel(activity);
             if (!activityLogger.IsEnabled(level))
                 return;
 
-            activityLogger.Write(ActivityUtil.ActivityToLogEvent(activityLogger, activity));
+            activityLogger.Write(ActivityConvert.ActivityToLogEvent(activityLogger, activity));
         };
         
         ActivitySource.AddActivityListener(activityListener);

@@ -18,4 +18,10 @@ public static class Constants
     /// span's start timestamp. All spans emitted by SerilogTracing carry this property.
     /// </summary>
     public const string SpanStartTimestampPropertyName = "SpanStartTimestamp";
+
+    internal const string LogEventPropertyCollectionName = "SerilogTracing.LogEventPropertyCollection";
+    internal const string SelfPropertyName = "SerilogTracing.LoggerActivity.Self";
+    internal const string MessageTemplateOverridePropertyName = "SerilogTracing.LoggerActivity.MessageTemplate";
+
+    internal const string ExceptionEventName = "exception";
 }

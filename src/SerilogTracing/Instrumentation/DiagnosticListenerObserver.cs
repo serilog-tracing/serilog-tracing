@@ -4,7 +4,14 @@ namespace SerilogTracing.Instrumentation;
 
 sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDisposable
 {
-    IDisposable? _subscription;
+    internal DiagnosticListenerObserver(IReadOnlyList<IActivityInstrumentor> enrichers)
+    {
+        _enrichers = enrichers;
+    }
+
+    IReadOnlyList<IActivityInstrumentor> _enrichers;
+    
+    List<IDisposable?> _subscription = new();
     
     public void OnCompleted()
     {
@@ -16,14 +23,34 @@ sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDispos
 
     public void OnNext(DiagnosticListener value)
     {
-        if (value.Name == "HttpHandlerDiagnosticListener")
+        foreach (var enricher in _enrichers)
         {
-            _subscription = value.Subscribe(new HttpHandlerDiagnosticObserver());
+            if (enricher.ShouldListenTo(value.Name))
+            {
+                _subscription.Add(value.Subscribe(new DiagnosticEventObserver(enricher)));
+            }
         }
     }
 
     public void Dispose()
     {
-        _subscription?.Dispose();
+        var failedDisposes = new List<Exception>();
+        
+        foreach (var subscription in _subscription)
+        {
+            try
+            {
+                subscription?.Dispose();
+            }
+            catch (Exception e)
+            {
+                failedDisposes.Add(e);
+            }
+        }
+
+        if (failedDisposes.Count > 0)
+        {
+            throw new AggregateException(failedDisposes);
+        }
     }
 }
