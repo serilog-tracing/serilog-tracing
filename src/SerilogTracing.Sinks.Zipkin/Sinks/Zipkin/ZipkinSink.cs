@@ -18,7 +18,7 @@ class ZipkinSink: IBatchedLogEventSink
             id: @sp,
             traceId: @tr,
             parentId: ParentSpanId,
-            name: @mt,
+            name: @m,
             timestamp: Microseconds(FromUnixEpoch(SpanStartTimestamp)),
             duration: Microseconds(Elapsed()),
             localEndpoint: {serviceName: Application},
