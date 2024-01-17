@@ -1,5 +1,5 @@
+using SerilogTracing.Collections;
 using Xunit;
-using Serilog.Collections;
 
 namespace SerilogTracing.Sinks.OpenTelemetry.Tests;
 

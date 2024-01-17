@@ -3,8 +3,9 @@ using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.PeriodicBatching;
+using SerilogTracing.Sinks.Zipkin;
 
-namespace SerilogTracing.Sinks.Zipkin;
+namespace SerilogTracing;
 
 /// <summary>
 /// Extends Serilog's <c>WriteTo</c> object with the <see cref="Zipkin"/> method.

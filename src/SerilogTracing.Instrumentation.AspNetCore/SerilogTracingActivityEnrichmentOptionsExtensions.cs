@@ -1,4 +1,6 @@
-﻿namespace SerilogTracing.Instrumentation.AspNetCore;
+﻿using SerilogTracing.Instrumentation.AspNetCore;
+
+namespace SerilogTracing;
 
 /// <summary>
 /// Support ASP.NET Core instrumentation.

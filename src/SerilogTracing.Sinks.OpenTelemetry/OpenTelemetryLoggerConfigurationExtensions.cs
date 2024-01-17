@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
+using Serilog;
 using Serilog.Configuration;
+using Serilog.Core;
+using Serilog.Sinks.PeriodicBatching;
+using SerilogTracing.Collections;
 using SerilogTracing.Sinks.OpenTelemetry;
 using SerilogTracing.Sinks.OpenTelemetry.Exporters;
-using Serilog.Sinks.PeriodicBatching;
-using Serilog.Collections;
 
-namespace Serilog;
+namespace SerilogTracing;
 
 /// <summary>
 /// Adds OpenTelemetry sink configuration methods to <see cref="LoggerSinkConfiguration"/>.
@@ -53,15 +53,31 @@ public static class OpenTelemetryLoggerConfigurationExtensions
             headers: new Dictionary<string, string>(options.Headers),
             httpMessageHandler: options.HttpMessageHandler ?? CreateSilentHttpMessageHandler());
 
-        var openTelemetrySink = new OpenTelemetrySink(
-            exporter: exporter,
-            formatProvider: options.FormatProvider,
-            resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
-            includedData: options.IncludedData,
-            isLogsEnabled: options.LogsEndpoint != null,
-            isTracesEnabled: options.TracesEndpoint != null);
+        ILogEventSink? logsSink = null, tracesSink = null;
 
-        var sink = new PeriodicBatchingSink(openTelemetrySink, options.BatchingOptions);
+        if (options.LogsEndpoint != null)
+        {
+            var openTelemetryLogsSink = new OpenTelemetryLogsSink(
+                exporter: exporter,
+                formatProvider: options.FormatProvider,
+                resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
+                includedData: options.IncludedData);
+
+            logsSink = new PeriodicBatchingSink(openTelemetryLogsSink, options.BatchingOptions);
+        }
+
+        if (options.TracesEndpoint != null)
+        {
+            var openTelemetryTracesSink = new OpenTelemetryTracesSink(
+                exporter: exporter,
+                formatProvider: options.FormatProvider,
+                resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
+                includedData: options.IncludedData);
+
+            tracesSink = new PeriodicBatchingSink(openTelemetryTracesSink, options.BatchingOptions);
+        }
+
+        var sink = new OpenTelemetrySink(exporter, logsSink, tracesSink);
 
         return loggerSinkConfiguration.Sink(sink, options.RestrictedToMinimumLevel, options.LevelSwitch);
     }
@@ -135,13 +151,27 @@ public static class OpenTelemetryLoggerConfigurationExtensions
             headers: new Dictionary<string, string>(options.Headers),
             httpMessageHandler: options.HttpMessageHandler ?? CreateSilentHttpMessageHandler());
 
-        var sink = new OpenTelemetrySink(
-            exporter: exporter,
-            formatProvider: options.FormatProvider,
-            resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
-            includedData: options.IncludedData,
-            isLogsEnabled: options.LogsEndpoint != null,
-            isTracesEnabled: options.TracesEndpoint != null);
+        ILogEventSink? logsSink = null, tracesSink = null;
+
+        if (options.LogsEndpoint != null)
+        {
+            logsSink = new OpenTelemetryLogsSink(
+                exporter: exporter,
+                formatProvider: options.FormatProvider,
+                resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
+                includedData: options.IncludedData);
+        }
+
+        if (options.TracesEndpoint != null)
+        {
+            tracesSink = new OpenTelemetryTracesSink(
+                exporter: exporter,
+                formatProvider: options.FormatProvider,
+                resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
+                includedData: options.IncludedData);
+        }
+
+        var sink = new OpenTelemetrySink(exporter, logsSink, tracesSink);
 
         return loggerAuditSinkConfiguration.Sink(sink, options.RestrictedToMinimumLevel, options.LevelSwitch);
     }
