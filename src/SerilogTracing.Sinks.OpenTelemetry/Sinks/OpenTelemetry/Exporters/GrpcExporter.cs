@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Net.Http;
 using Grpc.Core;
 using Grpc.Net.Client;
 using OpenTelemetry.Proto.Collector.Logs.V1;
@@ -26,8 +25,7 @@ namespace SerilogTracing.Sinks.OpenTelemetry.Exporters;
 /// </summary>
 sealed class GrpcExporter : IExporter, IDisposable
 {
-    readonly GrpcChannel? _logsChannel;
-    readonly GrpcChannel? _tracesChannel;
+    readonly GrpcChannel? _logsChannel, _tracesChannel;
 
     readonly LogsService.LogsServiceClient? _logsClient;
     readonly TraceService.TraceServiceClient? _tracesClient;

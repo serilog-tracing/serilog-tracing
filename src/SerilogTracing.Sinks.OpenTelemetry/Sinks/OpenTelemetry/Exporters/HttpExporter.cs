@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Net.Http;
 using Google.Protobuf;
 using OpenTelemetry.Proto.Collector.Logs.V1;
 using OpenTelemetry.Proto.Collector.Trace.V1;
@@ -64,7 +63,7 @@ sealed class HttpExporter : IExporter, IDisposable
 
     public void Export(ExportLogsServiceRequest request)
     {
-        var httpRequest = CreateHttpRequestMessage(request);
+        var httpRequest = CreateHttpRequestMessage(request, _logsEndpoint!);
 
 #if FEATURE_SYNC_HTTP_SEND
         // Used in audit mode; on later .NET platforms this can be done without the
@@ -85,7 +84,7 @@ sealed class HttpExporter : IExporter, IDisposable
     
     public void Export(ExportTraceServiceRequest request)
     {
-        var httpRequest = CreateHttpRequestMessage(request);
+        var httpRequest = CreateHttpRequestMessage(request, _tracesEndpoint!);
 
 #if FEATURE_SYNC_HTTP_SEND
         // Used in audit mode; on later .NET platforms this can be done without the
@@ -110,7 +109,7 @@ sealed class HttpExporter : IExporter, IDisposable
     /// </summary>
     public async Task ExportAsync(ExportLogsServiceRequest request)
     {
-        var httpRequest = CreateHttpRequestMessage(request);
+        var httpRequest = CreateHttpRequestMessage(request, _logsEndpoint!);
 
         // We could consider using HttpCompletionOption.ResponseHeadersRead here.
         var response = await _client.SendAsync(httpRequest);
@@ -124,7 +123,7 @@ sealed class HttpExporter : IExporter, IDisposable
     /// </summary>
     public async Task ExportAsync(ExportTraceServiceRequest request)
     {
-        var httpRequest = CreateHttpRequestMessage(request);
+        var httpRequest = CreateHttpRequestMessage(request, _tracesEndpoint!);
 
         // We could consider using HttpCompletionOption.ResponseHeadersRead here.
         var response = await _client.SendAsync(httpRequest);
@@ -132,7 +131,7 @@ sealed class HttpExporter : IExporter, IDisposable
         response.EnsureSuccessStatusCode();
     }
 
-    HttpRequestMessage CreateHttpRequestMessage(ExportLogsServiceRequest request)
+    static HttpRequestMessage CreateHttpRequestMessage(IMessage request, string endpoint)
     {
         var dataSize = request.CalculateSize();
         var buffer = new byte[dataSize];
@@ -142,22 +141,7 @@ sealed class HttpExporter : IExporter, IDisposable
         var content = new ByteArrayContent(buffer, 0, dataSize);
         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-protobuf");
 
-        var httpRequest = new HttpRequestMessage(HttpMethod.Post, _logsEndpoint);
-        httpRequest.Content = content;
-        return httpRequest;
-    }
-    
-    HttpRequestMessage CreateHttpRequestMessage(ExportTraceServiceRequest request)
-    {
-        var dataSize = request.CalculateSize();
-        var buffer = new byte[dataSize];
-
-        request.WriteTo(buffer.AsSpan());
-
-        var content = new ByteArrayContent(buffer, 0, dataSize);
-        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-protobuf");
-
-        var httpRequest = new HttpRequestMessage(HttpMethod.Post, _tracesEndpoint);
+        var httpRequest = new HttpRequestMessage(HttpMethod.Post, endpoint);
         httpRequest.Content = content;
         return httpRequest;
     }
