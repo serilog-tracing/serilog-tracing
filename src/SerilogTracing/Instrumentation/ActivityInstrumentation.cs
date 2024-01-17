@@ -85,7 +85,7 @@ public static class ActivityInstrumentation
             activity.SetTag(property.Name, sv.Value);
         }
 
-        collection.Add(property.Name, property);
+        collection[property.Name] = property;
     }
 
     /// <summary>
