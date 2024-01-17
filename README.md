@@ -139,7 +139,7 @@ If you're writing an ASP.NET Core application, you'll notice that the spans gene
 dotnet add package SerilogTracing.Instrumentation.AspNetCore
 ```
 
-Then add `Instrument.AspNetCore()` to your `TracingConfiguration`:
+Then add `Instrument.AspNetCoreRequests()` to your `TracingConfiguration`:
 
 ```csharp
 using var _ = new TracingConfiguration()
