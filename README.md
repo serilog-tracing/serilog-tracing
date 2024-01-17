@@ -165,7 +165,7 @@ Traces are collections of spans, connected by a common trace id. SerilogTracing 
 
 ## What's the relationship between SerilogTracing and OpenTelemetry?
 
-OpenTelemetry is a project that combines a variety of telemetry data models, schemas, APIs, and SDKs. SerilogTracing, like Serilog itself, has no dependency on the OpenTelemetry SDK, but can produce OpenTelemetry-compatible data using the OpenTelemetry Protocol (OTLP), but this is considered to be on equal footing with the many other schemas, protocols, and systems that exist in the wider Serilog ecosystem.
+OpenTelemetry is a project that combines a variety of telemetry data models, schemas, APIs, and SDKs. SerilogTracing, like Serilog itself, has no dependency on the OpenTelemetry SDK, but can produce OpenTelemetry-compatible data using the OpenTelemetry Protocol (OTLP), but this is considered to be on equal footing with the many other protocols and systems that exist in the wider Serilog ecosystem.
 
 Because SerilogTracing generates standard `System.Diagnostics.Activity` activities from the `"Serilog"` activity source, it can coexist with the .NET OpenTelemetry SDK in the same application if necessary, but, the `TracingConfiguration.EnableTracing()` method should not be used in this case.
 
