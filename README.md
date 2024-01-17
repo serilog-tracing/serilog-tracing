@@ -6,15 +6,15 @@ Traces are written to standard Serilog sinks. Most sinks will currently flatten 
 
 Here's the output of the included [example application](https://github.com/serilog-tracing/serilog-tracing/tree/dev/example) in the standard `System.Console` sink:
 
-![SerilogTracing terminal output](https://raw.githubusercontent.com/nblumhardt/serilog-tracing/dev/assets/terminal-output.png)
+![SerilogTracing terminal output](https://raw.githubusercontent.com/serilog-tracing/serilog-tracing/dev/assets/terminal-output.png)
 
 The same trace displayed in Seq:
 
-![SerilogTracing Seq output](https://raw.githubusercontent.com/nblumhardt/serilog-tracing/dev/assets/seq-output.png)
+![SerilogTracing Seq output](https://raw.githubusercontent.com/serilog-tracing/serilog-tracing/dev/assets/seq-output.png)
 
 And in Zipkin:
 
-![SerilogTracing Zipkin output](https://raw.githubusercontent.com/nblumhardt/serilog-tracing/dev/assets/zipkin-output.png)
+![SerilogTracing Zipkin output](https://raw.githubusercontent.com/serilog-tracing/serilog-tracing/dev/assets/zipkin-output.png)
 
 ## Getting started
 
