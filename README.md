@@ -165,13 +165,13 @@ Traces are collections of spans, connected by a common trace id. SerilogTracing 
 
 ## What's the relationship between SerilogTracing and OpenTelemetry?
 
-OpenTelemetry is a project that combines a variety of telemetry data models, schemas, APIs, and SDKs. SerilogTracing, like Serilog itself, has no dependency on the OpenTelemetry SDK, but can produce OpenTelemetry-compatible data using the OpenTelemetry Protocol (OTLP), but this is considered to be on equal footing with the many other protocols and systems that exist in the wider Serilog ecosystem.
-
-Because SerilogTracing generates standard `System.Diagnostics.Activity` activities from the `"Serilog"` activity source, it can coexist with the .NET OpenTelemetry SDK in the same application if necessary, but, the `TracingConfiguration.EnableTracing()` method should not be used in this case.
+OpenTelemetry is a project that combines a variety of telemetry data models, schemas, APIs, and SDKs. SerilogTracing, like Serilog itself, has no dependency on the OpenTelemetry SDK, but can produce OpenTelemetry-compatible data using the OpenTelemetry Protocol (OTLP). This is considered to be on equal footing with the many other protocols and systems that exist in the wider Serilog ecosystem.
 
 If you're going "all in" on OpenTelemetry, you might consider using the OpenTelemetry SDK instead of SerilogTracing. If you're seeking lightweight, deliberate instrumentation that has the same crafted feel and tight control offered by Serilog, you're in the right place.
 
-SerilogTracing includes a fork of _Serilog.Sinks.OpenTelemetry_. This is necessary (for now) because _Serilog.Sinks.OpenTelemetry_ only supports the OTLP logs protocol. _SerilogTracing.Sinks.OpenTelemetry_ extends this with support for OTLP traces.
+### `SerilogTracing.Sinks.OpenTelemetry`
+
+SerilogTracing includes a fork of [_Serilog.Sinks.OpenTelemetry_](https://github.com/serilog/serilog-sinks-opentelemetry). This is necessary (for now) because _Serilog.Sinks.OpenTelemetry_ only supports the OTLP logs protocol: _SerilogTracing.Sinks.OpenTelemetry_ extends this with support for OTLP traces.
 
 ## Who is developing SerilogTracing?
 
