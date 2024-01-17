@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Serilog;
 using Serilog.Events;
 using Serilog.Parsing;
-using SerilogTracing.Core;
 using SerilogTracing.Instrumentation;
 using SerilogTracing.Interop;
 
@@ -29,11 +27,16 @@ public sealed class LoggerActivity : IDisposable
         Logger = logger;
         Activity = activity;
         MessageTemplate = messageTemplate;
-        Captures = captures;
+        Properties = new();
+
+        foreach (var capture in captures)
+        {
+            Properties[capture.Name] = capture;
+        }
 
         if (activity != null)
         {
-            SetLoggerActivity(activity, this);
+            ActivityInstrumentation.AttachLoggerActivity(activity, this);
             StartTimestamp = activity.StartTimeUtc;
         }
         else
@@ -44,10 +47,9 @@ public sealed class LoggerActivity : IDisposable
 
     ILogger Logger { get; }
 
-    internal MessageTemplate MessageTemplate { get; }
     internal DateTime StartTimestamp { get; }
-    internal IEnumerable<LogEventProperty> Captures { get; }
-
+    internal MessageTemplate MessageTemplate { get; }
+    internal Dictionary<string, LogEventProperty> Properties { get; }
     internal Exception? Exception { get; private set; }
     internal LogEventLevel? CompletionLevel { get; private set; }
     internal TimeSpan Duration { get; private set; }
@@ -121,23 +123,6 @@ public sealed class LoggerActivity : IDisposable
         Duration = Activity?.Duration ?? DateTime.UtcNow - StartTimestamp;
         
         Logger.Write(ActivityConvert.ActivityToLogEvent(Logger, this));
-    }
-    
-    internal static void SetLoggerActivity(Activity activity, LoggerActivity loggerActivity)
-    {
-        activity.SetCustomProperty(Constants.SelfPropertyName, loggerActivity);
-    }
-    
-    internal static bool TryGetLoggerActivity(Activity activity, [NotNullWhen(true)] out LoggerActivity? loggerActivity)
-    {
-        if (activity.GetCustomProperty(Constants.SelfPropertyName) is LoggerActivity customPropertyValue)
-        {
-            loggerActivity = customPropertyValue;
-            return true;
-        }
-
-        loggerActivity = null;
-        return false;
     }
     
     /// <summary>
