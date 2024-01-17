@@ -33,6 +33,7 @@ Replace the contents of the generated `Program.cs` with:
 
 ```csharp
 using Serilog;
+using SerilogTracing;
 using SerilogTracing.Expressions;
 
 Log.Logger = new LoggerConfiguration()
@@ -74,6 +75,7 @@ The Serilog pipeline is set up normally:
 
 ```csharp
 using Serilog;
+using SerilogTracing;
 using SerilogTracing.Expressions;
 
 Log.Logger = new LoggerConfiguration()
