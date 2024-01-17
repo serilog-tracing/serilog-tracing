@@ -199,4 +199,22 @@ public static class ActivityInstrumentation
     {
         return activity.Status == ActivityStatusCode.Error ? LogEventLevel.Error : LogEventLevel.Information;
     }
+        
+    internal static void AttachLoggerActivity(Activity activity, LoggerActivity loggerActivity)
+    {
+        activity.SetCustomProperty(Constants.SelfPropertyName, loggerActivity);
+        activity.SetCustomProperty(Constants.LogEventPropertyCollectionName, loggerActivity.Properties);
+    }
+    
+    internal static bool TryGetLoggerActivity(Activity activity, [NotNullWhen(true)] out LoggerActivity? loggerActivity)
+    {
+        if (activity.GetCustomProperty(Constants.SelfPropertyName) is LoggerActivity customPropertyValue)
+        {
+            loggerActivity = customPropertyValue;
+            return true;
+        }
+
+        loggerActivity = null;
+        return false;
+    }
 }

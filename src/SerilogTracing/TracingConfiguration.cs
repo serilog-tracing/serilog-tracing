@@ -54,7 +54,7 @@ public class TracingConfiguration
 
         activityListener.ActivityStopped += activity =>
         {
-            if (LoggerActivity.TryGetLoggerActivity(activity, out _))
+            if (ActivityInstrumentation.TryGetLoggerActivity(activity, out _))
                 return; // `LoggerActivity` completion writes these to the activity-specific logger.
 
             var activityLogger = GetLogger(activity.Source.Name);

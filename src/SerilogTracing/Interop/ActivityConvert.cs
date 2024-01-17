@@ -37,8 +37,7 @@ static class ActivityConvert
         {
             ActivityInstrumentation.TryGetException(loggerActivity.Activity, out exception);
         }
-        var properties = loggerActivity.Captures.Concat(loggerActivity.Activity != null ? ActivityInstrumentation.GetLogEventProperties(loggerActivity.Activity) : Enumerable.Empty<LogEventProperty>()).ToDictionary(p => p.Name);
-        return ActivityToLogEvent(logger, loggerActivity.Activity, start, end, traceId, spanId, parentSpanId, level, exception, template, properties);
+        return ActivityToLogEvent(logger, loggerActivity.Activity, start, end, traceId, spanId, parentSpanId, level, exception, template, loggerActivity.Properties);
     }
 
     internal static LogEvent ActivityToLogEvent(
