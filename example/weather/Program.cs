@@ -4,8 +4,6 @@ using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Expressions;
 using SerilogTracing.Sinks.OpenTelemetry;
-using SerilogTracing.Sinks.Seq;
-using SerilogTracing.Sinks.Zipkin;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", typeof(Program).Assembly.GetName().Name)

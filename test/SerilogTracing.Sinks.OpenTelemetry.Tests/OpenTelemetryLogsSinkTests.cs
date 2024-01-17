@@ -6,7 +6,7 @@ using Xunit;
 
 namespace SerilogTracing.Sinks.OpenTelemetry.Tests;
 
-public class OpenTelemetrySinkTests
+public class OpenTelemetryLogsSinkTests
 {
     [Fact]
     public async Task DefaultScopeIsNull()
@@ -51,7 +51,7 @@ public class OpenTelemetrySinkTests
     static async Task<ExportLogsServiceRequest> ExportAsync(IEnumerable<LogEvent> events)
     {
         var exporter = new CollectingExporter();
-        var sink = new OpenTelemetrySink(exporter, null, new Dictionary<string, object>(), OpenTelemetrySinkOptions.DefaultIncludedData, isLogsEnabled: true, isTracesEnabled: true);
+        var sink = new OpenTelemetryLogsSink(exporter, null, new Dictionary<string, object>(), OpenTelemetrySinkOptions.DefaultIncludedData);
         await sink.EmitBatchAsync(events);
         return Assert.Single(exporter.LogsServiceRequests);
     }

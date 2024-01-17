@@ -2,10 +2,7 @@ using Serilog;
 using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Expressions;
-using SerilogTracing.Instrumentation.AspNetCore;
 using SerilogTracing.Sinks.OpenTelemetry;
-using SerilogTracing.Sinks.Seq;
-using SerilogTracing.Sinks.Zipkin;
 
 // ReSharper disable RedundantSuppressNullableWarningExpression
 

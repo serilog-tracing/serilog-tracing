@@ -22,7 +22,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Templates;
 
-namespace SerilogTracing.Sinks.Seq;
+namespace SerilogTracing;
 
 /// <summary>
 /// Extends Serilog configuration to write og events and traces to Seq.

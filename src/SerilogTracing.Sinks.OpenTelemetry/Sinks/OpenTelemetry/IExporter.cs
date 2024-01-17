@@ -24,6 +24,4 @@ interface IExporter
     
     void Export(ExportTraceServiceRequest request);
     Task ExportAsync(ExportTraceServiceRequest request);
-    
-    
 }
