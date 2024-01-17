@@ -80,12 +80,13 @@ public static class ActivityInstrumentation
 
     static void SetLogEventProperty(Activity activity, LogEventProperty property, Dictionary<string, LogEventProperty> collection)
     {
-        if (property.Value is ScalarValue sv)
-        {
-            activity.SetTag(property.Name, sv.Value);
-        }
-
+        activity.SetTag(property.Name, ToActivityTagValue(property.Value));
         collection[property.Name] = property;
+    }
+
+    static object? ToActivityTagValue(LogEventPropertyValue propertyValue)
+    {
+        return propertyValue is ScalarValue sv ? sv.Value : propertyValue;
     }
 
     /// <summary>
@@ -204,6 +205,10 @@ public static class ActivityInstrumentation
     {
         activity.SetCustomProperty(Constants.SelfPropertyName, loggerActivity);
         activity.SetCustomProperty(Constants.LogEventPropertyCollectionName, loggerActivity.Properties);
+        foreach (var (_, property) in loggerActivity.Properties)
+        {
+            activity.AddTag(property.Name, ToActivityTagValue(property.Value));
+        }
     }
     
     internal static bool TryGetLoggerActivity(Activity activity, [NotNullWhen(true)] out LoggerActivity? loggerActivity)

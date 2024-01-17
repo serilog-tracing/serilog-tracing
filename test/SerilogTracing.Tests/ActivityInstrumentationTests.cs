@@ -56,7 +56,7 @@ public class ActivityInstrumentationTests
         Assert.Equal(b, activity.GetTagItem("b"));
         Assert.Equal(c, activity.GetTagItem("c"));
         Assert.Equal(d, activity.GetTagItem("d"));
-        Assert.Null(activity.GetTagItem("e"));
+        Assert.IsType<DictionaryValue>(activity.GetTagItem("e"));
 
         var properties = ActivityInstrumentation.GetLogEventProperties(activity).ToList();
         
