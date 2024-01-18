@@ -1,8 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <RootNamespace>SerilogTracing</RootNamespace>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+        <DefineConstants>$(DefineConstants);FEATURE_SOCKETS_HTTP_HANDLER</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>

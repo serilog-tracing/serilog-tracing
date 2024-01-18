@@ -3,7 +3,7 @@
 		<Description>Sends log events and traces to OTLP (gRPC or HTTP) endpoints.</Description>
 		<Authors>Serilog Contributors</Authors>
 		<LangVersion>10</LangVersion>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
 		<PackageTags>serilog;sink;opentelemetry</PackageTags>
 		<PackageIcon>serilog-sink-nuget.png</PackageIcon>
 		<PackageProjectUrl>https://github.com/serilog-tracing/serilog-tracing</PackageProjectUrl>
@@ -21,9 +21,9 @@
 	</PropertyGroup>
 	
 	<PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-		<DefineConstants>$(DefineConstants);FEATURE_CWT_ADDORUPDATE;FEATURE_ACTIVITY;FEATURE_HALF;FEATURE_DATE_AND_TIME_ONLY;FEATURE_SYNC_HTTP_SEND</DefineConstants>
+		<DefineConstants>$(DefineConstants);FEATURE_CWT_ADDORUPDATE;FEATURE_ACTIVITY;FEATURE_HALF;FEATURE_DATE_AND_TIME_ONLY;FEATURE_SYNC_HTTP_SEND;FEATURE_SOCKETS_HTTP_HANDLER</DefineConstants>
 	</PropertyGroup>
-	
+
 	<ItemGroup>
 		<None Include="../../assets/serilog-sink-nuget.png" Pack="true" Visible="false" PackagePath="/" />
 		<None Include="../../README.md" Pack="true" Visible="false" PackagePath="/" />

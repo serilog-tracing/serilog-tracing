@@ -1,10 +1,15 @@
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Serilog.Events;
 using SerilogTracing.Core;
 
 // Plug-in functions have a standard signature with nullable return type.
 // ReSharper disable ReturnTypeCanBeNotNullable
+
+#if NETSTANDARD2_0
+using SerilogTracing.Expressions.Pollyfill;
+#else
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace SerilogTracing.Expressions;
 

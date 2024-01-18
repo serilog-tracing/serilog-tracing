@@ -27,8 +27,12 @@ namespace SerilogTracing;
 /// </summary>
 public static class OpenTelemetryLoggerConfigurationExtensions
 {
-    static HttpMessageHandler CreateSilentHttpMessageHandler() =>
+    static HttpMessageHandler? CreateDefaultHttpMessageHandler() =>
+#if FEATURE_SOCKETS_HTTP_HANDLER
         new SocketsHttpHandler { ActivityHeadersPropagator = null };
+#else
+        null;
+#endif
 
     /// <summary>
     /// Send log events to an OTLP exporter.
@@ -51,7 +55,7 @@ public static class OpenTelemetryLoggerConfigurationExtensions
             tracesEndpoint: options.TracesEndpoint,
             protocol: options.Protocol,
             headers: new Dictionary<string, string>(options.Headers),
-            httpMessageHandler: options.HttpMessageHandler ?? CreateSilentHttpMessageHandler());
+            httpMessageHandler: options.HttpMessageHandler ?? CreateDefaultHttpMessageHandler());
 
         ILogEventSink? logsSink = null, tracesSink = null;
 
@@ -149,7 +153,7 @@ public static class OpenTelemetryLoggerConfigurationExtensions
             tracesEndpoint: options.TracesEndpoint,
             protocol: options.Protocol,
             headers: new Dictionary<string, string>(options.Headers),
-            httpMessageHandler: options.HttpMessageHandler ?? CreateSilentHttpMessageHandler());
+            httpMessageHandler: options.HttpMessageHandler ?? CreateDefaultHttpMessageHandler());
 
         ILogEventSink? logsSink = null, tracesSink = null;
 

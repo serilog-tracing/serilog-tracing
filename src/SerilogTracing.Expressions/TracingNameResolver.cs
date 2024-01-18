@@ -2,6 +2,11 @@
 using System.Reflection;
 using Serilog.Expressions;
 
+#if NETSTANDARD2_0
+using SerilogTracing.Pollyfill;
+#nullable disable warnings
+#endif
+
 namespace SerilogTracing.Expressions;
 
 /// <summary>
@@ -20,3 +25,7 @@ public class TracingNameResolver: NameResolver
         return _tracingFunctions.TryResolveFunctionName(name, out implementation);
     }
 }
+
+#if NETSTANDARD2_0
+#nullable enable warnings
+#endif

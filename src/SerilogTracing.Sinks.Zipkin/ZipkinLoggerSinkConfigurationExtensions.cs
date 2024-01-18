@@ -12,6 +12,13 @@ namespace SerilogTracing;
 /// </summary>
 public static class ZipkinLoggerSinkConfigurationExtensions
 {
+    static HttpMessageHandler CreateDefaultHttpMessageHandler() =>
+#if FEATURE_SOCKETS_HTTP_HANDLER
+        new SocketsHttpHandler { ActivityHeadersPropagator = null };
+#else
+        new HttpClientHandler();
+#endif
+    
     /// <summary>
     /// Send trace data to a Zipkin server.
     /// </summary>
@@ -38,7 +45,7 @@ public static class ZipkinLoggerSinkConfigurationExtensions
         var batchingOptions = new PeriodicBatchingSinkOptions();
         configureBatchingOptions?.Invoke(batchingOptions);
         
-        messageHandler ??= new SocketsHttpHandler { ActivityHeadersPropagator = null };
+        messageHandler ??= CreateDefaultHttpMessageHandler();
 
         return @this.Sink(
             new PeriodicBatchingSink(new ZipkinSink(new Uri(endpoint), messageHandler), batchingOptions),
