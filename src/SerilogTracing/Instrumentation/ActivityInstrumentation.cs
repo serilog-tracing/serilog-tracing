@@ -3,6 +3,11 @@ using System.Diagnostics.CodeAnalysis;
 using Serilog.Events;
 using SerilogTracing.Core;
 
+#if NETSTANDARD2_0
+using SerilogTracing.Pollyfill;
+#nullable disable warnings
+#endif
+
 namespace SerilogTracing.Instrumentation;
 
 /// <summary>
@@ -223,3 +228,7 @@ public static class ActivityInstrumentation
         return false;
     }
 }
+
+#if !FEATURE_NULLABLE
+#nullable restore warnings
+#endif

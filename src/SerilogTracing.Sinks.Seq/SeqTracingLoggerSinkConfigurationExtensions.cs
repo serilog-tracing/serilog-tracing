@@ -32,9 +32,14 @@ public static class SeqTracingLoggerSinkConfigurationExtensions
     static ITextFormatter CreatePayloadFormatter() => new ExpressionTemplate(
         "{ {@t, @mt, @l: if @l = 'Information' then undefined() else @l, @x, @sp, @tr, @ps: ParentSpanId, @st: SpanStartTimestamp, ..rest()} }\n");
 
-    static HttpMessageHandler CreateSilentHttpMessageHandler() =>
+    static HttpMessageHandler? CreateDefaultHttpMessageHandler() =>
+#if FEATURE_SOCKETS_HTTP_HANDLER
         new SocketsHttpHandler { ActivityHeadersPropagator = null };
+#else
+        null;
+#endif
     
+    #pragma warning disable CS1574
     /// <summary>
     /// Write log events and traces to a <a href="https://datalust.co/seq">Seq</a> server.
     /// </summary>
@@ -72,6 +77,7 @@ public static class SeqTracingLoggerSinkConfigurationExtensions
     /// from the sink don't end up generating spans. If a custom message handler is passed, ensure
     /// <see cref="SocketsHttpHandler.ActivityHeadersPropagator"/> or its equivalent is set to <c>null</c>.
     /// </remarks>
+    #pragma warning restore CS1574
     public static LoggerConfiguration SeqTracing(
       this LoggerSinkConfiguration loggerSinkConfiguration,
       string serverUrl,
@@ -100,7 +106,7 @@ public static class SeqTracingLoggerSinkConfigurationExtensions
           bufferSizeLimitBytes,
           eventBodyLimitBytes,
           controlLevelSwitch,
-          messageHandler ?? CreateSilentHttpMessageHandler(),
+          messageHandler ?? CreateDefaultHttpMessageHandler(),
           retainedInvalidPayloadsLimitBytes,
           queueSizeLimit,
           CreatePayloadFormatter());
