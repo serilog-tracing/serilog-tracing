@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics;
+using SerilogTracing.Core;
 
 namespace SerilogTracing.Interop;
 
 static class LoggerActivitySource
 {
-    const string Name = "Serilog";
-
-    static ActivitySource Instance { get; } = new(Name, null);
+    static ActivitySource Instance { get; } = new(Constants.SerilogActivitySourceName, null);
 
     public static Activity StartActivity(string name)
     {
