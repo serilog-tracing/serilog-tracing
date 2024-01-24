@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using SerilogTracing.Instrumentation;
 
 namespace SerilogTracing;
 

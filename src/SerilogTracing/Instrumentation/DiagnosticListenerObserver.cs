@@ -10,7 +10,7 @@ sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDispos
     }
 
     readonly IReadOnlyList<IActivityInstrumentor> _instrumentors;
-    readonly List<IDisposable?> _subscription = [];
+    readonly List<IDisposable?> _subscriptions = [];
     
     public void OnCompleted()
     {
@@ -26,7 +26,7 @@ sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDispos
         {
             if (instrumentor.ShouldSubscribeTo(value.Name))
             {
-                _subscription.Add(value.Subscribe(new DiagnosticEventObserver(instrumentor)));
+                _subscriptions.Add(value.Subscribe(new DiagnosticEventObserver(instrumentor)));
             }
         }
     }
@@ -35,7 +35,7 @@ sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDispos
     {
         var failedDisposes = new List<Exception>();
         
-        foreach (var subscription in _subscription)
+        foreach (var subscription in _subscriptions)
         {
             try
             {

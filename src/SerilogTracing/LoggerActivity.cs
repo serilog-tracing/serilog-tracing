@@ -16,18 +16,24 @@ namespace SerilogTracing;
 /// <remarks><see cref="LoggerActivity"/> instances are not thread-safe.</remarks>
 public sealed class LoggerActivity : IDisposable
 {
-    internal static LoggerActivity None { get; } = new(new LoggerConfiguration().CreateLogger(), null, new(Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>());
+    /// <summary>
+    /// A <see cref="LoggerActivity"/> that represents a suppressed activity. The <see cref="Activity"/> property of
+    /// this instance, and only this instance, will be <c langword="null">null</c>.
+    /// </summary>
+    public static LoggerActivity None { get; } = new(new LoggerConfiguration().CreateLogger(), LevelAlias.Minimum, null, new(Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>());
 
     internal LoggerActivity(
         ILogger logger,
+        LogEventLevel defaultCompletionLevel,
         Activity? activity,
         MessageTemplate messageTemplate,
         IEnumerable<LogEventProperty> captures)
     {
         Logger = logger;
+        DefaultCompletionLevel = defaultCompletionLevel;
         Activity = activity;
         MessageTemplate = messageTemplate;
-        Properties = new();
+        Properties = new Dictionary<string, LogEventProperty>();
 
         foreach (var capture in captures)
         {
@@ -37,30 +43,22 @@ public sealed class LoggerActivity : IDisposable
         if (activity != null)
         {
             ActivityInstrumentation.AttachLoggerActivity(activity, this);
-            StartTimestamp = activity.StartTimeUtc;
-        }
-        else
-        {
-            StartTimestamp = DateTime.UtcNow;
         }
     }
 
     ILogger Logger { get; }
+    LogEventLevel DefaultCompletionLevel { get; set; }
+    bool IsComplete { get; set; }
 
-    internal DateTime StartTimestamp { get; }
     internal MessageTemplate MessageTemplate { get; }
     internal Dictionary<string, LogEventProperty> Properties { get; }
-    internal Exception? Exception { get; private set; }
-    internal LogEventLevel? CompletionLevel { get; private set; }
-    internal TimeSpan Duration { get; private set; }
-
-    internal ActivityTraceId? TraceId => Activity?.TraceId;
-    internal ActivitySpanId? SpanId => Activity?.SpanId;
-    internal ActivitySpanId? ParentSpanId => Activity?.ParentSpanId;
+    
+    bool IsSuppressed => Activity is null || IsComplete;
 
     /// <summary>
     /// The <see cref="Activity"/> that represents the current <see cref="LoggerActivity"/> for
-    /// <c>System.Diagnostics</c>, if any listeners are configured.
+    /// <c>System.Diagnostics</c>. This property is null if and only if the current <see cref="LoggerActivity"/> is
+    /// suppressed, either through level checks or sampling.
     /// </summary>
     public Activity? Activity { get; }
 
@@ -76,16 +74,24 @@ public sealed class LoggerActivity : IDisposable
     /// logic will be used to serialize the object into a structured value.</param>
     public void AddProperty(string propertyName, object? value, bool destructureObjects = false)
     {
-        if (Activity != null && Logger.BindProperty(propertyName, value, destructureObjects, out var property))
+        if (IsSuppressed)
         {
-            ActivityInstrumentation.SetLogEventProperty(Activity, property);
+            return;
+        }
+        
+        if (Logger.BindProperty(propertyName, value, destructureObjects, out var property))
+        {
+            ActivityInstrumentation.SetLogEventProperty(Activity!, property);
         }
     }
     
     /// <summary>
     /// Complete the activity, emitting a span to the underlying logger.
     /// </summary>
-    /// <param name="level">The log event level to associate with the span.</param>
+    /// <param name="level">By default, the level used when starting the activity will be used at completion. Specifying
+    /// a level here will override the original completion level, but only if <paramref name="level"/> is higher than
+    /// the original, for example to promote an <see cref="LogEventLevel.Information"/> event to a <see cref="LogEventLevel.Warning"/>
+    /// event. If the level specified here is lower, it will be ignored.</param>
     /// <param name="exception">An exception to associate with the span, if any.</param>
     /// <remarks>Serilog levels will be reflected on the wrapped activity using
     /// corresponding <see cref="ActivityStatusCode"/> values. Exceptions are reflected using
@@ -93,36 +99,46 @@ public sealed class LoggerActivity : IDisposable
     /// ignored.
     /// </remarks>
     public void Complete(
-        LogEventLevel level = LogEventLevel.Information,
+        LogEventLevel? level = null,
         Exception? exception = null)
     {
-        if (this == None
-            || CompletionLevel.HasValue
+        if (IsSuppressed
 #if FEATURE_ACTIVITY_ISSTOPPED
-            || Activity?.IsStopped is true
+            // Though it could be considered misuse, avoid failures when the underlying activity
+            // has been manually stopped/disposed outside of SerilogTracing.
+            || Activity!.IsStopped
 #endif
             )
         {
             return;
         }
+
+        // This property can be removed once we can rely on the existence of Activity.IsStopped.
+        IsComplete = true;
+        var end = DateTimeOffset.Now;
+
+        var completionLevel = DefaultCompletionLevel;
+        if (level is { } completionLevelOverride && completionLevelOverride > completionLevel)
+        {
+            completionLevel = completionLevelOverride;
+        }
         
-        CompletionLevel = level;
+        // The next half-dozen lines ensure other listeners see all of the info we have about the activity.
+        
         if (exception != null)
         {
-            Exception = exception;
-
-            if (Activity != null)
-            {
-                ActivityInstrumentation.TrySetException(Activity, exception);
-            }
+            ActivityInstrumentation.TrySetException(Activity!, exception);
         }
-
-        Activity?.SetStatus(level <= LogEventLevel.Warning ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
-        Activity?.Stop();
-
-        Duration = Activity?.Duration ?? DateTime.UtcNow - StartTimestamp;
         
-        Logger.Write(ActivityConvert.ActivityToLogEvent(Logger, this));
+        Activity!.SetStatus(completionLevel <= LogEventLevel.Warning ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
+        Activity!.SetEndTime(end.UtcDateTime);
+        Activity!.Stop();
+
+        // We assume here that `level` is still enabled as it was in the call to `StartActivity()`. If this is not
+        // the case, traces may end up with missing spans. Writing a `SelfLog` event would be reasonable but this
+        // will end up being a hot path so avoiding it at this time.
+        
+        Logger.Write(ActivityConvert.ActivityToLogEvent(Logger, this, end, completionLevel, exception));
     }
     
     /// <summary>

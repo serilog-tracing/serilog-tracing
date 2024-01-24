@@ -50,11 +50,13 @@ public class TracingConfiguration
         }
 
         Sample.ConfigureSampling(activityListener);
+        
+        // Note, this will not be reevaluated if the minimum level dynamically changes.
         activityListener.ShouldListenTo = source => GetLogger(source.Name).IsEnabled(LogEventLevel.Fatal);
 
         activityListener.ActivityStopped += activity =>
         {
-            if (ActivityInstrumentation.TryGetLoggerActivity(activity, out _))
+            if (ActivityInstrumentation.HasAttachedLoggerActivity(activity))
                 return; // `LoggerActivity` completion writes these to the activity-specific logger.
 
             var activityLogger = GetLogger(activity.Source.Name);

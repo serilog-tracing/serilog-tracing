@@ -12,7 +12,11 @@ static class ActivityConvert
     internal static LogEvent ActivityToLogEvent(ILogger logger, Activity activity)
     {
         var start = activity.StartTimeUtc;
-        var end = start + activity.Duration;
+        
+        // Note that races around time zone changes may cause local-time display issues, but the instant will
+        // be recorded correctly and this is what machine-readable outputs will see.
+        var end = new DateTimeOffset(start + activity.Duration).ToLocalTime();
+        
         var level = activity.Status == ActivityStatusCode.Error ? LogEventLevel.Error : LogEventLevel.Information;
         ActivityInstrumentation.TryGetMessageTemplateOverride(activity, out var messageTemplate);
         var template = messageTemplate ?? new MessageTemplate(new[] { new TextToken(activity.DisplayName) });
@@ -21,21 +25,18 @@ static class ActivityConvert
         return ActivityToLogEvent(logger, activity, start, end, activity.TraceId, activity.SpanId, activity.ParentSpanId, level, exception, template, properties);
     }
     
-    internal static LogEvent ActivityToLogEvent(ILogger logger, LoggerActivity loggerActivity)
+    internal static LogEvent ActivityToLogEvent(ILogger logger, LoggerActivity loggerActivity, DateTimeOffset end, LogEventLevel level, Exception? exception)
     {
-        var start = loggerActivity.StartTimestamp;
-        var end = start + loggerActivity.Duration;
-        var traceId = loggerActivity.TraceId;
-        var spanId = loggerActivity.SpanId;
-        var parentSpanId = loggerActivity.ParentSpanId;
-        var level = loggerActivity.CompletionLevel ?? ((loggerActivity.Activity != null
-            ? ActivityInstrumentation.GetCompletionLevel(loggerActivity.Activity) as LogEventLevel?
-            : null) ?? LogEventLevel.Information);
+        Activity activity = loggerActivity.Activity!;
+
+        var start = activity.StartTimeUtc;
+        var traceId = activity.TraceId;
+        var spanId = activity.SpanId;
+        var parentSpanId = activity.ParentSpanId;
         var template = loggerActivity.MessageTemplate;
-        var exception = loggerActivity.Exception;
-        if (exception == null && loggerActivity.Activity != null)
+        if (exception == null)
         {
-            ActivityInstrumentation.TryGetException(loggerActivity.Activity, out exception);
+            ActivityInstrumentation.TryGetException(activity, out exception);
         }
         return ActivityToLogEvent(logger, loggerActivity.Activity, start, end, traceId, spanId, parentSpanId, level, exception, template, loggerActivity.Properties);
     }
@@ -44,7 +45,7 @@ static class ActivityConvert
         ILogger logger,
         Activity? activity,
         DateTime start,
-        DateTime end,
+        DateTimeOffset end,
         ActivityTraceId? traceId,
         ActivitySpanId? spanId,
         ActivitySpanId? parentSpanId,

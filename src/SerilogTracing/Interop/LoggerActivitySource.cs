@@ -8,19 +8,20 @@ static class LoggerActivitySource
 
     static ActivitySource Instance { get; } = new(Name, null);
 
-    public static Activity StartActivity(string name)
+    public static Activity? TryStartActivity(string name)
     {
         // `ActivityKind` might be passed through here in the future. The `Activity` constructor does
         // not accept this.
         
-        // Sampling options are set by `ActivitySource.StartActivity()` and also need to be considered
-        // here in the future.
-        
         if (Instance.HasListeners())
         {
-            return Instance.StartActivity(name) ??
-                   throw new InvalidOperationException("`ActivitySource.StartActivity` unexpectedly returned `null`.");
+            // Tracing is enabled; if this returns `null`, sampling is suppressing the activity and so therefore
+            // should the logging layer.
+            return Instance.StartActivity(name);
         }
+        
+        // Tracing is not enabled. Levels are everything, and the level check has already been performed by the
+        // caller, so we're in business!
 
         var activity = new Activity(name);
         if (Activity.Current is {} parent)
