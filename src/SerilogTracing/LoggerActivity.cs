@@ -27,7 +27,7 @@ public sealed class LoggerActivity : IDisposable
         Logger = logger;
         Activity = activity;
         MessageTemplate = messageTemplate;
-        Properties = new();
+        Properties = [];
 
         foreach (var capture in captures)
         {
