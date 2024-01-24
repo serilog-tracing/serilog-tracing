@@ -13,7 +13,7 @@ public class TracingNameResolverTests
     public static object[][] Cases()
     {
         var start = new DateTime(2024, 01, 02, 03, 04, 05, DateTimeKind.Utc);
-        var end = start.AddMilliseconds(123).AddMicroseconds(456).AddTicks(7);
+        var end = start.AddMilliseconds(123).AddTicks(4567);
         var template = new MessageTemplate(new[] { new TextToken("") });
         var traceId = ActivityTraceId.CreateRandom();
         var rootSpanId = ActivitySpanId.CreateRandom();

@@ -5,7 +5,6 @@ using SerilogTracing.Core;
 
 #if NETSTANDARD2_0
 using SerilogTracing.Pollyfill;
-#nullable disable warnings
 #endif
 
 namespace SerilogTracing.Instrumentation;
@@ -216,19 +215,8 @@ public static class ActivityInstrumentation
         }
     }
     
-    internal static bool TryGetLoggerActivity(Activity activity, [NotNullWhen(true)] out LoggerActivity? loggerActivity)
+    internal static bool HasAttachedLoggerActivity(Activity activity)
     {
-        if (activity.GetCustomProperty(Constants.SelfPropertyName) is LoggerActivity customPropertyValue)
-        {
-            loggerActivity = customPropertyValue;
-            return true;
-        }
-
-        loggerActivity = null;
-        return false;
+        return activity.GetCustomProperty(Constants.SelfPropertyName) is LoggerActivity;
     }
 }
-
-#if !FEATURE_NULLABLE
-#nullable restore warnings
-#endif

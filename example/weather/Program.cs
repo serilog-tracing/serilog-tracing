@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System.Diagnostics;
+using Serilog;
 using Serilog.Events;
 using Serilog.Templates.Themes;
 using SerilogTracing;
