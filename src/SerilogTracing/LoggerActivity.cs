@@ -33,7 +33,7 @@ public sealed class LoggerActivity : IDisposable
         DefaultCompletionLevel = defaultCompletionLevel;
         Activity = activity;
         MessageTemplate = messageTemplate;
-        Properties = new Dictionary<string, LogEventProperty>();
+        Properties = [];
 
         foreach (var capture in captures)
         {
