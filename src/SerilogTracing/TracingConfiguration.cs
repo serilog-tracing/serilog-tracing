@@ -52,7 +52,7 @@ public class TracingConfiguration
         Sample.ConfigureSampling(activityListener);
         
         // Note, this will not be reevaluated if the minimum level dynamically changes.
-        activityListener.ShouldListenTo = source => GetLogger(source.Name).IsEnabled(LogEventLevel.Fatal);
+        activityListener.ShouldListenTo = source => source.Name == Core.Constants.SerilogActivitySourceName || GetLogger(source.Name).IsEnabled(LogEventLevel.Fatal);
 
         activityListener.ActivityStopped += activity =>
         {
