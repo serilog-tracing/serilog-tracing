@@ -36,7 +36,7 @@ public static class ActivityInstrumentation
     /// <param name="activity">The activity containing the message template.</param>
     /// <param name="messageTemplate">The assigned message template, if any.</param>
     /// <returns>True when the activity contains a message template.</returns>
-    public static bool TryGetMessageTemplateOverride(Activity activity, [NotNullWhen(true)] out MessageTemplate? messageTemplate)
+    internal static bool TryGetMessageTemplateOverride(Activity activity, [NotNullWhen(true)] out MessageTemplate? messageTemplate)
     {
         if (activity.GetCustomProperty(Constants.MessageTemplateOverridePropertyName) is MessageTemplate customPropertyValue)
         {
@@ -100,7 +100,7 @@ public static class ActivityInstrumentation
     /// </summary>
     /// <param name="activity">The activity containing the properties.</param>
     /// <returns>A collection of properties set on the activity.</returns>
-    public static IEnumerable<LogEventProperty> GetLogEventProperties(Activity activity)
+    internal static IEnumerable<LogEventProperty> GetLogEventProperties(Activity activity)
     {
         return TryGetLogEventPropertyCollection(activity, out var existing) ? existing.Values : Enumerable.Empty<LogEventProperty>();
     }
@@ -166,7 +166,7 @@ public static class ActivityInstrumentation
     /// <param name="exception">True if an exception event is present on the activity. The type of the returned
     /// exception is not guaranteed to match the one originally set on the activity.</param>
     /// <returns></returns>
-    public static bool TryGetException(Activity activity, [NotNullWhen(true)] out Exception? exception)
+    internal static bool TryGetException(Activity activity, [NotNullWhen(true)] out Exception? exception)
     {
         exception = ExceptionFromEvents(activity);
 
@@ -200,7 +200,7 @@ public static class ActivityInstrumentation
     /// <returns>A <see cref="LogEventLevel"/> based on <see cref="Activity.Status"/>. If the status is
     /// <see cref="ActivityStatusCode.Error"/> then the completion value will be <see cref="LogEventLevel.Error"/>.
     /// Otherwise it'll be <see cref="LogEventLevel.Information"/>.</returns>
-    public static LogEventLevel GetCompletionLevel(Activity activity)
+    internal static LogEventLevel GetCompletionLevel(Activity activity)
     {
         return activity.Status == ActivityStatusCode.Error ? LogEventLevel.Error : LogEventLevel.Information;
     }
