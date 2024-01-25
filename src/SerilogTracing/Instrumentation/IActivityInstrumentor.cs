@@ -13,7 +13,7 @@ public interface IActivityInstrumentor
     /// <param name="diagnosticListenerName">The <see cref="DiagnosticListener.Name"/> of the candidate <see cref="DiagnosticListener"/>.</param>
     /// <returns>Whether the instrumentor should receive events from the given listener.</returns>
     bool ShouldSubscribeTo(string diagnosticListenerName);
-    
+
     /// <summary>
     /// Enrich the an activity with context from a diagnostic event.
     /// </summary>

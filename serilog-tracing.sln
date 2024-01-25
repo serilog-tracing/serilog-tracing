@@ -48,6 +48,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Expressions"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Instrumentation.AspNetCore", "src\SerilogTracing.Instrumentation.AspNetCore\SerilogTracing.Instrumentation.AspNetCore.csproj", "{A41C8092-0527-4A83-85A3-6FECBA531E21}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Instrumentation.AspNetCore.Tests", "test\SerilogTracing.Instrumentation.AspNetCore.Tests\SerilogTracing.Instrumentation.AspNetCore.Tests.csproj", "{6E4D6C66-3611-4037-BD31-A039A78824A5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,7 @@ Global
 		{57AB5445-432E-4148-97BC-9953D5C162BD} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
 		{586FD369-EF68-49E0-B827-A35218E1E4E5} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
 		{A41C8092-0527-4A83-85A3-6FECBA531E21} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
+		{6E4D6C66-3611-4037-BD31-A039A78824A5} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -109,5 +112,9 @@ Global
 		{A41C8092-0527-4A83-85A3-6FECBA531E21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A41C8092-0527-4A83-85A3-6FECBA531E21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A41C8092-0527-4A83-85A3-6FECBA531E21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E4D6C66-3611-4037-BD31-A039A78824A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E4D6C66-3611-4037-BD31-A039A78824A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E4D6C66-3611-4037-BD31-A039A78824A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E4D6C66-3611-4037-BD31-A039A78824A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

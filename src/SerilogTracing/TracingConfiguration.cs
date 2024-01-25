@@ -3,6 +3,7 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
+using SerilogTracing.Configuration;
 using SerilogTracing.Instrumentation;
 using SerilogTracing.Interop;
 
