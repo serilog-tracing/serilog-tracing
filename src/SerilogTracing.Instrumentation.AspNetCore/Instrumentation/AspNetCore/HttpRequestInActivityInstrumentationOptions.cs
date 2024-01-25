@@ -7,7 +7,7 @@ namespace SerilogTracing.Instrumentation.AspNetCore;
 /// <summary>
 /// Configuration for a <see cref="HttpRequestInActivityInstrumentor"/>.
 /// </summary>
-public sealed class HttpRequestInActivityInstrumentorOptions
+public sealed class HttpRequestInActivityInstrumentationOptions
 {
     const string DefaultRequestCompletionMessageTemplate =
         "HTTP {RequestMethod} {RequestPath}";
@@ -28,7 +28,7 @@ public sealed class HttpRequestInActivityInstrumentorOptions
     /// <summary>
     /// Construct a default set of options.
     /// </summary>
-    public HttpRequestInActivityInstrumentorOptions()
+    public HttpRequestInActivityInstrumentationOptions()
     {
         MessageTemplate = DefaultRequestCompletionMessageTemplate;
         GetRequestProperties = DefaultGetRequestProperties;

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace SerilogTracing;
+namespace SerilogTracing.Configuration;
 
 /// <summary>
 /// Options for <see cref="TracingConfiguration"/> configuration.

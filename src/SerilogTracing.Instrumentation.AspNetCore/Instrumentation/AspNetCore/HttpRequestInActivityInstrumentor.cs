@@ -8,12 +8,12 @@ namespace SerilogTracing.Instrumentation.AspNetCore;
 /// <summary>
 /// An activity instrumentor that populates the current activity with context from incoming HTTP requests.
 /// </summary>
-public sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
+sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
 {
     /// <summary>
     /// Create an instance of the instrumentor.
     /// </summary>
-    public HttpRequestInActivityInstrumentor(HttpRequestInActivityInstrumentorOptions options)
+    public HttpRequestInActivityInstrumentor(HttpRequestInActivityInstrumentationOptions options)
     {
         _getRequestProperties = options.GetRequestProperties;
         _getResponseProperties = options.GetResponseProperties;

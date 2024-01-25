@@ -2,19 +2,13 @@
 using Serilog.Events;
 using Serilog.Parsing;
 
-namespace SerilogTracing.Instrumentation;
+namespace SerilogTracing.Instrumentation.HttpClient;
 
 /// <summary>
-/// An activity enricher that populates the current activity with context from outgoing HTTP requests.
+/// An activity instrumentor that populates the current activity with context from outgoing HTTP requests.
 /// </summary>
-public sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
+sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
 {
-    /// <summary>
-    /// Create an instance of the enricher.
-    /// </summary>
-    public HttpRequestOutActivityInstrumentor()
-    {}
-    
     /// <inheritdoc cref="IActivityInstrumentor.ShouldSubscribeTo"/>
     public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
@@ -40,10 +34,10 @@ public sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
 
                 var uriBuilder = new UriBuilder(request.RequestUri)
                 {
-                    Query = null,
-                    Fragment = null,
-                    UserName = null,
-                    Password = null
+                    Query = null!,
+                    Fragment = null!,
+                    UserName = null!,
+                    Password = null!
                 };
 
                 ActivityInstrumentation.SetMessageTemplateOverride(activity, MessageTemplateOverride);

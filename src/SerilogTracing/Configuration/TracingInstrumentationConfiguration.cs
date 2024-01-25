@@ -1,6 +1,7 @@
 ﻿using SerilogTracing.Instrumentation;
+using SerilogTracing.Instrumentation.HttpClient;
 
-namespace SerilogTracing;
+namespace SerilogTracing.Configuration;
 
 /// <summary>
 /// Controls instrumentation configuration.
