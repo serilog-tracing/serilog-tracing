@@ -45,14 +45,14 @@ public class OtlpEventBuilderTests
     {
         var logRecord = new LogRecord();
 
-        OtlpEventBuilder.ProcessBody((message) => { logRecord.Body = new AnyValue {StringValue = message}; }, Some.SerilogEvent(messageTemplate: ""), OpenTelemetrySinkOptions.DefaultIncludedData, null);
+        OtlpEventBuilder.ProcessBody(logRecord, Some.SerilogEvent(messageTemplate: ""), OpenTelemetrySinkOptions.DefaultIncludedData, null);
         Assert.Null(logRecord.Body);
 
-        OtlpEventBuilder.ProcessBody((message) => { logRecord.Body = new AnyValue {StringValue = message}; }, Some.SerilogEvent(messageTemplate: "\t\f "), OpenTelemetrySinkOptions.DefaultIncludedData, null);
+        OtlpEventBuilder.ProcessBody(logRecord, Some.SerilogEvent(messageTemplate: "\t\f "), OpenTelemetrySinkOptions.DefaultIncludedData, null);
         Assert.Null(logRecord.Body);
 
         const string template = "log message";
-        OtlpEventBuilder.ProcessBody((message) => { logRecord.Body = new AnyValue {StringValue = message}; }, Some.SerilogEvent(messageTemplate: template), OpenTelemetrySinkOptions.DefaultIncludedData, null);
+        OtlpEventBuilder.ProcessBody(logRecord, Some.SerilogEvent(messageTemplate: template), OpenTelemetrySinkOptions.DefaultIncludedData, null);
         Assert.NotNull(logRecord.Body);
         Assert.Equal(template, logRecord.Body.StringValue);
     }
@@ -63,7 +63,7 @@ public class OtlpEventBuilderTests
         var span = new Span();
 
         const string template = "A {Template}";
-        OtlpEventBuilder.ProcessName((name) => { span.Name = name; }, Some.SerilogEvent(messageTemplate: template, properties: new LogEventProperty[] { new("Template", new ScalarValue("Value")) }));
+        OtlpEventBuilder.ProcessName(span, Some.SerilogEvent(messageTemplate: template, properties: new LogEventProperty[] { new("Template", new ScalarValue("Value")) }));
         Assert.NotNull(span.Name);
         Assert.Equal(template, span.Name);
     }

@@ -36,7 +36,7 @@ static class OtlpEventBuilder
 
         ProcessProperties(logRecord.Attributes.Add, logEvent, includedData, out var scopeName);
         ProcessTimestamp(logRecord, logEvent);
-        ProcessBody((message) => { logRecord.Body = new AnyValue {StringValue = message}; }, logEvent, includedData, formatProvider);
+        ProcessBody(logRecord, logEvent, includedData, formatProvider);
         ProcessLevel(logRecord, logEvent);
         ProcessException(logRecord.Attributes, logEvent);
         ProcessIncludedFields(logRecord, logEvent, includedData);
@@ -51,7 +51,7 @@ static class OtlpEventBuilder
         ProcessProperties(span.Attributes.Add, logEvent, includedData, out var scopeName);
         ProcessTimestamp(span, logEvent);
         ProcessStartTime(span, logEvent);
-        ProcessName((message) => { span.Name = message; }, logEvent);
+        ProcessName(span, logEvent);
         ProcessLevel(span, logEvent);
         ProcessException(span.Attributes, logEvent);
         ProcessIncludedFields(span, logEvent, includedData);
@@ -60,7 +60,7 @@ static class OtlpEventBuilder
         return (span, scopeName);
     }
 
-    public static void ProcessBody(Action<string> setBody, LogEvent logEvent, IncludedData includedFields, IFormatProvider? formatProvider)
+    public static void ProcessBody(LogRecord logRecord, LogEvent logEvent, IncludedData includedFields, IFormatProvider? formatProvider)
     {
         if (!includedFields.HasFlag(IncludedData.TemplateBody))
         {
@@ -68,20 +68,20 @@ static class OtlpEventBuilder
 
             if (renderedMessage.Trim() != "")
             {
-                setBody(renderedMessage);
+                logRecord.Body = new AnyValue { StringValue = renderedMessage };
             }
         }
         else if (logEvent.MessageTemplate.Text.Trim() != "")
         {
-            setBody(logEvent.MessageTemplate.Text);
+            logRecord.Body = new AnyValue { StringValue = logEvent.MessageTemplate.Text };
         }
     }
     
-    public static void ProcessName(Action<string> setName, LogEvent logEvent)
+    public static void ProcessName(Span span, LogEvent logEvent)
     {
         if (logEvent.MessageTemplate.Text.Trim() != "")
         {
-            setName(logEvent.MessageTemplate.Text);
+            span.Name = logEvent.MessageTemplate.Text;
         }
     }
 
