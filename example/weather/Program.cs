@@ -17,7 +17,7 @@ Log.Logger = new LoggerConfiguration()
     })
     .CreateLogger();
 
-using var _ = new TracingConfiguration().EnableTracing();
+using var _ = new TracingConfiguration().TraceToStaticLogger();
 
 if (args.Length != 1)
 {
