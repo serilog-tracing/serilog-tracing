@@ -11,7 +11,6 @@ public static class TracingInstrumentationConfigurationHttpClientExtensions
     /// <summary>
     /// Add instrumentation for ASP.NET Core requests.
     /// </summary>
-    /// <returns></returns>
     public static TracingConfiguration HttpClientRequests(this TracingInstrumentationConfiguration configuration)
     {
         return configuration.With(new HttpRequestOutActivityInstrumentor());
