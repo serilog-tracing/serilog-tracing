@@ -75,11 +75,12 @@ The Serilog pipeline is set up normally:
 
 ```csharp
 using Serilog;
+using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Expressions;
 
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console(Formatters.CreateConsoleTextFormatter())
+    .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
     .CreateLogger();
 ```
 
