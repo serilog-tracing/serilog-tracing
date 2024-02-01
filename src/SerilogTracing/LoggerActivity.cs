@@ -102,13 +102,21 @@ public sealed class LoggerActivity : IDisposable
         LogEventLevel? level = null,
         Exception? exception = null)
     {
+        CompleteInternal(true, level, exception);
+    }
+    
+    void CompleteInternal(
+        bool isExplicit,
+        LogEventLevel? level = null,
+        Exception? exception = null)
+    {
         if (IsSuppressed
 #if FEATURE_ACTIVITY_ISSTOPPED
             // Though it could be considered misuse, avoid failures when the underlying activity
             // has been manually stopped/disposed outside of SerilogTracing.
             || Activity!.IsStopped
 #endif
-            )
+           )
         {
             return;
         }
@@ -129,8 +137,16 @@ public sealed class LoggerActivity : IDisposable
         {
             ActivityInstrumentation.TrySetException(Activity!, exception);
         }
-        
-        Activity!.SetStatus(completionLevel <= LogEventLevel.Warning ? ActivityStatusCode.Ok : ActivityStatusCode.Error);
+
+        // Only set the activity status if completion was done explicitly by the caller
+        // If the activity was disposed without completing then leave the status unset
+        if (isExplicit)
+        {
+            Activity!.SetStatus(completionLevel <= LogEventLevel.Warning
+                ? ActivityStatusCode.Ok
+                : ActivityStatusCode.Error);
+        }
+
         Activity!.SetEndTime(end.UtcDateTime);
         Activity!.Stop();
 
@@ -147,6 +163,6 @@ public sealed class LoggerActivity : IDisposable
     /// </summary>
     public void Dispose()
     {
-        Complete();
+        CompleteInternal(isExplicit: false);
     }
 }
