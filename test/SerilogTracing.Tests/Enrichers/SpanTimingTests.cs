@@ -5,7 +5,7 @@ using Xunit;
 
 namespace SerilogTracing.Tests.Enrichers;
 
-public class ElapsedMillisecondsTests
+public class SpanTimingTests
 {
     [Fact]
     void EnricherIsAppliedToSpans()
@@ -15,13 +15,13 @@ public class ElapsedMillisecondsTests
         var logEvent = Some.SerilogEvent("Message", timestamp: start + TimeSpan.FromSeconds(5),
             properties: new LogEventProperty[] { new("SpanStartTimestamp", new ScalarValue(start)) });
         
-        new ElapsedMilliseconds("Elapsed").Enrich(logEvent, new ScalarLogEventPropertyFactory());
+        new SpanTiming("Elapsed").Enrich(logEvent, new ScalarLogEventPropertyFactory());
         
-        Assert.Equal(5000D, ((ScalarValue)logEvent.Properties["Elapsed"]).Value);
+        Assert.Equal(TimeSpan.FromSeconds(5), ((ScalarValue)logEvent.Properties["Elapsed"]).Value);
         
         logEvent = Some.SerilogEvent("Message", timestamp: start + TimeSpan.FromSeconds(5));
         
-        new ElapsedMilliseconds("Elapsed").Enrich(logEvent, new ScalarLogEventPropertyFactory());
+        new SpanTiming("Elapsed").Enrich(logEvent, new ScalarLogEventPropertyFactory());
         
         Assert.False(logEvent.Properties.ContainsKey("Elapsed"));
     }

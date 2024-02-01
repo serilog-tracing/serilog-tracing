@@ -4,9 +4,9 @@ using SerilogTracing.Interop;
 
 namespace SerilogTracing.Enrichers;
 
-internal class ElapsedTime: ILogEventEnricher
+internal class SpanTiming: ILogEventEnricher
 {
-    public ElapsedTime(string propertyName)
+    public SpanTiming(string propertyName)
     {
         _propertyName = propertyName;
     }
