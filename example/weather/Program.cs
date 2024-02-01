@@ -5,7 +5,7 @@ using SerilogTracing;
 using SerilogTracing.Expressions;
 using SerilogTracing.Sinks.OpenTelemetry;
 
-await using var logger = new LoggerConfiguration()
+Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", typeof(Program).Assembly.GetName().Name)
     .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
     .WriteTo.SeqTracing("http://localhost:5341")
@@ -16,7 +16,7 @@ await using var logger = new LoggerConfiguration()
     })
     .CreateLogger();
 
-using var _ = new TracingConfiguration().TraceTo(logger);
+using var _ = new TracingConfiguration().TraceToStaticLogger();
 
 if (args.Length != 1)
 {
@@ -26,7 +26,7 @@ if (args.Length != 1)
 
 var postcode = args[0];
 
-using var activity = logger.StartActivity("Request weather for postcode {Postcode}", postcode);
+using var activity = Log.Logger.StartActivity("Request weather for postcode {Postcode}", postcode);
 
 try
 {
@@ -41,4 +41,8 @@ catch (Exception ex)
 {
     activity.Complete(LogEventLevel.Fatal, ex);
     return 1;
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
 }
