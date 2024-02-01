@@ -33,11 +33,12 @@ Replace the contents of the generated `Program.cs` with:
 
 ```csharp
 using Serilog;
+using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Expressions;
 
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console(Formatters.CreateConsoleTextFormatter())
+    .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
     .CreateLogger();
 
 using var _ = new TracingConfiguration().TraceToSharedLogger();
@@ -75,11 +76,12 @@ The Serilog pipeline is set up normally:
 
 ```csharp
 using Serilog;
+using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Expressions;
 
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console(Formatters.CreateConsoleTextFormatter())
+    .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
     .CreateLogger();
 ```
 
