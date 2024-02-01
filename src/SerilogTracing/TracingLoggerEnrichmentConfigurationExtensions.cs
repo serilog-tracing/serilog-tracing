@@ -16,7 +16,7 @@ public static class TracingLoggerEnrichmentConfigurationExtensions
     /// <param name="propertyName">The name of the property to add.</param>
     public static LoggerConfiguration WithElapsedMilliseconds(this LoggerEnrichmentConfiguration enrichment, string? propertyName = null)
     {
-        return enrichment.With(new ElapsedMilliseconds(propertyName ?? "ElapsedMs"));
+        return enrichment.With(new ElapsedMilliseconds(propertyName ?? "Elapsed"));
     }
     
     /// <summary>

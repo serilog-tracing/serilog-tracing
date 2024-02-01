@@ -15,14 +15,14 @@ public class ElapsedMillisecondsTests
         var logEvent = Some.SerilogEvent("Message", timestamp: start + TimeSpan.FromSeconds(5),
             properties: new LogEventProperty[] { new("SpanStartTimestamp", new ScalarValue(start)) });
         
-        new ElapsedMilliseconds("ElapsedMs").Enrich(logEvent, new ScalarLogEventPropertyFactory());
+        new ElapsedMilliseconds("Elapsed").Enrich(logEvent, new ScalarLogEventPropertyFactory());
         
-        Assert.Equal(5000D, ((ScalarValue)logEvent.Properties["ElapsedMs"]).Value);
+        Assert.Equal(5000D, ((ScalarValue)logEvent.Properties["Elapsed"]).Value);
         
         logEvent = Some.SerilogEvent("Message", timestamp: start + TimeSpan.FromSeconds(5));
         
-        new ElapsedMilliseconds("ElapsedMs").Enrich(logEvent, new ScalarLogEventPropertyFactory());
+        new ElapsedMilliseconds("Elapsed").Enrich(logEvent, new ScalarLogEventPropertyFactory());
         
-        Assert.False(logEvent.Properties.ContainsKey("ElapsedMs"));
+        Assert.False(logEvent.Properties.ContainsKey("Elapsed"));
     }
 }
