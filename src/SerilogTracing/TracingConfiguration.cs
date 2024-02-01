@@ -37,16 +37,46 @@ public class TracingConfiguration
     /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
     /// </summary>
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
+    [Obsolete("Use TraceTo(ILogger) or TraceToSharedLogger()")]
     public IDisposable EnableTracing(ILogger? logger = null)
+    {
+        return logger != null ? TraceTo(logger) : TraceToSharedLogger();
+    }
+
+    /// <summary>
+    /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
+    /// </summary>
+    /// <param name="logger">The logger instance to emit traces through. Avoid using the shared <see cref="Log.Logger"/> as
+    /// the value here. To emit traces through the shared static logger, call <see cref="TraceToSharedLogger"/> instead.</param>
+    /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
+    public IDisposable TraceTo(ILogger logger)
+    {
+        return EnableTracing(() => logger);
+    }
+
+    /// <summary>
+    /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
+    ///
+    /// This method is not equivalent to <code>TraceTo(Log.Logger)</code>. The former will emit traces through whatever the
+    /// value of <see cref="Log.Logger"/> happened to be at the time <see cref="TraceTo"/> was called. This method
+    /// will always emit traces through the current value of <see cref="Log.Logger"/>.
+    /// </summary>
+    /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
+    public IDisposable TraceToSharedLogger()
+    {
+        return EnableTracing(() => Log.Logger);
+    }
+
+    IDisposable EnableTracing(Func<ILogger> logger)
     {
         var instrumentors = Instrument.GetInstrumentors().ToArray();
         var activityListener = new ActivityListener();
         var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver(instrumentors));
         var disposeProxy = new DisposeProxy(diagnosticListenerSubscription, activityListener);
-
+        
         ILogger GetLogger(string name)
         {
-            var instance = logger ?? Log.Logger;
+            var instance = logger();
             return !string.IsNullOrWhiteSpace(name) ? instance.ForContext(Constants.SourceContextPropertyName, name) : instance;
         }
 

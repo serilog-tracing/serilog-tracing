@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Serilog;
+﻿using Serilog;
 using Serilog.Events;
 using Serilog.Templates.Themes;
 using SerilogTracing;
@@ -17,7 +16,7 @@ Log.Logger = new LoggerConfiguration()
     })
     .CreateLogger();
 
-using var _ = new TracingConfiguration().EnableTracing();
+using var _ = new TracingConfiguration().TraceToSharedLogger();
 
 if (args.Length != 1)
 {
@@ -47,4 +46,3 @@ finally
 {
     await Log.CloseAndFlushAsync();
 }
-

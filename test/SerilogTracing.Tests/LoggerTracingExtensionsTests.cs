@@ -55,7 +55,7 @@ public class LoggerTracingExtensionsTests
             configuration.Sample.UsingActivityContext((ref ActivityCreationOptions<ActivityContext> _) => result);
         }
 
-        using var _ = tracingEnabled ? configuration.EnableTracing(log) : null;
+        using var _ = tracingEnabled ? configuration.TraceTo(log) : null;
         
         // This activity source is "outside" SerilogTracing and only exists to 
         var sourceName = Some.String();
