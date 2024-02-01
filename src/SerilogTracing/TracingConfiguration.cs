@@ -37,17 +37,17 @@ public class TracingConfiguration
     /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
     /// </summary>
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
-    [Obsolete("Use TraceTo(ILogger) or TraceToStaticLogger()")]
+    [Obsolete("Use TraceTo(ILogger) or TraceToSharedLogger()")]
     public IDisposable EnableTracing(ILogger? logger = null)
     {
-        return logger != null ? TraceTo(logger) : TraceToStaticLogger();
+        return logger != null ? TraceTo(logger) : TraceToSharedLogger();
     }
 
     /// <summary>
     /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
     /// </summary>
     /// <param name="logger">The logger instance to emit traces through. Avoid using the shared <see cref="Log.Logger"/> as
-    /// the value here. To emit traces through the shared static logger, call <see cref="TraceToStaticLogger"/> instead.</param>
+    /// the value here. To emit traces through the shared static logger, call <see cref="TraceToSharedLogger"/> instead.</param>
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
     public IDisposable TraceTo(ILogger logger)
     {
@@ -62,7 +62,7 @@ public class TracingConfiguration
     /// will always emit traces through the current value of <see cref="Log.Logger"/>.
     /// </summary>
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
-    public IDisposable TraceToStaticLogger()
+    public IDisposable TraceToSharedLogger()
     {
         return EnableTracing(() => Log.Logger);
     }
