@@ -227,6 +227,6 @@ public static class ActivityInstrumentation
 
     internal static bool IsDataSuppressed(Activity? activity)
     {
-        return (!activity?.IsAllDataRequested ?? true) || IsSuppressed(activity);
+        return activity is not {IsAllDataRequested: true} || IsSuppressed(activity);
     }
 }

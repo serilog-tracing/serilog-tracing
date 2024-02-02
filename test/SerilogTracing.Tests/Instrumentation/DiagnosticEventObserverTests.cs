@@ -12,7 +12,7 @@ public class DiagnosticEventObserverTests
         using var activity = Some.Activity();
         activity.IsAllDataRequested = false;
 
-        var instrumentor = new CollectingActivityInstrumenter();
+        var instrumentor = new CollectingActivityInstrumentor();
         
         new DiagnosticEventObserver(instrumentor).OnNext(activity, "event", true);
         

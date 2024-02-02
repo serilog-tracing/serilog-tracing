@@ -16,7 +16,7 @@ internal class SpanTiming: ILogEventEnricher
     
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
-        if (LogEventSpanInstrumentation.TryGetElapsed(logEvent, out var elapsed))
+        if (LogEventTracingProperties.TryGetElapsed(logEvent, out var elapsed))
         {
             logEvent.AddOrUpdateProperty(propertyFactory.CreateProperty(_propertyName, elapsed.Value));
         }

@@ -3,7 +3,7 @@ using SerilogTracing.Instrumentation;
 
 namespace SerilogTracing.Tests.Support;
 
-class CollectingActivityInstrumenter: IActivityInstrumentor
+class CollectingActivityInstrumentor: IActivityInstrumentor
 {
     public Activity? Activity { get; set; }
     public string? EventName { get; set; }

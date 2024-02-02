@@ -4,7 +4,7 @@ using SerilogTracing.Core;
 
 namespace SerilogTracing.Instrumentation;
 
-static class LogEventSpanInstrumentation
+static class LogEventTracingProperties
 {
     public static bool TryGetElapsed(LogEvent logEvent, [NotNullWhen(true)] out TimeSpan? elapsed)
     {
