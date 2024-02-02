@@ -219,4 +219,14 @@ public static class ActivityInstrumentation
     {
         return activity.GetCustomProperty(Constants.SelfPropertyName) is LoggerActivity;
     }
+
+    internal static bool IsSuppressed(Activity? activity)
+    {
+        return activity is null;
+    }
+
+    internal static bool IsDataSuppressed(Activity? activity)
+    {
+        return (!activity?.IsAllDataRequested ?? true) || IsSuppressed(activity);
+    }
 }

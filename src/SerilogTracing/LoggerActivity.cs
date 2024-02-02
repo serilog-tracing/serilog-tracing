@@ -53,9 +53,9 @@ public sealed class LoggerActivity : IDisposable
     internal MessageTemplate MessageTemplate { get; }
     internal Dictionary<string, LogEventProperty> Properties { get; }
     
-    bool IsSuppressed => Activity is null || IsComplete;
+    bool IsSuppressed => ActivityInstrumentation.IsSuppressed(Activity) || IsComplete;
 
-    bool IsDataSuppressed => (!Activity?.IsAllDataRequested ?? true) || IsSuppressed;
+    bool IsDataSuppressed => ActivityInstrumentation.IsDataSuppressed(Activity) || IsComplete;
 
     /// <summary>
     /// The <see cref="Activity"/> that represents the current <see cref="LoggerActivity"/> for
