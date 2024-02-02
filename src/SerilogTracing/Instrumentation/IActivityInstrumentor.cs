@@ -17,6 +17,8 @@ public interface IActivityInstrumentor
     /// <summary>
     /// Enrich the an activity with context from a diagnostic event.
     /// </summary>
+    /// <remarks>This method will only be called by SerilogTracing for activities that are expected to be enriched with data.
+    /// This is, activities where <see cref="Activity.IsAllDataRequested"/> is true.</remarks>
     /// <param name="activity">The activity to enrich with instrumentation.</param>
     /// <param name="eventName">The name of the event.</param>
     /// <param name="eventArgs">The value of the event.</param>
