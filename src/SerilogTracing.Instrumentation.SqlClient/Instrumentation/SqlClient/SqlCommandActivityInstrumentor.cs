@@ -7,7 +7,7 @@ using Serilog.Parsing;
 
 namespace SerilogTracing.Instrumentation.SqlClient;
 
-class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOptions options): IActivityInstrumentor
+sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOptions options): IActivityInstrumentor
 {
     const string DiagnosticListenerName = "SqlClientDiagnosticListener";
 

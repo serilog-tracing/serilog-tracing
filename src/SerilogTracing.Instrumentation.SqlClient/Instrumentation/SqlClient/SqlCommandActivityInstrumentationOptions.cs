@@ -5,7 +5,7 @@ namespace SerilogTracing.Instrumentation.SqlClient;
 /// <summary>
 /// Configuration for <see cref="SqlCommand"/> instrumentation.
 /// </summary>
-public class SqlCommandActivityInstrumentationOptions
+public sealed class SqlCommandActivityInstrumentationOptions
 {
     /// <summary>
     /// Include the command text (i.e. the stored procedure name, SQL statement, or table name) in spans. The risk
