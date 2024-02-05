@@ -9,6 +9,13 @@ namespace SerilogTracing.Instrumentation.HttpClient;
 /// </summary>
 sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
 {
+    readonly PropertyAccessor<HttpRequestMessage> _requestAccessor = new("Request");
+    readonly PropertyAccessor<TaskStatus> _requestTaskStatusAccessor = new("RequestTaskStatus");
+    readonly PropertyAccessor<HttpResponseMessage> _responseAccessor = new("Response");
+
+    static readonly MessageTemplate MessageTemplateOverride =
+        new MessageTemplateParser().Parse("HTTP {RequestMethod} {RequestUri}");
+
     /// <inheritdoc cref="IActivityInstrumentor.ShouldSubscribeTo"/>
     public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
@@ -23,8 +30,11 @@ sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
             case "System.Net.Http.HttpRequestOut.Start" when
                 activity.OperationName == "System.Net.Http.HttpRequestOut":
             {
-                var request = GetRequest(eventArgs);
-                if (request == null || request.RequestUri == null) return;
+                if (!_requestAccessor.TryGetValue(eventArgs, out var request) ||
+                    request?.RequestUri == null)
+                {
+                    return;
+                }
 
                 // The message template and properties will need to be set through a configurable enrichment
                 // mechanism, since the detail/information-leakage trade-off will be different for different
@@ -48,12 +58,16 @@ sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
             }
             case "System.Net.Http.HttpRequestOut.Stop":
             {
-                var response = GetResponse(eventArgs);
+                if (!_responseAccessor.TryGetValue(eventArgs, out var response))
+                {
+                    return;
+                }
+                
                 activity.AddTag("StatusCode", response != null ? (int)response.StatusCode : null);
 
-                if (activity.Status == ActivityStatusCode.Unset)
+                if (activity.Status == ActivityStatusCode.Unset &&
+                    _requestTaskStatusAccessor.TryGetValue(eventArgs, out var requestTaskStatus))
                 {
-                    var requestTaskStatus = GetRequestTaskStatus(eventArgs);
                     if (requestTaskStatus == TaskStatus.Faulted || response is { IsSuccessStatusCode: false })
                         activity.SetStatus(ActivityStatusCode.Error);
                 }
@@ -61,24 +75,5 @@ sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
                 break;
             }
         }
-    }
-    
-    static readonly Func<object, HttpRequestMessage?> GetRequest = CreateAccessor<HttpRequestMessage>(
-        "System.Net.Http.DiagnosticsHandler+ActivityStartData, System.Net.Http", "Request");
-    
-    static readonly Func<object, TaskStatus> GetRequestTaskStatus = CreateAccessor<TaskStatus>(
-        "System.Net.Http.DiagnosticsHandler+ActivityStopData, System.Net.Http", "RequestTaskStatus");
-    
-    static readonly Func<object, HttpResponseMessage?> GetResponse = CreateAccessor<HttpResponseMessage>(
-        "System.Net.Http.DiagnosticsHandler+ActivityStopData, System.Net.Http", "Response");
-
-    static readonly MessageTemplate MessageTemplateOverride =
-        new MessageTemplateParser().Parse("HTTP {RequestMethod} {RequestUri}");
-    
-    static Func<object, T?> CreateAccessor<T>(string typeName, string propertyName) where T: notnull
-    {
-        var type = Type.GetType(typeName, throwOnError: true)!;
-        var propertyInfo = type.GetProperty(propertyName)!;
-        return receiver => (T?)propertyInfo.GetValue(receiver);
     }
 }

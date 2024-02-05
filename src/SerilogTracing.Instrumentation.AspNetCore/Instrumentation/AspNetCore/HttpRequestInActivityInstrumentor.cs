@@ -23,14 +23,16 @@ sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
     readonly Func<HttpRequest, IEnumerable<LogEventProperty>> _getRequestProperties;
     readonly Func<HttpResponse, IEnumerable<LogEventProperty>> _getResponseProperties;
     readonly MessageTemplate _messageTemplateOverride;
+    readonly PropertyAccessor<Exception> _exceptionAccessor = new("exception");
+    readonly PropertyAccessor<HttpContext> _httpContextAccessor = new("httpContext");
 
-    /// <inheritdoc cref="IActivityInstrumentor.ShouldSubscribeTo"/>
+    /// <inheritdoc />
     public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
         return diagnosticListenerName == "Microsoft.AspNetCore";
     }
 
-    /// <inheritdoc cref="IActivityInstrumentor.ShouldSubscribeTo"/>
+    /// <inheritdoc />
     public void InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
         switch (eventName)
@@ -45,15 +47,12 @@ sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
 
                 break;
             case "Microsoft.AspNetCore.Diagnostics.UnhandledException":
-                var eventType = eventArgs.GetType();
-
-                var exception = eventType.GetProperty("exception")?.GetValue(eventArgs) as Exception;
-                var httpContext = eventType.GetProperty("httpContext")?.GetValue(eventArgs) as HttpContext;
-
-                if (exception is null || httpContext is null) return;
-
-                ActivityInstrumentation.TrySetException(activity, exception);
-                
+                if (_exceptionAccessor.TryGetValue(eventArgs, out var exception) &&
+                    _httpContextAccessor.TryGetValue(eventArgs, out var httpContext) &&
+                    exception is not null && httpContext is not null)
+                {
+                    ActivityInstrumentation.TrySetException(activity, exception);
+                }
                 break;
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Stop":
                 if (eventArgs is not HttpContext stop) return;

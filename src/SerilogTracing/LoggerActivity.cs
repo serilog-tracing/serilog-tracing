@@ -18,7 +18,7 @@ public sealed class LoggerActivity : IDisposable
 {
     /// <summary>
     /// A <see cref="LoggerActivity"/> that represents a suppressed activity. The <see cref="Activity"/> property of
-    /// this instance, and only this instance, will be <c langword="null">null</c>.
+    /// this instance, and only this instance, will be <c langword="null"/>.
     /// </summary>
     public static LoggerActivity None { get; } = new(new LoggerConfiguration().CreateLogger(), LevelAlias.Minimum, null, new(Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>());
 
@@ -72,7 +72,7 @@ public sealed class LoggerActivity : IDisposable
     /// the property value will be converted to a tag value using <see cref="Object.ToString"/>.</remarks>
     /// <param name="propertyName">The name of the property to add.</param>
     /// <param name="value">The value of the property.</param>
-    /// <param name="destructureObjects">If <c langword="true">true</c>, Serilog's capturing
+    /// <param name="destructureObjects">If <c langword="true"/>, Serilog's capturing
     /// logic will be used to serialize the object into a structured value.</param>
     public void AddProperty(string propertyName, object? value, bool destructureObjects = false)
     {
