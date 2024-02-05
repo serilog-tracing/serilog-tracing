@@ -28,8 +28,10 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
         // Instrumentation is applied in `OnDiagnosticEvent`.
     }
     
-    public void OnNext(string eventName, object eventArgs)
+    public void OnNext(string eventName, object? eventArgs)
     {
+        if (eventArgs == null) return;
+        
         switch (eventName)
         {
             case "Microsoft.Data.SqlClient.WriteCommandBefore":

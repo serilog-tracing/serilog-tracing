@@ -14,5 +14,5 @@ public interface IInstrumentationEventObserver
     /// </summary>
     /// <param name="eventName">The name of the event.</param>
     /// <param name="eventArgs">The value of the event.</param>
-    void OnNext(string eventName, object eventArgs);
+    void OnNext(string eventName, object? eventArgs);
 }

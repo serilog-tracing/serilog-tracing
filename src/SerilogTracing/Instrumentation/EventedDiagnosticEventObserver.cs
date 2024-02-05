@@ -25,13 +25,10 @@ sealed class EventedDiagnosticEventObserver: IObserver<KeyValuePair<string,objec
 
     public void OnNext(KeyValuePair<string, object?> value)
     {
-        if (value.Value == null)
-            return;
-        
         _observer.OnNext(value.Key, value.Value);
         
-        if (Activity.Current == null) return;
         var activity = Activity.Current;
+        if (value.Value == null || activity == null) return;
         
         _instrumentor.InstrumentActivity(activity, value.Key, value.Value);
     }
