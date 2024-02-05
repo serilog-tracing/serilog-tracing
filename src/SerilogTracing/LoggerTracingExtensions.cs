@@ -58,7 +58,8 @@ public static class LoggerTracingExtensions
     /// is completed using <see cref="LoggerActivity.Complete"/> or <see cref="LoggerActivity.Dispose"/>.</param>
     /// <param name="level">The <see cref="LogEventLevel"/> of the <see cref="LogEvent"/> generated when the activity
     /// is completed. The <see cref="LoggerActivity.Complete"/> method can be used to override this with
-    /// a higher level, but the level cannot be lowered at completion.</param>
+    /// a higher level, but the level cannot be lowered at completion. If the <paramref name="logger"/> is configured
+    /// to ignore the given level then this method will not start an activity.</param>
     /// <param name="messageTemplate">A message template that will be used to format the activity name.</param>
     /// <param name="propertyValues">Values to substitute into the <paramref name="messageTemplate"/> placeholders.
     /// These properties will also be attached to the resulting span.</param>

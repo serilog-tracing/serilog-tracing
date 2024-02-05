@@ -2,11 +2,11 @@
 using Serilog.Events;
 using SerilogTracing.Core;
 
-namespace SerilogTracing.Interop;
+namespace SerilogTracing.Instrumentation;
 
-static class LogEventSpanExtensions
+static class LogEventTracingProperties
 {
-    internal static bool TryGetElapsed(this LogEvent logEvent, [NotNullWhen(true)] out TimeSpan? elapsed)
+    public static bool TryGetElapsed(LogEvent logEvent, [NotNullWhen(true)] out TimeSpan? elapsed)
     {
         if (!logEvent.Properties.TryGetValue(Constants.SpanStartTimestampPropertyName, out var st) ||
             st is not ScalarValue

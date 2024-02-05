@@ -22,8 +22,15 @@ sealed class DiagnosticEventObserver: IObserver<KeyValuePair<string,object?>>
     public void OnNext(KeyValuePair<string, object?> value)
     {
         if (value.Value == null || Activity.Current == null) return;
-        var activity = Activity.Current;
-        
-        _instrumentor.InstrumentActivity(activity, value.Key, value.Value);
+
+        OnNext(Activity.Current, value.Key, value.Value);
+    }
+    
+    internal void OnNext(Activity activity, string eventName, object eventValue)
+    {
+        if (!ActivityInstrumentation.IsDataSuppressed(activity))
+        {
+            _instrumentor.InstrumentActivity(activity, eventName, eventValue);
+        }
     }
 }

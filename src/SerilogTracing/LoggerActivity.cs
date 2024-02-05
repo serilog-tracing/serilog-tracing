@@ -53,7 +53,9 @@ public sealed class LoggerActivity : IDisposable
     internal MessageTemplate MessageTemplate { get; }
     internal Dictionary<string, LogEventProperty> Properties { get; }
     
-    bool IsSuppressed => Activity is null || IsComplete;
+    bool IsSuppressed => ActivityInstrumentation.IsSuppressed(Activity) || IsComplete;
+
+    bool IsDataSuppressed => ActivityInstrumentation.IsDataSuppressed(Activity) || IsComplete;
 
     /// <summary>
     /// The <see cref="Activity"/> that represents the current <see cref="LoggerActivity"/> for
@@ -65,8 +67,8 @@ public sealed class LoggerActivity : IDisposable
     /// <summary>
     /// Add a property to the activity. This will be recorded in the emitted span.
     /// </summary>
-    /// <remarks>If <see cref="Activity"/> is not null, the property value will also be
-    /// attached to it as a tag. Note that when <paramref name="destructureObjects"/> is specified,
+    /// <remarks>If <see cref="Activity"/> is not null and <see cref="System.Diagnostics.Activity.IsAllDataRequested"/>
+    /// is true, then the property value will be attached to it as a tag. Note that when <paramref name="destructureObjects"/> is specified,
     /// the property value will be converted to a tag value using <see cref="Object.ToString"/>.</remarks>
     /// <param name="propertyName">The name of the property to add.</param>
     /// <param name="value">The value of the property.</param>
@@ -74,7 +76,7 @@ public sealed class LoggerActivity : IDisposable
     /// logic will be used to serialize the object into a structured value.</param>
     public void AddProperty(string propertyName, object? value, bool destructureObjects = false)
     {
-        if (IsSuppressed)
+        if (IsDataSuppressed)
         {
             return;
         }

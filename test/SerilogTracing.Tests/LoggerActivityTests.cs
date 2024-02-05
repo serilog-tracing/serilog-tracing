@@ -53,4 +53,44 @@ public class LoggerActivityTests
 
         Assert.Equal(ActivityStatusCode.Unset, activity.Status);
     }
+
+    [Fact]
+    public void ActivitySuppression()
+    {
+        var sink = new CollectingSink();
+
+        var logger = new LoggerConfiguration()
+            .MinimumLevel.Is(LevelAlias.Minimum)
+            .WriteTo.Sink(sink)
+            .CreateLogger();
+
+        var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, null, MessageTemplate.Empty, []);
+        loggerActivity.Complete(LogEventLevel.Information);
+        
+        Assert.Empty(sink.Events);
+    }
+
+    [Fact]
+    public void ActivityDataSuppression()
+    {
+        var sink = new CollectingSink();
+
+        var logger = new LoggerConfiguration()
+            .MinimumLevel.Is(LevelAlias.Minimum)
+            .WriteTo.Sink(sink)
+            .CreateLogger();
+        
+        using var activity = Some.Activity();
+        activity.IsAllDataRequested = false;
+        activity.Start();
+
+        var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, activity, MessageTemplate.Empty, []);
+        
+        loggerActivity.AddProperty("Discarded", true);
+        
+        loggerActivity.Complete(LogEventLevel.Information);
+        
+        var span = sink.SingleEvent;
+        Assert.DoesNotContain("Discarded", span.Properties);
+    }
 }

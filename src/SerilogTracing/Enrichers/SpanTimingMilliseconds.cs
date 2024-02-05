@@ -1,5 +1,6 @@
 ﻿using Serilog.Core;
 using Serilog.Events;
+using SerilogTracing.Instrumentation;
 using SerilogTracing.Interop;
 
 namespace SerilogTracing.Enrichers;
@@ -15,7 +16,7 @@ internal class SpanTimingMilliseconds: ILogEventEnricher
     
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
-        if (logEvent.TryGetElapsed(out var elapsed))
+        if (LogEventTracingProperties.TryGetElapsed(logEvent, out var elapsed))
         {
             logEvent.AddOrUpdateProperty(propertyFactory.CreateProperty(_propertyName, elapsed.Value.TotalMilliseconds));
         }
