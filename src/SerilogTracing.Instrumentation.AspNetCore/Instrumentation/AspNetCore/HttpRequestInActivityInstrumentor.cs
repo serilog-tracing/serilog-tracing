@@ -26,13 +26,13 @@ sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
     readonly PropertyAccessor<Exception> _exceptionAccessor = new("exception");
     readonly PropertyAccessor<HttpContext> _httpContextAccessor = new("httpContext");
 
-    /// <inheritdoc cref="IActivityInstrumentor.ShouldSubscribeTo"/>
+    /// <inheritdoc />
     public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
         return diagnosticListenerName == "Microsoft.AspNetCore";
     }
 
-    /// <inheritdoc cref="IActivityInstrumentor.ShouldSubscribeTo"/>
+    /// <inheritdoc />
     public void InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
         switch (eventName)
