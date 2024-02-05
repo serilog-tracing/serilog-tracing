@@ -73,31 +73,15 @@ public class TracingConfiguration
         var activityListener = new ActivityListener();
         var diagnosticListenerSubscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver(instrumentors));
         var disposeProxy = new DisposeProxy(diagnosticListenerSubscription, activityListener);
-        
-        ILogger GetLogger(string name)
-        {
-            var instance = logger();
-            return !string.IsNullOrWhiteSpace(name) ? instance.ForContext(Constants.SourceContextPropertyName, name) : instance;
-        }
+
+        var writer = new ActivityWriter(logger);
 
         Sample.ConfigureSampling(activityListener);
         
         // Note, this will not be reevaluated if the minimum level dynamically changes.
-        activityListener.ShouldListenTo = source => source.Name == Core.Constants.SerilogActivitySourceName || GetLogger(source.Name).IsEnabled(LogEventLevel.Fatal);
+        activityListener.ShouldListenTo = source => source.Name == Core.Constants.SerilogActivitySourceName || writer.GetLogger(source.Name).IsEnabled(LogEventLevel.Fatal);
 
-        activityListener.ActivityStopped += activity =>
-        {
-            if (ActivityInstrumentation.HasAttachedLoggerActivity(activity))
-                return; // `LoggerActivity` completion writes these to the activity-specific logger.
-
-            var activityLogger = GetLogger(activity.Source.Name);
-
-            var level = ActivityInstrumentation.GetCompletionLevel(activity);
-            if (!activityLogger.IsEnabled(level))
-                return;
-
-            activityLogger.Write(ActivityConvert.ActivityToLogEvent(activityLogger, activity));
-        };
+        activityListener.ActivityStopped += writer.Write;
         
         ActivitySource.AddActivityListener(activityListener);
 
