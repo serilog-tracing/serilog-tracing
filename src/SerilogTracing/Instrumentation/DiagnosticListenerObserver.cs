@@ -26,7 +26,14 @@ sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDispos
         {
             if (instrumentor.ShouldSubscribeTo(value.Name))
             {
-                _subscriptions.Add(value.Subscribe(new DiagnosticEventObserver(instrumentor)));
+                if (instrumentor is IInstrumentationEventObserver direct)
+                {
+                    _subscriptions.Add(value.Subscribe(new EventedDiagnosticEventObserver(instrumentor, direct)));
+                }
+                else
+                {
+                    _subscriptions.Add(value.Subscribe(new DiagnosticEventObserver(instrumentor)));
+                }
             }
         }
     }

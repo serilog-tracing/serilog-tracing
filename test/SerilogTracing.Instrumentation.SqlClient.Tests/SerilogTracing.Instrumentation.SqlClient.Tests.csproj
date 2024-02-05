@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\SerilogTracing.Instrumentation.AspNetCore\SerilogTracing.Instrumentation.AspNetCore.csproj" />
+        <ProjectReference Include="..\..\src\SerilogTracing.Instrumentation.SqlClient\SerilogTracing.Instrumentation.SqlClient.csproj" />
     </ItemGroup>
 
 </Project>

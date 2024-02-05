@@ -7,7 +7,7 @@ using Serilog.Parsing;
 
 namespace SerilogTracing.Instrumentation.SqlClient;
 
-sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOptions options): IActivityInstrumentor
+sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOptions options): IActivityInstrumentor, IInstrumentationEventObserver
 {
     const string DiagnosticListenerName = "SqlClientDiagnosticListener";
 
@@ -25,6 +25,11 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
 
     public void InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
+        // Instrumentation is applied in `OnDiagnosticEvent`.
+    }
+    
+    public void OnNext(string eventName, object eventArgs)
+    {
         switch (eventName)
         {
             case "Microsoft.Data.SqlClient.WriteCommandBefore":
@@ -36,13 +41,21 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
                     return;
                 
                 child.DisplayName = _messageTemplateOverride.Text;
+
+                if (!child.IsAllDataRequested)
+                {
+                    return;
+                }
+                
                 ActivityInstrumentation.SetMessageTemplateOverride(child, _messageTemplateOverride);
                 
                 if (_getCommand.TryGetValue(eventArgs, out var command) && command is not null)
                 {
-                    // Here we'll need to quickly, heuristically, try to spot the command type based on the command text.
-                    var operation = GetOperationType(command);
-                    ActivityInstrumentation.SetLogEventProperties(child, new LogEventProperty("Operation", new ScalarValue(operation)));
+                    var database = command.Connection.Database;
+                    var operation = GetOperation(command, options.InferOperation);
+                    ActivityInstrumentation.SetLogEventProperties(child,
+                        new LogEventProperty("Operation", new ScalarValue(operation)),
+                        new LogEventProperty("Database", new ScalarValue(database)));
 
                     if (options.IncludeCommandText)
                     {
@@ -54,12 +67,14 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
             }
             case "Microsoft.Data.SqlClient.WriteCommandAfter":
             {
+                var activity = Activity.Current;
+                
                 // Unlikely, but possible if an additional child activity started during the command and was not
                 // stopped correctly, or conversely, if someone else stopped our activity before we did.
-                if (activity.Source != ActivitySource)
+                if (activity is null || activity.Source != ActivitySource)
                     return;
 
-                if (_getStatistics.TryGetValue(eventArgs, out var statistics) && statistics is not null)
+                if (activity.IsAllDataRequested && _getStatistics.TryGetValue(eventArgs, out var statistics) && statistics is not null)
                 {
                     // See https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/sql/provider-statistics-for-sql-server
                     var networkServerTimeMilliseconds = statistics["NetworkServerTime"];
@@ -75,17 +90,21 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
             }
             case "Microsoft.Data.SqlClient.WriteCommandError":
             {
-                if (activity.Source != ActivitySource)
+                var activity = Activity.Current;
+                if (activity is null || activity.Source != ActivitySource)
                     return;
 
-                if (_getException.TryGetValue(eventArgs, out var exception) && exception is not null)
+                if (activity.IsAllDataRequested)
                 {
-                    ActivityInstrumentation.TrySetException(activity, exception);
-                    activity.SetStatus(ActivityStatusCode.Error, exception.Message);
-                }
-                else
-                {
-                    activity.SetStatus(ActivityStatusCode.Error);
+                    if (_getException.TryGetValue(eventArgs, out var exception) && exception is not null)
+                    {
+                        ActivityInstrumentation.TrySetException(activity, exception);
+                        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
+                    }
+                    else
+                    {
+                        activity.SetStatus(ActivityStatusCode.Error);
+                    }
                 }
 
                 activity.Stop();
@@ -94,16 +113,16 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
         }
     }
 
-    static string GetOperationType(SqlCommand command)
+    static string GetOperation(SqlCommand command, bool inferOperationFromCommandText)
     {
         if (command.CommandType == CommandType.StoredProcedure)
             return "EXEC";
 
         if (command.CommandType == CommandType.TableDirect)
             return "DIRECT";
-
-        // Here we'll need to, for better or for worse, attempt to heuristically detect the operation type.
         
-        return "BATCH";
+        return inferOperationFromCommandText ?
+            CommandTextTokenizer.FindFirstOperation(command.CommandText) ?? "BATCH" :
+            "BATCH";
     }
 }
