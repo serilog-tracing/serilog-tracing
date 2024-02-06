@@ -154,10 +154,14 @@ public class TracingConfiguration
 
     static LogEventLevel GetCompletionLevel(LevelOverrideMap levelMap, Activity activity)
     {
-        var level = ActivityInstrumentation.GetCompletionLevel(activity);
-        var overrideLevel = GetInitialLevel(levelMap, activity.Source.Name);
+        var level = GetInitialLevel(levelMap, activity.Source.Name);
 
-        return overrideLevel > level ? overrideLevel : level;
+        if (activity.Status == ActivityStatusCode.Error && level < LogEventLevel.Error)
+        {
+            return LogEventLevel.Error;
+        }
+
+        return level;
     }
 
     sealed class DisposeProxy(params IDisposable[] disposables) : IDisposable

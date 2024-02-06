@@ -193,18 +193,6 @@ public static class ActivityInstrumentation
         public override string ToString() => toString ?? "No information available.";
     }
 
-    /// <summary>
-    /// Compute a <see cref="LogEventLevel"/> based on the status of the activity.
-    /// </summary>
-    /// <param name="activity">The activity.</param>
-    /// <returns>A <see cref="LogEventLevel"/> based on <see cref="Activity.Status"/>. If the status is
-    /// <see cref="ActivityStatusCode.Error"/> then the completion value will be <see cref="LogEventLevel.Error"/>.
-    /// Otherwise it'll be <see cref="LogEventLevel.Information"/>.</returns>
-    internal static LogEventLevel GetCompletionLevel(Activity activity)
-    {
-        return activity.Status == ActivityStatusCode.Error ? LogEventLevel.Error : LogEventLevel.Information;
-    }
-        
     internal static void AttachLoggerActivity(Activity activity, LoggerActivity loggerActivity)
     {
         activity.SetCustomProperty(Constants.SelfPropertyName, loggerActivity);

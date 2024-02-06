@@ -88,16 +88,4 @@ public class ActivityInstrumentationTests
         
         Assert.Equal("Test Error", exception.Message);
     }
-
-    [Fact]
-    public void GetCompletionLevel()
-    {
-        var activity = Some.Activity();
-        
-        Assert.Equal(LogEventLevel.Information, ActivityInstrumentation.GetCompletionLevel(activity));
-
-        activity.SetStatus(ActivityStatusCode.Error);
-        
-        Assert.Equal(LogEventLevel.Error, ActivityInstrumentation.GetCompletionLevel(activity));
-    }
 }
