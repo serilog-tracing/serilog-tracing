@@ -125,6 +125,13 @@ public sealed class LoggerActivity : IDisposable
 
         // This property can be removed once we can rely on the existence of Activity.IsStopped.
         IsComplete = true;
+        
+        if (Activity!.Recorded)
+        {
+            Activity.Stop();
+            return;
+        }
+        
         var end = DateTimeOffset.Now;
 
         var completionLevel = DefaultCompletionLevel;

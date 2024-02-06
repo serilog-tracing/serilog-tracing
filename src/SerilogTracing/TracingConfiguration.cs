@@ -93,7 +93,8 @@ public class TracingConfiguration
 
         var levelMap = InitialLevel.GetOverrideMap();
 
-        // NOTE: We may want a config setting to only listen to specific sources
+        // We may want an opt-in to performing level checks eagerly here.
+        // It would be a performance win, but would also prevent dynamic log level changes from being effective.
         activityListener.ShouldListenTo = _ => true;
 
         var sample = Sample.ActivityContext;
@@ -106,14 +107,21 @@ public class TracingConfiguration
 
             return sample?.Invoke(ref activity) ?? ActivitySamplingResult.AllData;
         };
-        activityListener.SampleUsingParentId = (ref ActivityCreationOptions<string> activity) =>
-        {
-            if (!GetLogger(activity.Source.Name)
-                    .IsEnabled(GetInitialLevel(levelMap, activity.Source.Name)))
-                return ActivitySamplingResult.None;
 
-            return usingParentId?.Invoke(ref activity) ?? ActivitySamplingResult.AllData;
-        };
+        // Only set this listener if the user supplied a parent id based sampler,
+        // or if they didn't supply a context based one. It's treated preferentially, so if set
+        // then the context based sampler will be ignored.
+        if (usingParentId != null || sample == null)
+        {
+            activityListener.SampleUsingParentId = (ref ActivityCreationOptions<string> activity) =>
+            {
+                if (!GetLogger(activity.Source.Name)
+                        .IsEnabled(GetInitialLevel(levelMap, activity.Source.Name)))
+                    return ActivitySamplingResult.None;
+
+                return usingParentId?.Invoke(ref activity) ?? ActivitySamplingResult.AllData;
+            };
+        }
 
         activityListener.ActivityStopped += activity =>
         {
