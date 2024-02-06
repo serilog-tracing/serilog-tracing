@@ -122,11 +122,13 @@ public sealed class LoggerActivity : IDisposable
         {
             return;
         }
+        
+        // `Activity` is guaranteed to be non-null here thanks to `!IsSuppressed`
 
         // This property can be removed once we can rely on the existence of Activity.IsStopped.
         IsComplete = true;
         
-        if (Activity!.Recorded)
+        if (!Activity!.Recorded)
         {
             Activity.Stop();
             return;
