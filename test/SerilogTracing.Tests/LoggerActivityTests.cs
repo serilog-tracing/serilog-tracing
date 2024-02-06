@@ -25,6 +25,7 @@ public class LoggerActivityTests
             .CreateLogger();
 
         using var activity = Some.Activity();
+        activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.Start();
         
         var loggerActivity = new LoggerActivity(logger, initialLevel, activity, MessageTemplate.Empty, []);
@@ -81,6 +82,7 @@ public class LoggerActivityTests
             .CreateLogger();
         
         using var activity = Some.Activity();
+        activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.IsAllDataRequested = false;
         activity.Start();
 
