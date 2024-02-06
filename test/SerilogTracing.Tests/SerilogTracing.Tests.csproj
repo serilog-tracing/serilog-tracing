@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\SerilogTracing.Expressions\SerilogTracing.Expressions.csproj" />
     <ProjectReference Include="..\..\src\SerilogTracing\SerilogTracing.csproj" />
   </ItemGroup>

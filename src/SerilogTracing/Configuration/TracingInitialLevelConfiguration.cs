@@ -13,7 +13,7 @@ public class TracingInitialLevelConfiguration
     readonly Dictionary<string, LoggingLevelSwitch> _overrides = new();
     LogEventLevel _initialLevel = LogEventLevel.Information;
 
-    internal LevelOverrideMap GetOverrideMap() => new LevelOverrideMap(_overrides, _initialLevel, null);
+    internal LevelOverrideMap GetOverrideMap() => new(_overrides, _initialLevel, null);
     
     internal TracingInitialLevelConfiguration(TracingConfiguration tracingConfiguration)
     {

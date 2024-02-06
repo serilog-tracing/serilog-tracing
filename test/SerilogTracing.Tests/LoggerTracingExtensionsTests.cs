@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Serilog;
 using Serilog.Events;
-using SerilogTracing.Interop;
 using SerilogTracing.Tests.Support;
 using Xunit;
 

@@ -197,6 +197,22 @@ Traces are collections of spans, connected by a common trace id. SerilogTracing 
 | Status description or error event | `Exception` |
 | Tags | `Properties[*]` |
 
+## Levelling for external activity sources
+
+SerilogTracing can consume activities from .NET itself, and libraries that don't themselves use SerilogTracing. By default, you'll see spans for all activities, from all sources, in your Serilog output.
+
+To "turn down" the level of tracing performed by an external activity source, use SerilogTracing's `InitialLevel` configuration to set a level for spans from that source:
+
+```csharp
+    .InitialLevel.Override("Npgsql", LogEventLevel.Debug)
+```
+
+In this example, when activities from the [Npgsql](https://github.com/npgsql/npgsql) activity source are assigned an initial level of `Debug`, they'll be suppressed unless your Serilog logger has debug logging enabled.
+
+### Why is this an _initial_ level?
+
+The initial level assigned to a source determines whether activities are created by the source. When the activity is completed, it may be recorded at a higher level; for example, a span created at an initial `Information` level may complete as an `Error` (but not at a lower level such as `Debug`, because doing so may suppress the span cause the trace hierarchy to become incoherent).
+
 ## What's the relationship between SerilogTracing and OpenTelemetry?
 
 OpenTelemetry is a project that combines a variety of telemetry data models, schemas, APIs, and SDKs. SerilogTracing, like Serilog itself, has no dependency on the OpenTelemetry SDK, but can output traces using the OpenTelemetry Protocol (OTLP). From the point of view of SerilogTracing, this is considered to be just one of many protocols and systems that exist in the wider Serilog ecosystem.
