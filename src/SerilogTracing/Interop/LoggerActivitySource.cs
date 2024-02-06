@@ -16,20 +16,34 @@ static class LoggerActivitySource
         {
             // Tracing is enabled; if this returns `null`, sampling is suppressing the activity and so therefore
             // should the logging layer.
-            return Instance.StartActivity(name);
+            var listenerActivity = Instance.CreateActivity(name, ActivityKind.Internal);
+
+            // If this is the root activity then mark it as recorded
+            if (listenerActivity is { ParentId: null })
+            {
+                listenerActivity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
+            }
+
+            listenerActivity?.Start();
+
+            return listenerActivity;
         }
         
         // Tracing is not enabled. Levels are everything, and the level check has already been performed by the
         // caller, so we're in business!
 
-        var activity = new Activity(name);
+        var manualActivity = new Activity(name);
         if (Activity.Current is {} parent)
         {
-            activity.SetParentId(parent.TraceId, parent.SpanId, parent.ActivityTraceFlags);
+            manualActivity.SetParentId(parent.TraceId, parent.SpanId, parent.ActivityTraceFlags);
+        }
+        else
+        {
+            manualActivity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         }
 
-        activity.Start();
+        manualActivity.Start();
 
-        return activity;
+        return manualActivity;
     }
 }

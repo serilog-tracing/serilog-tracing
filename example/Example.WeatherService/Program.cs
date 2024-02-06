@@ -1,4 +1,5 @@
 using Serilog;
+using Serilog.Events;
 using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Expressions;
