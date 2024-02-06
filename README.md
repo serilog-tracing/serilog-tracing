@@ -165,6 +165,22 @@ using var _ = new TracingConfiguration()
     .TraceToSharedLogger();
 ```
 
+## Adding instrumentation for `Microsoft.Data.SqlClient`
+
+Microsoft's client libraray for SQL Server doesn't generate spans by default. To turn on tracing of database commands, install `SerilogTracing.Instrumentation.SqlClient`:
+
+```sh
+dotnet add package SerilogTracing.Instrumentation.SqlClient
+```
+
+Then add `Instrument.SqlClientCommands()` to your `TracingConfiguration`:
+
+```csharp
+using var _ = new TracingConfiguration()
+    .Instrument.SqlClientCommands()
+    .TraceToSharedLogger();
+```
+
 ## How are traces represented as `LogEvent`s?
 
 Traces are collections of spans, connected by a common trace id. SerilogTracing maps the typical properties associated with a span onto Serilog `LogEvent` instances:
