@@ -58,7 +58,7 @@ public class ExternalActivityTests
     [InlineData(LogEventLevel.Fatal, LogEventLevel.Fatal)]
     public void ErroredExternalActivitiesUseErrorLevel(LogEventLevel initialLevel, LogEventLevel completionLevel)
     {
-        var source = new ActivitySource($"{typeof(ExternalActivityTests).FullName}.${nameof(ExternalActivitiesUseInitialLevel)}");
+        var source = new ActivitySource($"{typeof(ExternalActivityTests).FullName}.${nameof(ErroredExternalActivitiesUseErrorLevel)}.${initialLevel}.${completionLevel}");
         
         var sink = new CollectingSink();
 
