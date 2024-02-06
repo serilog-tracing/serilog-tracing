@@ -84,10 +84,11 @@ public class LoggerTracingExtensionsTests
             Assert.Equal(parent.SpanId,
                 (span.Properties[Core.Constants.ParentSpanIdPropertyName] as ScalarValue)?.Value);
         }
-        
-        // NOTE: We can't assert there's no activity when `activityExpected` is `false`,
-        // because we use a shared `ActivitySource`, any other listener in a concurrent test
-        // run may still cause activities to be created despite sampling
+        else
+        {
+            Assert.Same(LoggerActivity.None, activity);
+            Assert.Empty(sink.Events);
+        }
     }
 
     static ActivityListener CreateAlwaysOnListenerFor(string sourceName)
