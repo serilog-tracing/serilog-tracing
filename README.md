@@ -154,7 +154,7 @@ These sinks have been built or modified to work well with tracing back-ends:
 If you're writing an ASP.NET Core application, you'll notice that the spans generated in response to web requests have very generic names, like `HttpRequestIn`. To fix that, first add `SerilogTracing.Instrumentation.AspNetCore`:
 
 ```sh
-dotnet add package SerilogTracing.Instrumentation.AspNetCore
+dotnet add package SerilogTracing.Instrumentation.AspNetCore --prerelease
 ```
 
 Then add `Instrument.AspNetCoreRequests()` to your `TracingConfiguration`:
@@ -170,7 +170,7 @@ using var _ = new TracingConfiguration()
 Microsoft's client libraray for SQL Server doesn't generate spans by default. To turn on tracing of database commands, install `SerilogTracing.Instrumentation.SqlClient`:
 
 ```sh
-dotnet add package SerilogTracing.Instrumentation.SqlClient
+dotnet add package SerilogTracing.Instrumentation.SqlClient --prerelease
 ```
 
 Then add `Instrument.SqlClientCommands()` to your `TracingConfiguration`:
