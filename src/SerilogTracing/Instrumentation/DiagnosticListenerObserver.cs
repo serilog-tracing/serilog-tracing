@@ -24,17 +24,15 @@ sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDispos
     {
         foreach (var instrumentor in _instrumentors)
         {
-            if (instrumentor.ShouldSubscribeTo(value.Name))
+            if (!instrumentor.ShouldSubscribeTo(value.Name)) continue;
+            
+            IObserver<KeyValuePair<string, object?>> observer = new DiagnosticEventObserver(instrumentor);
+            if (instrumentor is IInstrumentationEventObserver direct)
             {
-                if (instrumentor is IInstrumentationEventObserver direct)
-                {
-                    _subscriptions.Add(value.Subscribe(new EventedDiagnosticEventObserver(instrumentor, direct)));
-                }
-                else
-                {
-                    _subscriptions.Add(value.Subscribe(new DiagnosticEventObserver(instrumentor)));
-                }
+                observer = new DirectDiagnosticEventObserver(observer, direct);
             }
+                
+            _subscriptions.Add(value.Subscribe(observer));
         }
     }
 
