@@ -9,7 +9,7 @@ namespace SerilogTracing.Interop;
 
 static class ActivityConvert
 {
-    internal static LogEvent ActivityToLogEvent(ILogger logger, Activity activity)
+    internal static LogEvent ActivityToLogEvent(ILogger logger, Activity activity, LogEventLevel level)
     {
         var start = activity.StartTimeUtc;
         
@@ -17,7 +17,6 @@ static class ActivityConvert
         // be recorded correctly and this is what machine-readable outputs will see.
         var end = new DateTimeOffset(start + activity.Duration).ToLocalTime();
         
-        var level = activity.Status == ActivityStatusCode.Error ? LogEventLevel.Error : LogEventLevel.Information;
         ActivityInstrumentation.TryGetMessageTemplateOverride(activity, out var messageTemplate);
         var template = messageTemplate ?? new MessageTemplate(new[] { new TextToken(activity.DisplayName) });
         ActivityInstrumentation.TryGetException(activity, out var exception);

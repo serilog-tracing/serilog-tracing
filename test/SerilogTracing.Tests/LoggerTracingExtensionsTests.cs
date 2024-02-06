@@ -64,9 +64,10 @@ public class LoggerTracingExtensionsTests
         using var parent = source.StartActivity(Some.String());
         
         Assert.NotNull(parent);
+        parent.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
+        
         Assert.NotEqual(default(ActivityTraceId).ToHexString(), parent.TraceId.ToHexString());
         Assert.NotEqual(default(ActivitySpanId).ToHexString(), parent.SpanId.ToHexString());
-
         
         var activity = log
             .ForContext(Serilog.Core.Constants.SourceContextPropertyName, activitySourceContext)
