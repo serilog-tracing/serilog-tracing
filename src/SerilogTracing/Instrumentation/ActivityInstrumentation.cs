@@ -82,10 +82,10 @@ public static class ActivityInstrumentation
         }
     }
 
-    internal static void SetLogEventProperty(Activity activity, LogEventProperty property, Dictionary<string, LogEventProperty> collection)
+    internal static void SetLogEventProperty(Activity activity, LogEventProperty property, Dictionary<string, LogEventPropertyValue> collection)
     {
         activity.SetTag(property.Name, ToActivityTagValue(property.Value));
-        collection[property.Name] = property;
+        collection[property.Name] = property.Value;
     }
 
     static object? ToActivityTagValue(LogEventPropertyValue propertyValue)
@@ -93,9 +93,9 @@ public static class ActivityInstrumentation
         return propertyValue is ScalarValue sv ? sv.Value : propertyValue;
     }
 
-    internal static bool TryGetLogEventPropertyCollection(Activity activity, [NotNullWhen(true)] out Dictionary<string, LogEventProperty>? properties)
+    internal static bool TryGetLogEventPropertyCollection(Activity activity, [NotNullWhen(true)] out Dictionary<string, LogEventPropertyValue>? properties)
     {
-        if (activity.GetCustomProperty(Constants.LogEventPropertyCollectionName) is Dictionary<string, LogEventProperty> existing)
+        if (activity.GetCustomProperty(Constants.LogEventPropertyCollectionName) is Dictionary<string, LogEventPropertyValue> existing)
         {
             properties = existing;
             return true;
@@ -105,14 +105,14 @@ public static class ActivityInstrumentation
         return false;
     }
 
-    static Dictionary<string, LogEventProperty> GetOrInitLogEventPropertyCollection(Activity activity)
+    static Dictionary<string, LogEventPropertyValue> GetOrInitLogEventPropertyCollection(Activity activity)
     {
         if (TryGetLogEventPropertyCollection(activity, out var existing))
         {
             return existing;
         }
 
-        var added = new Dictionary<string, LogEventProperty>();
+        var added = new Dictionary<string, LogEventPropertyValue>();
         activity.SetCustomProperty(Constants.LogEventPropertyCollectionName, added);
 
         return added;
@@ -185,9 +185,9 @@ public static class ActivityInstrumentation
     {
         activity.SetCustomProperty(Constants.SelfPropertyName, loggerActivity);
         activity.SetCustomProperty(Constants.LogEventPropertyCollectionName, loggerActivity.Properties);
-        foreach (var (_, property) in loggerActivity.Properties)
+        foreach (var (name, value) in loggerActivity.Properties)
         {
-            activity.AddTag(property.Name, ToActivityTagValue(property.Value));
+            activity.AddTag(name, ToActivityTagValue(value));
         }
     }
     
