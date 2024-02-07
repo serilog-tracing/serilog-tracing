@@ -31,7 +31,7 @@ sealed class DiagnosticListenerObserver : IObserver<DiagnosticListener>, IDispos
             {
                 observer = new DirectDiagnosticEventObserver(observer, direct);
             }
-                
+
             _subscriptions.Add(value.Subscribe(observer));
         }
     }

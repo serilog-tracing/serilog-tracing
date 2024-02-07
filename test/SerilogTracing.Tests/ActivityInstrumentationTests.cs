@@ -47,7 +47,8 @@ public class ActivityInstrumentationTests
         activity.SetTag("a", a);
         
         // Tags are not included in custom properties
-        Assert.Empty(ActivityInstrumentation.GetLogEventProperties(activity));
+        Assert.False(ActivityInstrumentation.TryGetLogEventPropertyCollection(activity, out var logEventProperties));
+        Assert.Null(logEventProperties);
         
         ActivityInstrumentation.SetLogEventProperty(activity, new LogEventProperty("b", new ScalarValue(b)));
         ActivityInstrumentation.SetLogEventProperties(activity, new LogEventProperty("c", new ScalarValue(c)), new LogEventProperty("d", new ScalarValue(d)), new LogEventProperty("e", new DictionaryValue(e)));
@@ -58,13 +59,13 @@ public class ActivityInstrumentationTests
         Assert.Equal(d, activity.GetTagItem("d"));
         Assert.IsType<DictionaryValue>(activity.GetTagItem("e"));
 
-        var properties = ActivityInstrumentation.GetLogEventProperties(activity).ToList();
+        Assert.True(ActivityInstrumentation.TryGetLogEventPropertyCollection(activity, out logEventProperties));
         
         // All set properties are present
-        Assert.Equal(b, ((ScalarValue)properties.First(p => p.Name == "b").Value).Value);
-        Assert.Equal(c, ((ScalarValue)properties.First(p => p.Name == "c").Value).Value);
-        Assert.Equal(d, ((ScalarValue)properties.First(p => p.Name == "d").Value).Value);
-        Assert.NotNull(properties.First(p => p.Name == "e").Value);
+        Assert.Equal(b, ((ScalarValue)logEventProperties.Values.First(p => p.Name == "b").Value).Value);
+        Assert.Equal(c, ((ScalarValue)logEventProperties.Values.First(p => p.Name == "c").Value).Value);
+        Assert.Equal(d, ((ScalarValue)logEventProperties.Values.First(p => p.Name == "d").Value).Value);
+        Assert.NotNull(logEventProperties.Values.First(p => p.Name == "e").Value);
     }
 
     [Fact]

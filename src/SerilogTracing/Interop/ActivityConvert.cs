@@ -20,13 +20,16 @@ static class ActivityConvert
         ActivityInstrumentation.TryGetMessageTemplateOverride(activity, out var messageTemplate);
         var template = messageTemplate ?? new MessageTemplate(new[] { new TextToken(activity.DisplayName) });
         ActivityInstrumentation.TryGetException(activity, out var exception);
-        var properties = ActivityInstrumentation.GetLogEventProperties(activity).ToDictionary(p => p.Name);
+        var properties = ActivityInstrumentation.TryGetLogEventPropertyCollection(activity, out var activityProperties)
+            ? activityProperties
+            : new Dictionary<string, LogEventProperty>();
+        
         return ActivityToLogEvent(logger, activity, start, end, activity.TraceId, activity.SpanId, activity.ParentSpanId, level, exception, template, properties);
     }
     
     internal static LogEvent ActivityToLogEvent(ILogger logger, LoggerActivity loggerActivity, DateTimeOffset end, LogEventLevel level, Exception? exception)
     {
-        Activity activity = loggerActivity.Activity!;
+        var activity = loggerActivity.Activity!;
 
         var start = activity.StartTimeUtc;
         var traceId = activity.TraceId;
@@ -53,9 +56,13 @@ static class ActivityConvert
         MessageTemplate messageTemplate,
         Dictionary<string, LogEventProperty> properties)
     {
-        if (activity is { } a)
+        if (activity != null)
         {
-            foreach (var tag in a.Tags.Concat(a.Baggage).Select(t => new KeyValuePair<string, object?>(t.Key, t.Value)).Concat(a.TagObjects))
+#if FEATURE_ACTIVITY_STRUCTENUMERATORS
+            foreach (var tag in activity.EnumerateTagObjects())
+#else
+            foreach (var tag in activity.TagObjects)
+#endif
             {
                 if (properties.ContainsKey(tag.Key))
                     continue;
@@ -67,10 +74,10 @@ static class ActivityConvert
             }
         }
 
-        properties[SpanStartTimestampPropertyName] = new LogEventProperty(SpanStartTimestampPropertyName, new ScalarValue(start));
+        properties[SpanStartTimestampPropertyName] = new (SpanStartTimestampPropertyName, new ScalarValue(start));
         if (parentSpanId != null && parentSpanId.Value != default)
         {
-            properties[ParentSpanIdPropertyName] = new LogEventProperty(ParentSpanIdPropertyName, new ScalarValue(parentSpanId.Value));
+            properties[ParentSpanIdPropertyName] = new (ParentSpanIdPropertyName, new ScalarValue(parentSpanId.Value));
         }
 
         var evt = new LogEvent(
