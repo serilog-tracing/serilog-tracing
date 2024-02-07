@@ -12,7 +12,7 @@ public class ExternalActivityTests
     [Fact]
     public void ExternalActivitiesAreEmitted()
     {
-        var source = new ActivitySource($"{typeof(ExternalActivityTests).FullName}.${nameof(ExternalActivitiesAreEmitted)}");
+        using var source = Some.ActivitySource();
         
         var sink = new CollectingSink();
 
