@@ -51,7 +51,7 @@ public class LoggerTracingExtensionsTests
         if (includedInSample is { } always)
         {
             var result = always ? ActivitySamplingResult.AllData : ActivitySamplingResult.None;
-            configuration.Sample.UsingParentId((ref ActivityCreationOptions<string> _) => result);
+            configuration.Sample.Using((ref ActivityCreationOptions<ActivityContext> _) => result);
         }
 
         using var _ = tracingEnabled ? configuration.TraceTo(log) : null;

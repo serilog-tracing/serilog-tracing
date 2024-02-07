@@ -19,7 +19,6 @@ public class TracingConfigurationTests
         configuration.Instrument.WithDefaultInstrumentation(false);
         configuration.Instrument.HttpClientRequests();
 
-        configuration.Sample.UsingActivityContext((ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.None);
-        configuration.Sample.UsingParentId((ref ActivityCreationOptions<string> _) => ActivitySamplingResult.None);
+        configuration.Sample.Using((ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.None);
     }
 }

@@ -57,8 +57,7 @@ static class Some
     {
         var listener = new ActivityListener();
         listener.ShouldListenTo = source => source.Name == sourceName;
-        listener.SampleUsingParentId = (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllData;
-        listener.Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllData;
+        listener.Sample = (ref ActivityCreationOptions<ActivityContext> ctx) => ctx.Source.Name == sourceName ? ActivitySamplingResult.AllData : ActivitySamplingResult.None;
         System.Diagnostics.ActivitySource.AddActivityListener(listener);
         return listener;
     }

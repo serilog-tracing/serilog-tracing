@@ -98,7 +98,6 @@ public class TracingConfiguration
         activityListener.ShouldListenTo = _ => true;
 
         var sample = Sample.ActivityContext;
-        var usingParentId = Sample.ParentId;
         activityListener.Sample = (ref ActivityCreationOptions<ActivityContext> activity) =>
         {
             if (!GetLogger(activity.Source.Name)
@@ -107,21 +106,6 @@ public class TracingConfiguration
 
             return sample?.Invoke(ref activity) ?? ActivitySamplingResult.AllData;
         };
-
-        // Only set this listener if the user supplied a parent id based sampler,
-        // or if they didn't supply a context based one. It's treated preferentially, so if set
-        // then the context based sampler will be ignored.
-        if (usingParentId != null || sample == null)
-        {
-            activityListener.SampleUsingParentId = (ref ActivityCreationOptions<string> activity) =>
-            {
-                if (!GetLogger(activity.Source.Name)
-                        .IsEnabled(GetInitialLevel(levelMap, activity.Source.Name)))
-                    return ActivitySamplingResult.None;
-
-                return usingParentId?.Invoke(ref activity) ?? ActivitySamplingResult.AllData;
-            };
-        }
 
         activityListener.ActivityStopped += activity =>
         {
