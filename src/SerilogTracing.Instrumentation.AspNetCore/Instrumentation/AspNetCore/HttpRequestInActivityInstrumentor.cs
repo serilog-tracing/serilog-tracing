@@ -59,6 +59,11 @@ sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
                 
                 ActivityInstrumentation.SetLogEventProperties(activity, _getResponseProperties(stop.Response).ToArray());
 
+                if (stop.Response.StatusCode >= 500)
+                {
+                    activity.SetStatus(ActivityStatusCode.Error);
+                }
+
                 break;
         }
     }

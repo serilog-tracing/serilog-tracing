@@ -6,6 +6,7 @@ using Xunit;
 
 namespace SerilogTracing.Tests;
 
+[Collection("Shared")]
 public class LoggerTracingExtensionsTests
 {
     static LoggerTracingExtensionsTests()
@@ -50,16 +51,14 @@ public class LoggerTracingExtensionsTests
         if (includedInSample is { } always)
         {
             var result = always ? ActivitySamplingResult.AllData : ActivitySamplingResult.None;
-            configuration.Sample.UsingParentId((ref ActivityCreationOptions<string> _) => result);
-            configuration.Sample.UsingActivityContext((ref ActivityCreationOptions<ActivityContext> _) => result);
+            configuration.Sample.Using((ref ActivityCreationOptions<ActivityContext> _) => result);
         }
 
         using var _ = tracingEnabled ? configuration.TraceTo(log) : null;
         
         // This activity source is "outside" SerilogTracing and only exists to 
-        var sourceName = Some.String();
-        using var listener = CreateAlwaysOnListenerFor(sourceName);
-        using var source = new ActivitySource(sourceName);
+        using var source = Some.ActivitySource();
+        using var listener = Some.AlwaysOnListenerFor(source.Name);
         using var parent = source.StartActivity(Some.String());
         
         Assert.NotNull(parent);
@@ -89,15 +88,5 @@ public class LoggerTracingExtensionsTests
             Assert.Same(LoggerActivity.None, activity);
             Assert.Empty(sink.Events);
         }
-    }
-
-    static ActivityListener CreateAlwaysOnListenerFor(string sourceName)
-    {
-        var listener = new ActivityListener();
-        listener.ShouldListenTo = source => source.Name == sourceName;
-        listener.SampleUsingParentId = (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllData;
-        listener.Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllData;
-        ActivitySource.AddActivityListener(listener);
-        return listener;
     }
 }

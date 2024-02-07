@@ -7,6 +7,7 @@ using Xunit;
 
 namespace SerilogTracing.Tests;
 
+[Collection("Shared")]
 public class ActivityInstrumentationTests
 {
     [Fact]
@@ -15,7 +16,7 @@ public class ActivityInstrumentationTests
         var templateA = new MessageTemplateParser().Parse("{Template} A");
         var templateB = new MessageTemplateParser().Parse("{Template} B");
 
-        var activity = Some.Activity();
+        using var activity = Some.Activity();
         
         Assert.False(ActivityInstrumentation.TryGetMessageTemplateOverride(activity, out _));
         
@@ -33,7 +34,7 @@ public class ActivityInstrumentationTests
     [Fact]
     public void GetSetLogEventProperties()
     {
-        var activity = Some.Activity();
+        using var activity = Some.Activity();
 
         var a = Some.Boolean();
         var b = Some.Integer();
@@ -69,17 +70,21 @@ public class ActivityInstrumentationTests
     }
 
     [Fact]
-    public void GetSetException()
+    public void TrySetExceptionDoesNotOverrideExistingEvent()
     {
-        var activity = Some.Activity();
+        using var activity = Some.Activity();
 
         activity.AddEvent(new ActivityEvent("exception"));
         
         Assert.True(ActivityInstrumentation.TryGetException(activity, out _));
         
         Assert.False(ActivityInstrumentation.TrySetException(activity, new Exception("Test Error")));
+    }
 
-        activity = Some.Activity();
+    [Fact]
+    public void GetAndSetExceptionIsRoundTripped()
+    {
+        using var activity = Some.Activity();
         
         Assert.False(ActivityInstrumentation.TryGetException(activity, out _));
         

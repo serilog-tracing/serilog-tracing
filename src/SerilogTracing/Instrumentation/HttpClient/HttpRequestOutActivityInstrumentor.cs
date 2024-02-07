@@ -62,14 +62,21 @@ sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
                 {
                     return;
                 }
-                
-                activity.AddTag("StatusCode", response != null ? (int)response.StatusCode : null);
 
-                if (activity.Status == ActivityStatusCode.Unset &&
-                    _requestTaskStatusAccessor.TryGetValue(eventArgs, out var requestTaskStatus))
+                var statusCode = response != null ? (int?)response.StatusCode : null;
+                ActivityInstrumentation.SetLogEventProperty(activity, new LogEventProperty("StatusCode", new ScalarValue(statusCode)));
+
+                if (activity.Status == ActivityStatusCode.Unset)
                 {
-                    if (requestTaskStatus == TaskStatus.Faulted || response is { IsSuccessStatusCode: false })
+                    if (statusCode >= 400)
+                    {
                         activity.SetStatus(ActivityStatusCode.Error);
+                    }
+                    else if (_requestTaskStatusAccessor.TryGetValue(eventArgs, out var requestTaskStatus))
+                    {
+                        if (requestTaskStatus == TaskStatus.Faulted || response is { IsSuccessStatusCode: false })
+                            activity.SetStatus(ActivityStatusCode.Error);
+                    }
                 }
 
                 break;

@@ -6,12 +6,13 @@ using Xunit;
 
 namespace SerilogTracing.Tests;
 
+[Collection("Shared")]
 public class ExternalActivityTests
 {
     [Fact]
     public void ExternalActivitiesAreEmitted()
     {
-        var source = new ActivitySource($"{typeof(ExternalActivityTests).FullName}.${nameof(ExternalActivitiesAreEmitted)}");
+        using var source = Some.ActivitySource();
         
         var sink = new CollectingSink();
 
@@ -20,9 +21,9 @@ public class ExternalActivityTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        new TracingConfiguration().TraceTo(logger);
+        using var _ = new TracingConfiguration().TraceTo(logger);
 
-        var activity = source.StartActivity()!;
+        using var activity = source.StartActivity()!;
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.Stop();
         
@@ -42,11 +43,11 @@ public class ExternalActivityTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        new TracingConfiguration()
+        using var _ = new TracingConfiguration()
             .InitialLevel.Is(LogEventLevel.Debug)
             .TraceTo(logger);
 
-        var activity = source.StartActivity()!;
+        using var activity = source.StartActivity()!;
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.Stop();
         
@@ -67,11 +68,11 @@ public class ExternalActivityTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        new TracingConfiguration()
+        using var _ = new TracingConfiguration()
             .InitialLevel.Is(initialLevel)
             .TraceTo(logger);
 
-        var activity = source.StartActivity()!;
+        using var activity = source.StartActivity()!;
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.SetStatus(ActivityStatusCode.Error);
         activity.Stop();
@@ -91,11 +92,11 @@ public class ExternalActivityTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        new TracingConfiguration()
+        using var _ = new TracingConfiguration()
             .InitialLevel.Override(typeof(ExternalActivityTests).FullName!, LogEventLevel.Debug)
             .TraceTo(logger);
 
-        var activity = source.StartActivity()!;
+        using var activity = source.StartActivity()!;
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.Stop();
         
@@ -105,7 +106,7 @@ public class ExternalActivityTests
     [Fact]
     public void ExternalActivitiesSampleInitialLevel()
     {
-        var source = new ActivitySource($"{typeof(ExternalActivityTests).FullName}.${nameof(ExternalActivitiesSampleInitialLevel)}");
+        using var source = Some.ActivitySource();
         
         var sink = new CollectingSink();
 
@@ -114,14 +115,11 @@ public class ExternalActivityTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        new TracingConfiguration()
+        using var _ = new TracingConfiguration()
             .InitialLevel.Is(LogEventLevel.Debug)
             .TraceTo(logger);
 
-        var activity = source.StartActivity()!;
-        activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
-        activity.Stop();
-        
-        Assert.Empty(sink.Events);
+        using var activity = source.StartActivity();
+        Assert.Null(activity);
     }
 }
