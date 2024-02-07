@@ -82,7 +82,7 @@ public static class ActivityInstrumentation
         }
     }
 
-    static void SetLogEventProperty(Activity activity, LogEventProperty property, Dictionary<string, LogEventProperty> collection)
+    internal static void SetLogEventProperty(Activity activity, LogEventProperty property, Dictionary<string, LogEventProperty> collection)
     {
         activity.SetTag(property.Name, ToActivityTagValue(property.Value));
         collection[property.Name] = property;
@@ -93,19 +93,7 @@ public static class ActivityInstrumentation
         return propertyValue is ScalarValue sv ? sv.Value : propertyValue;
     }
 
-    /// <summary>
-    /// Get all <see cref="LogEventProperty">log event properties</see> set on the activity by <see cref="ActivityInstrumentation.SetLogEventProperty(Activity, LogEventProperty)"/>.
-    ///
-    /// This method won't include tags on the activity.
-    /// </summary>
-    /// <param name="activity">The activity containing the properties.</param>
-    /// <returns>A collection of properties set on the activity.</returns>
-    internal static IEnumerable<LogEventProperty> GetLogEventProperties(Activity activity)
-    {
-        return TryGetLogEventPropertyCollection(activity, out var existing) ? existing.Values : Enumerable.Empty<LogEventProperty>();
-    }
-    
-    static bool TryGetLogEventPropertyCollection(Activity activity, [NotNullWhen(true)] out Dictionary<string, LogEventProperty>? properties)
+    internal static bool TryGetLogEventPropertyCollection(Activity activity, [NotNullWhen(true)] out Dictionary<string, LogEventProperty>? properties)
     {
         if (activity.GetCustomProperty(Constants.LogEventPropertyCollectionName) is Dictionary<string, LogEventProperty> existing)
         {
@@ -215,6 +203,6 @@ public static class ActivityInstrumentation
 
     internal static bool IsDataSuppressed(Activity? activity)
     {
-        return activity is not {IsAllDataRequested: true} || IsSuppressed(activity);
+        return activity is not { IsAllDataRequested: true };
     }
 }

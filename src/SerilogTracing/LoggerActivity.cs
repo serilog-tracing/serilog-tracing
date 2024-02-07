@@ -83,7 +83,7 @@ public sealed class LoggerActivity : IDisposable
         
         if (Logger.BindProperty(propertyName, value, destructureObjects, out var property))
         {
-            ActivityInstrumentation.SetLogEventProperty(Activity!, property);
+            ActivityInstrumentation.SetLogEventProperty(Activity!, property, Properties);
         }
     }
     
