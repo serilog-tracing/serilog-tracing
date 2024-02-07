@@ -64,7 +64,7 @@ sealed class HttpRequestOutActivityInstrumentor: IActivityInstrumentor
                 }
 
                 var statusCode = response != null ? (int?)response.StatusCode : null;
-                activity.AddTag("StatusCode", statusCode);
+                ActivityInstrumentation.SetLogEventProperty(activity, new LogEventProperty("StatusCode", new ScalarValue(statusCode)));
 
                 if (activity.Status == ActivityStatusCode.Unset)
                 {

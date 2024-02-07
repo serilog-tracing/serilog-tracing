@@ -3,6 +3,7 @@ using Xunit;
 
 namespace SerilogTracing.Tests;
 
+[Collection("Shared")]
 public class TracingConfigurationTests
 {
     [Fact]

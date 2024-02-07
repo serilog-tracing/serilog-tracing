@@ -4,6 +4,7 @@ using Xunit;
 
 namespace SerilogTracing.Tests.Instrumentation;
 
+[Collection("Shared")]
 public class DiagnosticEventObserverTests
 {
     [Fact]

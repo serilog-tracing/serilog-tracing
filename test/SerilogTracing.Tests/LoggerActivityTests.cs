@@ -6,6 +6,7 @@ using Xunit;
 
 namespace SerilogTracing.Tests;
 
+[Collection("Shared")]
 public class LoggerActivityTests
 {
     [Theory]
