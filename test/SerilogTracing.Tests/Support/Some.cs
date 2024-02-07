@@ -47,4 +47,18 @@ static class Some
 
         return logEvent;
     }
+
+    public static ActivitySource ActivitySource()
+    {
+        return new ActivitySource(String());
+    }
+
+    public static ActivityListener AlwaysOnListenerFor(string sourceName)
+    {
+        var listener = new ActivityListener();
+        listener.ShouldListenTo = source => source.Name == sourceName;
+        listener.Sample = (ref ActivityCreationOptions<ActivityContext> ctx) => ctx.Source.Name == sourceName ? ActivitySamplingResult.AllData : ActivitySamplingResult.None;
+        System.Diagnostics.ActivitySource.AddActivityListener(listener);
+        return listener;
+    }
 }
