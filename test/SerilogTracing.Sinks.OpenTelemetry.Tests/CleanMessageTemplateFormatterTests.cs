@@ -17,7 +17,7 @@ public class CleanMessageTemplateFormatterTests
         };
 
         var actual = CleanMessageTemplateFormatter.Format(template, properties, null);
-        
+
         // The default formatter would produce "Hello, \"world\"!" here.
         Assert.Equal("Hello, world!", actual);
     }
@@ -28,7 +28,7 @@ public class CleanMessageTemplateFormatterTests
         var template = new MessageTemplateParser().Parse("Received {Payload}");
         var properties = new Dictionary<string, LogEventPropertyValue>
         {
-            ["Payload"] = new StructureValue(new []
+            ["Payload"] = new StructureValue(new[]
             {
                 // Particulars of the JSON structure are unimportant, this is handed of to Serilog's default
                 // JSON value formatter.
@@ -37,7 +37,7 @@ public class CleanMessageTemplateFormatterTests
         };
 
         var actual = CleanMessageTemplateFormatter.Format(template, properties, null);
-        
+
         // The default formatter would produce "Received {a = 42}" here.
         Assert.Equal("Received {\"a\":42}", actual);
     }

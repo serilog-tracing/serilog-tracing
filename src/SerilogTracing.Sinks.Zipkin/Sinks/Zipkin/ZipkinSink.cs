@@ -8,7 +8,7 @@ using SerilogTracing.Expressions;
 
 namespace SerilogTracing.Sinks.Zipkin;
 
-class ZipkinSink: IBatchedLogEventSink
+class ZipkinSink : IBatchedLogEventSink
 {
     readonly Encoding _encoding = new UTF8Encoding(false);
     readonly HttpClient _client;
@@ -26,12 +26,12 @@ class ZipkinSink: IBatchedLogEventSink
         }
     }
     """, nameResolver: new TracingNameResolver());
-    
+
     public ZipkinSink(Uri endpoint, HttpMessageHandler messageHandler)
     {
         _client = new HttpClient(messageHandler) { BaseAddress = endpoint };
     }
-        
+
     public async Task EmitBatchAsync(IEnumerable<LogEvent> batch)
     {
         var content = FormatRequestContent(batch);
@@ -51,7 +51,7 @@ class ZipkinSink: IBatchedLogEventSink
     {
         var content = new StringWriter();
         content.Write('[');
-        
+
         var any = false;
         foreach (var logEvent in batch.Where(IsSpan))
         {
@@ -68,7 +68,7 @@ class ZipkinSink: IBatchedLogEventSink
 
         if (!any)
             return null;
-        
+
         content.Write(']');
         return content.ToString();
     }

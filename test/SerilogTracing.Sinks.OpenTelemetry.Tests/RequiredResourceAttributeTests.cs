@@ -17,7 +17,7 @@ public class RequiredResourceAttributeTests
         };
 
         var actual = RequiredResourceAttributes.AddDefaults(ra);
-        
+
         Assert.Equal(supplied, actual["service.name"]);
     }
 
@@ -25,7 +25,7 @@ public class RequiredResourceAttributeTests
     public void MissingServiceNameDefaultsToExecutableName()
     {
         var actual = RequiredResourceAttributes.AddDefaults(new Dictionary<string, object>());
-        
+
         Assert.StartsWith("unknown_service:", (string)actual["service.name"]);
     }
 

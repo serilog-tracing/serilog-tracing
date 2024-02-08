@@ -4,11 +4,11 @@ using OpenTelemetry.Proto.Collector.Trace.V1;
 
 namespace SerilogTracing.Sinks.OpenTelemetry.Tests.Support;
 
-class CollectingExporter: IExporter
+class CollectingExporter : IExporter
 {
     public List<ExportLogsServiceRequest> LogsServiceRequests { get; } = new();
     public List<ExportTraceServiceRequest> TraceServiceRequests { get; } = new();
-    
+
     public void Export(ExportLogsServiceRequest request)
     {
         LogsServiceRequests.Add(request);

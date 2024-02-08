@@ -20,7 +20,7 @@ namespace SerilogTracing.Sinks.OpenTelemetry.Tests.Support;
 static class Some
 {
     static int _nextInt;
-    
+
     public const string TestMessageTemplate = "Message template {Variable}";
 
     internal static LogEvent DefaultSerilogEvent()
@@ -37,7 +37,7 @@ static class Some
         return SerilogEvent(messageTemplate, new List<LogEventProperty>(), timestamp, ex);
     }
 
-	internal static LogEvent SerilogEvent(string messageTemplate, IEnumerable<LogEventProperty> properties, DateTimeOffset? timestamp = null, Exception? ex = null)
+    internal static LogEvent SerilogEvent(string messageTemplate, IEnumerable<LogEventProperty> properties, DateTimeOffset? timestamp = null, Exception? ex = null)
     {
         var ts = timestamp ?? DateTimeOffset.UtcNow;
         var parser = new MessageTemplateParser();

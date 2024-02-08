@@ -5,7 +5,7 @@ using Xunit;
 
 namespace SerilogTracing.Sinks.OpenTelemetry.Tests.Support;
 
-class CollectingSink: ILogEventSink
+class CollectingSink : ILogEventSink
 {
     readonly List<LogEvent> _emitted = new();
 
@@ -25,7 +25,7 @@ class CollectingSink: ILogEventSink
         var collector = new LoggerConfiguration()
             .WriteTo.Sink(sink)
             .CreateLogger();
-        
+
         emitter(collector);
 
         return sink._emitted;

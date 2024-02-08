@@ -22,5 +22,5 @@ public class PublicApiVisibilityTests
         {
             options.WithFilenameGenerator((_, _, fileType, fileExtension) => $"{nameof(PublicApiVisibilityTests)}.{fileType}.{fileExtension}");
         });
-    }    
+    }
 }

@@ -33,13 +33,13 @@ public class OtlpEventBuilderTests
         var logEvent = Some.DefaultSerilogEvent();
 
         logEvent.AddOrUpdateProperty(new LogEventProperty("property_name", new ScalarValue("ok")));
-        logEvent.AddOrUpdateProperty(new LogEventProperty(SerilogTracing.Core.Constants.SpanStartTimestampPropertyName, new ScalarValue(new DateTime(2024,8,22,10,30,0))));
+        logEvent.AddOrUpdateProperty(new LogEventProperty(SerilogTracing.Core.Constants.SpanStartTimestampPropertyName, new ScalarValue(new DateTime(2024, 8, 22, 10, 30, 0))));
 
         var span = OtlpEventBuilder.ToSpan(logEvent, null, OpenTelemetrySinkOptions.DefaultIncludedData);
         var propertyKeyValue = PrimitiveConversions.NewStringAttribute("property_name", "ok");
 
     }
-    
+
     [Fact]
     public void TestProcessMessage()
     {
@@ -56,7 +56,7 @@ public class OtlpEventBuilderTests
         Assert.NotNull(logRecord.Body);
         Assert.Equal(template, logRecord.Body.StringValue);
     }
-    
+
     [Fact]
     public void TestProcessName()
     {
@@ -85,7 +85,7 @@ public class OtlpEventBuilderTests
     {
         var logRecord = new LogRecord();
         var logEvent = Some.DefaultSerilogEvent();
-        
+
         var prop = new LogEventProperty("property_name", new ScalarValue("ok"));
         var propertyKeyValue = PrimitiveConversions.NewStringAttribute("property_name", "ok");
 
@@ -114,7 +114,7 @@ public class OtlpEventBuilderTests
         var span = new Span();
         OtlpEventBuilder.ProcessTimestamp(span, logEvent);
     }
-    
+
 
     [Fact]
     public void TestException()
@@ -152,14 +152,14 @@ public class OtlpEventBuilderTests
     public void IncludeMessageTemplateMD5Hash()
     {
         var logEvent = Some.SerilogEvent(messageTemplate: Some.TestMessageTemplate);
-        
+
         var (logRecord, _) = OtlpEventBuilder.ToLogRecord(logEvent, null, IncludedData.MessageTemplateMD5HashAttribute);
-        
+
         var expectedHash = PrimitiveConversions.Md5Hash(Some.TestMessageTemplate);
-        var expectedAttribute = new KeyValue { Key = SemanticConventions.AttributeMessageTemplateMD5Hash, Value = new() { StringValue = expectedHash }};
+        var expectedAttribute = new KeyValue { Key = SemanticConventions.AttributeMessageTemplateMD5Hash, Value = new() { StringValue = expectedHash } };
         Assert.Contains(expectedAttribute, logRecord.Attributes);
     }
-    
+
     [Fact]
     public void IncludeMessageTemplateText()
     {
@@ -167,13 +167,13 @@ public class OtlpEventBuilderTests
         var properties = new List<LogEventProperty> { new("Name", new ScalarValue("World")) };
 
         var logEvent = Some.SerilogEvent(messageTemplate, properties);
-        
+
         var (logRecord, _) = OtlpEventBuilder.ToLogRecord(logEvent, null, IncludedData.MessageTemplateTextAttribute);
 
         var expectedAttribute = new KeyValue { Key = SemanticConventions.AttributeMessageTemplateText, Value = new() { StringValue = messageTemplate } };
         Assert.Contains(expectedAttribute, logRecord.Attributes);
     }
-    
+
     [Fact]
     public void IncludeTraceIdWhenActivityIsNull()
     {
@@ -200,7 +200,7 @@ public class OtlpEventBuilderTests
         Assert.NotNull(Activity.Current);
 
         var logEvent = CollectingSink.CollectSingle(log => log.Information("Hello, trace and span!"));
-        
+
         var (logRecord, _) = OtlpEventBuilder.ToLogRecord(logEvent, null, IncludedData.TraceIdField | IncludedData.SpanIdField);
 
         Assert.Equal(logRecord.TraceId, PrimitiveConversions.ToOpenTelemetryTraceId(Activity.Current.TraceId.ToHexString()));
@@ -217,45 +217,50 @@ public class OtlpEventBuilderTests
         Assert.NotNull(logRecord.Body);
         Assert.Equal(messageTemplate, logRecord.Body.StringValue);
     }
-    
+
     [Fact]
     public void NoRenderingsIncludedWhenNoneInTemplate()
     {
-        var logEvent = Some.SerilogEvent(messageTemplate: "Hello, {Name}", properties: new [] { new LogEventProperty("Name", new ScalarValue("World"))});
-        
+        var logEvent = Some.SerilogEvent(messageTemplate: "Hello, {Name}", properties: new[] { new LogEventProperty("Name", new ScalarValue("World")) });
+
         var (logRecord, _) = OtlpEventBuilder.ToLogRecord(logEvent, null, IncludedData.MessageTemplateRenderingsAttribute);
-        
+
         Assert.DoesNotContain(SemanticConventions.AttributeMessageTemplateRenderings, logRecord.Attributes.Select(a => a.Key));
     }
-    
+
     [Fact]
     public void RenderingsIncludedWhenPresentInTemplate()
     {
         var logEvent = CollectingSink.CollectSingle(log => log.Information("{First:0} {Second} {Third:0.00}", 123.456, 234.567, 345.678));
-        
+
         var (logRecord, _) = OtlpEventBuilder.ToLogRecord(logEvent, null, IncludedData.MessageTemplateRenderingsAttribute);
-        
-        var expectedAttribute = new KeyValue { Key = SemanticConventions.AttributeMessageTemplateRenderings, Value = new()
+
+        var expectedAttribute = new KeyValue
         {
-            ArrayValue = new ArrayValue {
-                Values =
+            Key = SemanticConventions.AttributeMessageTemplateRenderings,
+            Value = new()
+            {
+                ArrayValue = new ArrayValue
+                {
+                    Values =
                 {
                     // Only values for tokens with format strings are included.
                     new AnyValue{ StringValue = "123"},
                     new AnyValue{ StringValue = "345.68"},
                 }
+                }
             }
-        }};
+        };
         Assert.Contains(expectedAttribute, logRecord.Attributes);
     }
-    
+
     [Fact]
     public void RenderingsNotIncludedWhenIncludedDataDoesNotSpecifyThem()
     {
         var logEvent = CollectingSink.CollectSingle(log => log.Information("{First:0}", 123.456));
-        
+
         var (logRecord, _) = OtlpEventBuilder.ToLogRecord(logEvent, null, OpenTelemetrySinkOptions.DefaultIncludedData);
-        
+
         Assert.DoesNotContain(SemanticConventions.AttributeMessageTemplateRenderings, logRecord.Attributes.Select(a => a.Key));
     }
 
@@ -264,11 +269,11 @@ public class OtlpEventBuilderTests
     {
         var contextType = typeof(OtlpEventBuilderTests);
         var logEvent = CollectingSink.CollectSingle(log => log.ForContext(contextType).Information("Hello, world!"));
-        
+
         var (logRecord, scopeName) = OtlpEventBuilder.ToLogRecord(logEvent, null, OpenTelemetrySinkOptions.DefaultIncludedData);
-        
+
         Assert.Equal(contextType.FullName, scopeName);
-        Assert.DoesNotContain(Constants.SourceContextPropertyName, logRecord.Attributes.Select(a => a.Key));        
+        Assert.DoesNotContain(Constants.SourceContextPropertyName, logRecord.Attributes.Select(a => a.Key));
     }
 
     [Fact]
@@ -276,9 +281,9 @@ public class OtlpEventBuilderTests
     {
         var contextType = typeof(OtlpEventBuilderTests);
         var logEvent = CollectingSink.CollectSingle(log => log.ForContext(contextType).Information("Hello, world!"));
-        
+
         var (logRecord, scopeName) = OtlpEventBuilder.ToLogRecord(logEvent, null, OpenTelemetrySinkOptions.DefaultIncludedData | IncludedData.SourceContextAttribute);
-        
+
         Assert.Equal(contextType.FullName, scopeName);
         var ctx = Assert.Single(logRecord.Attributes.Where(a => a.Key == Constants.SourceContextPropertyName));
         Assert.Equal(contextType.FullName, ctx.Value.StringValue);

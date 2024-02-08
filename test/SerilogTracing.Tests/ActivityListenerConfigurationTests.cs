@@ -4,7 +4,7 @@ using Xunit;
 namespace SerilogTracing.Tests;
 
 [Collection("Shared")]
-public class TracingConfigurationTests
+public class ActivityListenerConfigurationTests
 {
     [Fact]
     public void TracingConfigurationMethodsAreCallable()
@@ -13,7 +13,7 @@ public class TracingConfigurationTests
         // otherwise uncalled: not yet verifying outcomes, but
         // will at least pick up on obvious things like NREs.
 
-        var configuration = new TracingConfiguration();
+        var configuration = new ActivityListenerConfiguration();
 
         configuration.Instrument.WithDefaultInstrumentation(true);
         configuration.Instrument.WithDefaultInstrumentation(false);

@@ -3,12 +3,12 @@ using SerilogTracing.Instrumentation;
 
 namespace SerilogTracing.Tests.Support;
 
-class CollectingActivityInstrumentor: IActivityInstrumentor
+class CollectingActivityInstrumentor : IActivityInstrumentor
 {
     public Activity? Activity { get; set; }
     public string? EventName { get; set; }
     public object? EventArgs { get; set; }
-    
+
     public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
         return true;

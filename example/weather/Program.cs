@@ -16,7 +16,7 @@ Log.Logger = new LoggerConfiguration()
     })
     .CreateLogger();
 
-using var _ = new TracingConfiguration().TraceToSharedLogger();
+using var _ = new ActivityListenerConfiguration().TraceToSharedLogger();
 
 if (args.Length != 1)
 {

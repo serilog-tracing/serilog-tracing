@@ -29,9 +29,9 @@ public class DiagnosticEventObserverTests
         activity.IsAllDataRequested = true;
 
         var instrumentor = new CollectingActivityInstrumentor();
-        
+
         new DiagnosticEventObserver(instrumentor).OnNext(activity, "event", true);
-        
+
         Assert.Equal(activity, instrumentor.Activity);
         Assert.Equal("event", instrumentor.EventName);
         Assert.Equal(true, instrumentor.EventArgs);

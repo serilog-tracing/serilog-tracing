@@ -1,4 +1,18 @@
-﻿using SerilogTracing.Instrumentation;
+﻿// Copyright © SerilogTracing Contributors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using SerilogTracing.Instrumentation;
 using SerilogTracing.Instrumentation.HttpClient;
 
 namespace SerilogTracing.Configuration;
@@ -6,21 +20,21 @@ namespace SerilogTracing.Configuration;
 /// <summary>
 /// Controls instrumentation configuration.
 /// </summary>
-public sealed class TracingInstrumentationConfiguration
+public sealed class ActivityListenerInstrumentationConfiguration
 {
-    readonly TracingConfiguration _tracingConfiguration;
+    readonly ActivityListenerConfiguration _activityListenerConfiguration;
     readonly List<IActivityInstrumentor> _instrumentors = [];
     bool _withDefaultInstrumentors = true;
-    
+
     static IEnumerable<IActivityInstrumentor> GetDefaultInstrumentors() => [new HttpRequestOutActivityInstrumentor()];
-    
+
     internal IEnumerable<IActivityInstrumentor> GetInstrumentors() =>
         _withDefaultInstrumentors ?
             GetDefaultInstrumentors().Concat(_instrumentors) : _instrumentors;
-    
-    internal TracingInstrumentationConfiguration(TracingConfiguration tracingConfiguration)
+
+    internal ActivityListenerInstrumentationConfiguration(ActivityListenerConfiguration activityListenerConfiguration)
     {
-        _tracingConfiguration = tracingConfiguration;
+        _activityListenerConfiguration = activityListenerConfiguration;
     }
 
     /// <summary>
@@ -28,10 +42,10 @@ public sealed class TracingInstrumentationConfiguration
     /// </summary>
     /// <param name="withDefaults">If true, default activity instrumentors will be used.</param>
     /// <returns>Configuration object allowing method chaining.</returns>
-    public TracingConfiguration WithDefaultInstrumentation(bool withDefaults)
+    public ActivityListenerConfiguration WithDefaultInstrumentation(bool withDefaults)
     {
         _withDefaultInstrumentors = withDefaults;
-        return _tracingConfiguration;
+        return _activityListenerConfiguration;
     }
 
     /// <summary>
@@ -43,7 +57,7 @@ public sealed class TracingInstrumentationConfiguration
     /// <returns>Configuration object allowing method chaining.</returns>
     /// <exception cref="ArgumentNullException">When <paramref name="instrumentors"/> is <code>null</code></exception>
     /// <exception cref="ArgumentException">When any element of <paramref name="instrumentors"/> is <code>null</code></exception>
-    public TracingConfiguration With(params IActivityInstrumentor[] instrumentors)
+    public ActivityListenerConfiguration With(params IActivityInstrumentor[] instrumentors)
     {
         if (instrumentors == null)
         {
@@ -59,8 +73,8 @@ public sealed class TracingInstrumentationConfiguration
 
             _instrumentors.Add(instrumentor);
         }
-        
-        return _tracingConfiguration;
+
+        return _activityListenerConfiguration;
     }
 
     /// <summary>
@@ -70,7 +84,7 @@ public sealed class TracingInstrumentationConfiguration
     /// <typeparam name="TInstrumentor">Instrumentor type to apply to all events passing through
     /// the logger.</typeparam>
     /// <returns>Configuration object allowing method chaining.</returns>
-    public TracingConfiguration With<TInstrumentor>()
+    public ActivityListenerConfiguration With<TInstrumentor>()
         where TInstrumentor : IActivityInstrumentor, new()
     {
         return With(new TInstrumentor());

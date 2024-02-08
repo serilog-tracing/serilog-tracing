@@ -23,7 +23,8 @@ namespace SerilogTracing.Sinks.OpenTelemetry.Tests;
 
 public class PrimitiveConversionsTests
 {
-    public static byte[] GetRandomBytes(int size) {
+    public static byte[] GetRandomBytes(int size)
+    {
         var bytes = new byte[size];
         var rnd = new Random();
         rnd.NextBytes(bytes);
@@ -32,7 +33,7 @@ public class PrimitiveConversionsTests
 
     public static string ByteArrayToString(byte[] bytes)
     {
-        return BitConverter.ToString(bytes).Replace("-","").ToLower();
+        return BitConverter.ToString(bytes).Replace("-", "").ToLower();
     }
 
     [Fact]
@@ -302,7 +303,7 @@ public class PrimitiveConversionsTests
         Assert.Equal("0", value.Key);
         Assert.Equal("test", value.Value.StringValue);
     }
-    
+
     [Fact]
     public void StructureKeysAreDeduplicated()
     {
@@ -314,7 +315,7 @@ public class PrimitiveConversionsTests
         });
 
         Assert.Equal(3, structure.Properties.Count);
-        
+
         var any = PrimitiveConversions.ToOpenTelemetryAnyValue(structure);
 
         Assert.Equal(2, any.KvlistValue.Values.Count);

@@ -18,7 +18,7 @@ public class DirectDiagnosticEventObserverTests
         var inner = new DiagnosticEventObserver(instrumentor);
 
         var directObserver = new CollectingInstrumentationEventObserver();
-        
+
         var wrapper = new DirectDiagnosticEventObserver(inner, directObserver);
         wrapper.OnNext(new KeyValuePair<string, object?>("event", true));
 

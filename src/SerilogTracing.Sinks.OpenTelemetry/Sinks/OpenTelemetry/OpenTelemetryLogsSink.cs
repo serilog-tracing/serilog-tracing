@@ -53,7 +53,7 @@ class OpenTelemetryLogsSink : IBatchedLogEventSink, ILogEventSink
     public Task EmitBatchAsync(IEnumerable<LogEvent> batch)
     {
         var resourceLogs = _resourceLogsTemplate.Clone();
-        
+
         var logsAnonymousScope = (ScopeLogs?)null;
         var logsNamedScopes = (Dictionary<string, ScopeLogs>?)null;
 
@@ -67,7 +67,7 @@ class OpenTelemetryLogsSink : IBatchedLogEventSink, ILogEventSink
                     logsAnonymousScope = RequestTemplateFactory.CreateScopeLogs(null);
                     resourceLogs.ScopeLogs.Add(logsAnonymousScope);
                 }
-            
+
                 logsAnonymousScope.LogRecords.Add(logRecord);
             }
             else
@@ -79,7 +79,7 @@ class OpenTelemetryLogsSink : IBatchedLogEventSink, ILogEventSink
                     logsNamedScopes.Add(scopeName, namedScope);
                     resourceLogs.ScopeLogs.Add(namedScope);
                 }
-            
+
                 namedScope.LogRecords.Add(logRecord);
             }
         }
@@ -104,7 +104,7 @@ class OpenTelemetryLogsSink : IBatchedLogEventSink, ILogEventSink
         request.ResourceLogs.Add(resourceLogs);
         _exporter.Export(request);
     }
-    
+
     /// <summary>
     /// A no-op for an empty batch.
     /// </summary>

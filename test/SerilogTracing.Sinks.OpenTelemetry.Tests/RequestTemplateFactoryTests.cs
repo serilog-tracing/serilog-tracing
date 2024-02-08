@@ -34,7 +34,7 @@ public class RequestTemplateFactoryTests
 
         n = clone.ScopeLogs.Count;
         Assert.Equal(1, n);
-        
+
         clone = template.Clone();
 
         n = clone.ScopeLogs.Count;

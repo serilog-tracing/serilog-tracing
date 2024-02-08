@@ -28,7 +28,7 @@ namespace SerilogTracing.Sinks.OpenTelemetry.ProtocolHelpers;
 static class PrimitiveConversions
 {
     static readonly DateTimeOffset UnixEpoch = new(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
-    
+
     public static ulong ToUnixNano(DateTimeOffset dateTimeOffset)
     {
         if (dateTimeOffset < UnixEpoch) throw new ArgumentOutOfRangeException(nameof(dateTimeOffset));
@@ -49,18 +49,18 @@ static class PrimitiveConversions
             _ => SeverityNumber.Unspecified
         };
     }
-    
+
     public static Status ToStatus(LogEventLevel level)
     {
         return new Status
         {
             Code = level switch
             {
-                LogEventLevel.Verbose 
+                LogEventLevel.Verbose
                     or LogEventLevel.Debug
                     or LogEventLevel.Information
                     or LogEventLevel.Warning => Status.Types.StatusCode.Ok,
-                LogEventLevel.Error 
+                LogEventLevel.Error
                     or LogEventLevel.Fatal => Status.Types.StatusCode.Error,
                 _ => Status.Types.StatusCode.Unset,
             }
@@ -140,10 +140,10 @@ static class PrimitiveConversions
         var map = new AnyValue();
         var kvList = new KeyValueList();
         map.KvlistValue = kvList;
-        
+
         // Per the OTLP protos, attribute keys MUST be unique.
         var seen = new HashSet<string>();
-        
+
         foreach (var prop in value.Properties)
         {
             if (seen.Contains(prop.Name))
@@ -179,7 +179,7 @@ static class PrimitiveConversions
                 Value = v
             });
         }
-        
+
         return map;
     }
 
@@ -230,7 +230,7 @@ static class PrimitiveConversions
             bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
         return bytes;
     }
-    
+
     public static string Md5Hash(string s)
     {
         using var md5 = MD5.Create();

@@ -17,7 +17,7 @@ public class OpenTelemetryLogsSinkTests
         var scopeLogs = Assert.Single(resourceLogs.ScopeLogs);
         Assert.Null(scopeLogs.Scope);
     }
-    
+
     [Fact]
     public async Task SourceContextNameIsInstrumentationScope()
     {
@@ -28,7 +28,7 @@ public class OpenTelemetryLogsSinkTests
         var scopeLogs = Assert.Single(resourceLogs.ScopeLogs);
         Assert.Equal(contextType.FullName, scopeLogs.Scope.Name);
     }
-    
+
     [Fact]
     public async Task ScopeLogsAreGrouped()
     {

@@ -22,7 +22,7 @@ static class Some
     }
 
     static int _integer = new Random().Next(int.MaxValue / 2);
-    
+
     public static Activity Activity(string? name = null)
     {
         return new Activity(name ?? String());

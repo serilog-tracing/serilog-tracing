@@ -24,6 +24,6 @@ static class PackageIdentity
     }
 
     public const string TelemetrySdkName = "serilog";
-    
+
     public const string TelemetrySdkLanguage = "dotnet";
 }

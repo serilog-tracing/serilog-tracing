@@ -78,10 +78,10 @@ sealed class HttpExporter : IExporter, IDisposable
         // staying on the same thread, here.
         var response = _client.SendAsync(httpRequest).Result;
 #endif
-        
+
         response.EnsureSuccessStatusCode();
     }
-    
+
     public void Export(ExportTraceServiceRequest request)
     {
         var httpRequest = CreateHttpRequestMessage(request, _tracesEndpoint!);
@@ -99,7 +99,7 @@ sealed class HttpExporter : IExporter, IDisposable
         // staying on the same thread, here.
         var response = _client.SendAsync(httpRequest).Result;
 #endif
-        
+
         response.EnsureSuccessStatusCode();
     }
 
@@ -113,10 +113,10 @@ sealed class HttpExporter : IExporter, IDisposable
 
         // We could consider using HttpCompletionOption.ResponseHeadersRead here.
         var response = await _client.SendAsync(httpRequest);
-        
+
         response.EnsureSuccessStatusCode();
     }
-    
+
     /// <summary>
     /// Sends the given protobuf request containing OpenTelemetry spans
     /// to an OTLP/HTTP endpoint.
@@ -127,7 +127,7 @@ sealed class HttpExporter : IExporter, IDisposable
 
         // We could consider using HttpCompletionOption.ResponseHeadersRead here.
         var response = await _client.SendAsync(httpRequest);
-        
+
         response.EnsureSuccessStatusCode();
     }
 

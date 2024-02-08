@@ -1,4 +1,18 @@
-﻿using System.Diagnostics;
+﻿// Copyright © SerilogTracing Contributors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Serilog.Events;
 using Serilog.Parsing;
@@ -8,7 +22,7 @@ namespace SerilogTracing.Instrumentation.AspNetCore;
 /// <summary>
 /// An activity instrumentor that populates the current activity with context from incoming HTTP requests.
 /// </summary>
-sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
+sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
 {
     /// <summary>
     /// Create an instance of the instrumentor.
@@ -39,10 +53,10 @@ sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
         {
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Start":
                 if (eventArgs is not HttpContext start) return;
-                
+
                 ActivityInstrumentation.SetMessageTemplateOverride(activity, _messageTemplateOverride);
                 activity.DisplayName = _messageTemplateOverride.Text;
-                
+
                 ActivityInstrumentation.SetLogEventProperties(activity, _getRequestProperties(start.Request).ToArray());
 
                 break;
@@ -56,7 +70,7 @@ sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
                 break;
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Stop":
                 if (eventArgs is not HttpContext stop) return;
-                
+
                 ActivityInstrumentation.SetLogEventProperties(activity, _getResponseProperties(stop.Response).ToArray());
 
                 if (stop.Response.StatusCode >= 500)

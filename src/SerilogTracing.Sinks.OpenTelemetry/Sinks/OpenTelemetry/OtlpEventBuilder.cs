@@ -43,11 +43,11 @@ static class OtlpEventBuilder
 
         return (logRecord, scopeName);
     }
-    
+
     public static (Span span, string? scopeName) ToSpan(LogEvent logEvent, IFormatProvider? formatProvider, IncludedData includedData)
     {
         var span = new Span();
-        
+
         ProcessProperties(span.Attributes.Add, logEvent, includedData, out var scopeName);
         ProcessTimestamp(span, logEvent);
         ProcessStartTime(span, logEvent);
@@ -76,7 +76,7 @@ static class OtlpEventBuilder
             logRecord.Body = new AnyValue { StringValue = logEvent.MessageTemplate.Text };
         }
     }
-    
+
     public static void ProcessName(Span span, LogEvent logEvent)
     {
         if (logEvent.MessageTemplate.Text.Trim() != "")
@@ -91,12 +91,12 @@ static class OtlpEventBuilder
         logRecord.SeverityText = level.ToString();
         logRecord.SeverityNumber = PrimitiveConversions.ToSeverityNumber(level);
     }
-    
+
     public static void ProcessLevel(Span span, LogEvent logEvent)
     {
         span.Status = PrimitiveConversions.ToStatus(logEvent.Level);
     }
-    
+
     public static void ProcessProperties(Action<KeyValue> adder, LogEvent logEvent, IncludedData includedData, out string? scopeName)
     {
         scopeName = null;
@@ -111,13 +111,13 @@ static class OtlpEventBuilder
                 }
             }
 
-            if (property is {Key: SerilogTracing.Core.Constants.SpanStartTimestampPropertyName})
+            if (property is { Key: SerilogTracing.Core.Constants.SpanStartTimestampPropertyName })
             {
                 continue;
             }
 
-            if (property is 
-                {Key: SerilogTracing.Core.Constants.ParentSpanIdPropertyName})
+            if (property is
+                { Key: SerilogTracing.Core.Constants.ParentSpanIdPropertyName })
             {
                 continue;
             }
@@ -132,7 +132,7 @@ static class OtlpEventBuilder
         logRecord.TimeUnixNano = PrimitiveConversions.ToUnixNano(logEvent.Timestamp);
         logRecord.ObservedTimeUnixNano = logRecord.TimeUnixNano;
     }
-    
+
     public static void ProcessTimestamp(Span span, LogEvent logEvent)
     {
         span.EndTimeUnixNano = PrimitiveConversions.ToUnixNano(logEvent.Timestamp);
@@ -141,7 +141,7 @@ static class OtlpEventBuilder
     static void ProcessStartTime(Span span, LogEvent logEvent)
     {
         if (logEvent.Properties.TryGetValue(SerilogTracing.Core.Constants.SpanStartTimestampPropertyName,
-                out var sst) && sst is ScalarValue {Value: DateTime start})
+                out var sst) && sst is ScalarValue { Value: DateTime start })
         {
             span.StartTimeUnixNano = PrimitiveConversions.ToUnixNano(start);
         }
@@ -168,12 +168,12 @@ static class OtlpEventBuilder
 
     static void ProcessIncludedFields(LogRecord logRecord, LogEvent logEvent, IncludedData includedFields)
     {
-        if ((includedFields & IncludedData.TraceIdField) != IncludedData.None && logEvent.TraceId is {} traceId)
+        if ((includedFields & IncludedData.TraceIdField) != IncludedData.None && logEvent.TraceId is { } traceId)
         {
             logRecord.TraceId = PrimitiveConversions.ToOpenTelemetryTraceId(traceId.ToHexString());
         }
 
-        if ((includedFields & IncludedData.SpanIdField) != IncludedData.None && logEvent.SpanId is {} spanId)
+        if ((includedFields & IncludedData.SpanIdField) != IncludedData.None && logEvent.SpanId is { } spanId)
         {
             logRecord.SpanId = PrimitiveConversions.ToOpenTelemetrySpanId(spanId.ToHexString());
         }
@@ -211,26 +211,26 @@ static class OtlpEventBuilder
                     propertyToken.Render(logEvent.Properties, space, CultureInfo.InvariantCulture);
                     renderings.Values.Add(new AnyValue { StringValue = space.ToString() });
                 }
-                
+
                 logRecord.Attributes.Add(PrimitiveConversions.NewAttribute(
                     SemanticConventions.AttributeMessageTemplateRenderings,
                     new AnyValue { ArrayValue = renderings }));
             }
         }
     }
-    
+
     static void ProcessIncludedFields(Span span, LogEvent logEvent, IncludedData includedFields)
     {
-        if ((includedFields & IncludedData.TraceIdField) != IncludedData.None && logEvent.TraceId is {} traceId)
+        if ((includedFields & IncludedData.TraceIdField) != IncludedData.None && logEvent.TraceId is { } traceId)
         {
             span.TraceId = PrimitiveConversions.ToOpenTelemetryTraceId(traceId.ToHexString());
         }
 
-        if ((includedFields & IncludedData.SpanIdField) != IncludedData.None && logEvent.SpanId is {} spanId)
+        if ((includedFields & IncludedData.SpanIdField) != IncludedData.None && logEvent.SpanId is { } spanId)
         {
             span.SpanId = PrimitiveConversions.ToOpenTelemetrySpanId(spanId.ToHexString());
         }
-        
+
         if ((includedFields & IncludedData.MessageTemplateTextAttribute) != IncludedData.None)
         {
             span.Attributes.Add(PrimitiveConversions.NewAttribute(SemanticConventions.AttributeMessageTemplateText, new()
@@ -264,14 +264,14 @@ static class OtlpEventBuilder
                     propertyToken.Render(logEvent.Properties, space, CultureInfo.InvariantCulture);
                     renderings.Values.Add(new AnyValue { StringValue = space.ToString() });
                 }
-                
+
                 span.Attributes.Add(PrimitiveConversions.NewAttribute(
                     SemanticConventions.AttributeMessageTemplateRenderings,
                     new AnyValue { ArrayValue = renderings }));
             }
         }
     }
-    
+
     public static void ProcessParentSpanId(Span span, LogEvent logEvent)
     {
         if (logEvent.Properties.TryGetValue(SerilogTracing.Core.Constants.ParentSpanIdPropertyName, out var ps) &&

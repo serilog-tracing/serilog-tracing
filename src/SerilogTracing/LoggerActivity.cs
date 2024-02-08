@@ -1,4 +1,18 @@
-﻿using System.Diagnostics;
+﻿// Copyright © SerilogTracing Contributors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System.Diagnostics;
 using Serilog;
 using Serilog.Events;
 using Serilog.Parsing;
@@ -52,7 +66,7 @@ public sealed class LoggerActivity : IDisposable
 
     internal MessageTemplate MessageTemplate { get; }
     internal Dictionary<string, LogEventPropertyValue> Properties { get; }
-    
+
     bool IsSuppressed => ActivityInstrumentation.IsSuppressed(Activity) || IsComplete;
 
     bool IsDataSuppressed => ActivityInstrumentation.IsDataSuppressed(Activity) || IsComplete;
@@ -80,13 +94,13 @@ public sealed class LoggerActivity : IDisposable
         {
             return;
         }
-        
+
         if (Logger.BindProperty(propertyName, value, destructureObjects, out var property))
         {
             ActivityInstrumentation.SetLogEventProperty(Activity!, property, Properties);
         }
     }
-    
+
     /// <summary>
     /// Complete the activity, emitting a span to the underlying logger.
     /// </summary>
@@ -106,7 +120,7 @@ public sealed class LoggerActivity : IDisposable
     {
         CompleteInternal(true, level, exception);
     }
-    
+
     void CompleteInternal(
         bool isExplicit,
         LogEventLevel? level = null,
@@ -122,18 +136,18 @@ public sealed class LoggerActivity : IDisposable
         {
             return;
         }
-        
+
         // `Activity` is guaranteed to be non-null here thanks to `!IsSuppressed`
 
         // This property can be removed once we can rely on the existence of Activity.IsStopped.
         IsComplete = true;
-        
+
         if (!Activity!.Recorded)
         {
             Activity.Stop();
             return;
         }
-        
+
         var end = DateTimeOffset.Now;
 
         var completionLevel = DefaultCompletionLevel;
@@ -141,9 +155,9 @@ public sealed class LoggerActivity : IDisposable
         {
             completionLevel = completionLevelOverride;
         }
-        
+
         // The next half-dozen lines ensure other listeners see all of the info we have about the activity.
-        
+
         if (exception != null)
         {
             ActivityInstrumentation.TrySetException(Activity!, exception);
@@ -164,10 +178,10 @@ public sealed class LoggerActivity : IDisposable
         // We assume here that `level` is still enabled as it was in the call to `StartActivity()`. If this is not
         // the case, traces may end up with missing spans. Writing a `SelfLog` event would be reasonable but this
         // will end up being a hot path so avoiding it at this time.
-        
+
         Logger.Write(ActivityConvert.ActivityToLogEvent(Logger, this, end, completionLevel, exception));
     }
-    
+
     /// <summary>
     /// Dispose the activity. This will call <see cref="Complete"/>, if the activity has not already been
     /// completed.

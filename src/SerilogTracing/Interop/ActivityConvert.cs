@@ -1,4 +1,18 @@
-﻿using System.Diagnostics;
+﻿// Copyright © SerilogTracing Contributors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System.Diagnostics;
 using Serilog;
 using Serilog.Events;
 using Serilog.Parsing;
@@ -12,21 +26,21 @@ static class ActivityConvert
     internal static LogEvent ActivityToLogEvent(ILogger logger, Activity activity, LogEventLevel level)
     {
         var start = activity.StartTimeUtc;
-        
+
         // Note that races around time zone changes may cause local-time display issues, but the instant will
         // be recorded correctly and this is what machine-readable outputs will see.
         var end = new DateTimeOffset(start + activity.Duration).ToLocalTime();
-        
+
         ActivityInstrumentation.TryGetMessageTemplateOverride(activity, out var messageTemplate);
         var template = messageTemplate ?? new MessageTemplate(new[] { new TextToken(activity.DisplayName) });
         ActivityInstrumentation.TryGetException(activity, out var exception);
         var properties = ActivityInstrumentation.TryGetLogEventPropertyCollection(activity, out var activityProperties)
             ? activityProperties
             : new Dictionary<string, LogEventPropertyValue>();
-        
+
         return ActivityToLogEvent(logger, activity, start, end, activity.TraceId, activity.SpanId, activity.ParentSpanId, level, exception, template, properties);
     }
-    
+
     internal static LogEvent ActivityToLogEvent(ILogger logger, LoggerActivity loggerActivity, DateTimeOffset end, LogEventLevel level, Exception? exception)
     {
         var activity = loggerActivity.Activity!;
