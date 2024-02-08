@@ -14,13 +14,8 @@
 
 using System.Diagnostics;
 using Serilog;
-using Serilog.Debugging;
-using Serilog.Events;
 using SerilogTracing.Configuration;
-using SerilogTracing.Core;
-using SerilogTracing.Instrumentation;
 using SerilogTracing.Interop;
-using Constants = Serilog.Core.Constants;
 
 namespace SerilogTracing;
 
