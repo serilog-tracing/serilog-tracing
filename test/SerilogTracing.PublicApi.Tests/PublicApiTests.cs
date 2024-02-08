@@ -1,4 +1,6 @@
-﻿using PublicApiGenerator;
+﻿using System.Reflection;
+using PublicApiGenerator;
+using SerilogTracing.Expressions;
 using Shouldly;
 using Xunit;
 
@@ -6,10 +8,17 @@ namespace SerilogTracing.PublicApi.Tests;
 
 public class PublicApiTests
 {
-    [Fact]
-    public void PublicApiSurfaceIsStable()
+    [Theory]
+    [InlineData(typeof(ActivityListenerConfiguration))]
+    [InlineData(typeof(TracingNameResolver))]
+    [InlineData(typeof(ActivityListenerInstrumentationConfigurationSqlClientExtensions))]
+    [InlineData(typeof(ActivityListenerInstrumentationConfigurationAspNetCoreExtensions))]
+    [InlineData(typeof(OpenTelemetryLoggerConfigurationExtensions))]
+    [InlineData(typeof(SeqTracingLoggerSinkConfigurationExtensions))]
+    [InlineData(typeof(ZipkinLoggerSinkConfigurationExtensions))]
+    public void PublicApiSurfaceIsStable(Type representativeType)
     {
-        var assembly = typeof(ActivityListenerConfiguration).Assembly;
+        var assembly = representativeType.Assembly;
         var publicApi = assembly.GeneratePublicApi(
             new ApiGeneratorOptions
             {

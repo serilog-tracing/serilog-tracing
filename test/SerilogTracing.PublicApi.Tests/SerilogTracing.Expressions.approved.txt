@@ -1,0 +1,12 @@
+namespace SerilogTracing.Expressions
+{
+    public static class Formatters
+    {
+        public static Serilog.Formatting.ITextFormatter CreateConsoleTextFormatter(Serilog.Templates.Themes.TemplateTheme? theme = null) { }
+    }
+    public class TracingNameResolver : Serilog.Expressions.NameResolver
+    {
+        public TracingNameResolver() { }
+        public override bool TryResolveFunctionName(string name, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out System.Reflection.MethodInfo? implementation) { }
+    }
+}

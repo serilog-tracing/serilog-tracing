@@ -1,0 +1,7 @@
+namespace SerilogTracing
+{
+    public static class ZipkinLoggerSinkConfigurationExtensions
+    {
+        public static Serilog.LoggerConfiguration Zipkin(this Serilog.Configuration.LoggerSinkConfiguration @this, string endpoint, System.Action<Serilog.Sinks.PeriodicBatching.PeriodicBatchingSinkOptions>? configureBatchingOptions = null, System.Net.Http.HttpMessageHandler? messageHandler = null, Serilog.Events.LogEventLevel restrictedToMinimumLevel = 0, Serilog.Core.LoggingLevelSwitch? levelSwitch = null) { }
+    }
+}
