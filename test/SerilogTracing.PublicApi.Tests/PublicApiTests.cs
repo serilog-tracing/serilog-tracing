@@ -13,8 +13,7 @@ public class PublicApiTests
         var publicApi = assembly.GeneratePublicApi(
             new ApiGeneratorOptions
             {
-                IncludeAssemblyAttributes = false,
-                ExcludeAttributes = ["System.Diagnostics.DebuggerDisplayAttribute"]
+                IncludeAssemblyAttributes = false
             });
 
         publicApi.ShouldMatchApproved(options =>
