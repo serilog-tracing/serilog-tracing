@@ -87,7 +87,7 @@ public class ActivityListenerConfiguration
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
     public IDisposable TraceTo(ILogger logger)
     {
-        return EnableTracing(() => logger);
+        return LoggerActivityListener.Configure(this, () => logger);
     }
 
     /// <summary>
@@ -99,94 +99,6 @@ public class ActivityListenerConfiguration
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
     public IDisposable TraceToSharedLogger()
     {
-        return EnableTracing(() => Log.Logger);
-    }
-
-    IDisposable EnableTracing(Func<ILogger> logger)
-    {
-        ILogger GetLogger(string name)
-        {
-            var instance = logger();
-            return !string.IsNullOrWhiteSpace(name)
-                ? instance.ForContext(Constants.SourceContextPropertyName, name)
-                : instance;
-        }
-
-        var activityListener = new ActivityListener();
-        var disposeProxy = new DisposeProxy(activityListener,
-            DiagnosticListener.AllListeners.Subscribe(
-                new DiagnosticListenerObserver(Instrument.GetInstrumentors().ToArray())));
-
-        var levelMap = InitialLevel.GetOverrideMap();
-
-        // We may want an opt-in to performing level checks eagerly here.
-        // It would be a performance win, but would also prevent dynamic log level changes from being effective.
-        activityListener.ShouldListenTo = _ => true;
-
-        var sample = Sample.ActivityContext;
-        activityListener.Sample = (ref ActivityCreationOptions<ActivityContext> activity) =>
-        {
-            if (!GetLogger(activity.Source.Name)
-                    .IsEnabled(GetInitialLevel(levelMap, activity.Source.Name)))
-                return ActivitySamplingResult.None;
-
-            return sample?.Invoke(ref activity) ?? ActivitySamplingResult.AllData;
-        };
-
-        activityListener.ActivityStopped += activity =>
-        {
-            if (!activity.Recorded) return;
-
-            if (ActivityInstrumentation.HasAttachedLoggerActivity(activity))
-                return; // `LoggerActivity` completion writes these to the activity-specific logger.
-
-            var activityLogger = GetLogger(activity.Source.Name);
-
-            var level = GetCompletionLevel(levelMap, activity);
-
-            if (!activityLogger.IsEnabled(level))
-                return;
-
-            activityLogger.Write(ActivityConvert.ActivityToLogEvent(activityLogger, activity, level));
-        };
-
-        ActivitySource.AddActivityListener(activityListener);
-
-        return disposeProxy;
-    }
-
-    static LogEventLevel GetInitialLevel(LevelOverrideMap levelMap, string activitySourceName)
-    {
-        levelMap.GetEffectiveLevel(activitySourceName, out var initialLevel, out var overrideLevel);
-
-        return overrideLevel?.MinimumLevel ?? initialLevel;
-    }
-
-    static LogEventLevel GetCompletionLevel(LevelOverrideMap levelMap, Activity activity)
-    {
-        var level = GetInitialLevel(levelMap, activity.Source.Name);
-
-        if (activity.Status == ActivityStatusCode.Error && level < LogEventLevel.Error)
-        {
-            return LogEventLevel.Error;
-        }
-
-        return level;
-    }
-
-    sealed class DisposeProxy(params IDisposable[] disposables) : IDisposable
-    {
-        public void Dispose()
-        {
-            foreach (var disposable in disposables)
-                try
-                {
-                    disposable.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    SelfLog.WriteLine("TracingLogger: exception in dispose" + Environment.NewLine + ex);
-                }
-        }
+        return LoggerActivityListener.Configure(this, () => Log.Logger);
     }
 }
