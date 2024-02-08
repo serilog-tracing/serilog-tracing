@@ -15,6 +15,8 @@
 using System.Diagnostics;
 using Serilog;
 using SerilogTracing.Configuration;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace SerilogTracing;
 
@@ -22,6 +24,7 @@ namespace SerilogTracing;
 /// Configure integration between SerilogTracing and the .NET tracing infrastructure.
 /// </summary>
 [Obsolete("This type has been renamed to ActivityListenerConfiguration; use that name instead.")]
+// ReSharper disable once UnusedType.Global
 public class TracingConfiguration
 {
     readonly ActivityListenerConfiguration _inner = new();
@@ -30,17 +33,26 @@ public class TracingConfiguration
     /// Configures instrumentation of <see cref="Activity">activities</see>.
     /// </summary>
     public ActivityListenerInstrumentationConfiguration Instrument => _inner.Instrument;
-    
+
     /// <summary>
     /// Configures sampling.
     /// </summary>
     public ActivityListenerSamplingConfiguration Sample => _inner.Sample;
-    
+
     /// <summary>
     /// Configures the initial level assigned to externally created activities.
     /// </summary>
     public ActivityListenerInitialLevelConfiguration InitialLevel => _inner.InitialLevel;
 
+    /// <summary>
+    /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
+    /// </summary>
+    /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
+    public IDisposable EnableTracing(ILogger? logger = null)
+    {
+        return logger != null ? TraceTo(logger) : TraceToSharedLogger();
+    }
+    
     /// <summary>
     /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
     /// </summary>

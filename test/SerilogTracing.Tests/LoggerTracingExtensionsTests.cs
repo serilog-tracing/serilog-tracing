@@ -16,7 +16,7 @@ public class LoggerTracingExtensionsTests
         Activity.DefaultIdFormat = ActivityIdFormat.W3C;
         Activity.ForceDefaultIdFormat = true;
     }
-    
+
     [Theory]
     [InlineData(true, true, true, true)]
     [InlineData(true, true, false, false)]
@@ -37,10 +37,10 @@ public class LoggerTracingExtensionsTests
         //   3. Does `SerilogActivitySource.Instance.StartActivity()` return an activity? (I.e. is not suppressed by sampling?)
         //     * If yes, return a new `LoggerActivity` wrapping it.
         //     * If no, return `None` .
-        
+
         const string activitySourceContext = "SerilogTracing.Tests.LoggerTracingExtensionsTests";
         const LogEventLevel activityLevel = LogEventLevel.Information;
-        
+
         var sink = new CollectingSink();
         var log = new LoggerConfiguration()
             .MinimumLevel.Override(activitySourceContext, levelEnabled ? activityLevel : LevelAlias.Off)
@@ -55,28 +55,28 @@ public class LoggerTracingExtensionsTests
         }
 
         using var _ = tracingEnabled ? configuration.TraceTo(log) : null;
-        
+
         // This activity source is "outside" SerilogTracing and only exists to 
         using var source = Some.ActivitySource();
         using var listener = Some.AlwaysOnListenerFor(source.Name);
         using var parent = source.StartActivity(Some.String());
-        
+
         Assert.NotNull(parent);
         parent.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
-        
+
         Assert.NotEqual(default(ActivityTraceId).ToHexString(), parent.TraceId.ToHexString());
         Assert.NotEqual(default(ActivitySpanId).ToHexString(), parent.SpanId.ToHexString());
-        
+
         var activity = log
             .ForContext(Serilog.Core.Constants.SourceContextPropertyName, activitySourceContext)
             .StartActivity(activityLevel, Some.String());
-        
+
         activity.Complete();
 
         if (activityExpected)
         {
             Assert.NotSame(LoggerActivity.None, activity);
-            
+
             var span = sink.SingleEvent;
 
             Assert.Equal(parent.TraceId, span.TraceId);

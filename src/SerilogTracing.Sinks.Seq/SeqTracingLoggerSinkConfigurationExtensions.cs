@@ -38,8 +38,8 @@ public static class SeqTracingLoggerSinkConfigurationExtensions
 #else
         null;
 #endif
-    
-    #pragma warning disable CS1574
+
+#pragma warning disable CS1574
     /// <summary>
     /// Write log events and traces to a <a href="https://datalust.co/seq">Seq</a> server.
     /// </summary>
@@ -77,7 +77,7 @@ public static class SeqTracingLoggerSinkConfigurationExtensions
     /// from the sink don't end up generating spans. If a custom message handler is passed, ensure
     /// <see cref="SocketsHttpHandler.ActivityHeadersPropagator"/> or its equivalent is set to <c>null</c>.
     /// </remarks>
-    #pragma warning restore CS1574
+#pragma warning restore CS1574
     public static LoggerConfiguration SeqTracing(
       this LoggerSinkConfiguration loggerSinkConfiguration,
       string serverUrl,
@@ -93,22 +93,22 @@ public static class SeqTracingLoggerSinkConfigurationExtensions
       long? retainedInvalidPayloadsLimitBytes = null,
       int queueSizeLimit = 100000)
     {
-      if (loggerSinkConfiguration == null)
-          throw new ArgumentNullException(nameof (loggerSinkConfiguration));
+        if (loggerSinkConfiguration == null)
+            throw new ArgumentNullException(nameof(loggerSinkConfiguration));
 
-      return loggerSinkConfiguration.Seq(
-          serverUrl,
-          restrictedToMinimumLevel,
-          batchPostingLimit,
-          period,
-          apiKey,
-          bufferBaseFilename,
-          bufferSizeLimitBytes,
-          eventBodyLimitBytes,
-          controlLevelSwitch,
-          messageHandler ?? CreateDefaultHttpMessageHandler(),
-          retainedInvalidPayloadsLimitBytes,
-          queueSizeLimit,
-          CreatePayloadFormatter());
+        return loggerSinkConfiguration.Seq(
+            serverUrl,
+            restrictedToMinimumLevel,
+            batchPostingLimit,
+            period,
+            apiKey,
+            bufferBaseFilename,
+            bufferSizeLimitBytes,
+            eventBodyLimitBytes,
+            controlLevelSwitch,
+            messageHandler ?? CreateDefaultHttpMessageHandler(),
+            retainedInvalidPayloadsLimitBytes,
+            queueSizeLimit,
+            CreatePayloadFormatter());
     }
 }

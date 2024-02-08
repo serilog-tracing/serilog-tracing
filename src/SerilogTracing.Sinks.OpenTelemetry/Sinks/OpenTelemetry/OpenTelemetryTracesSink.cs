@@ -66,7 +66,7 @@ class OpenTelemetryTracesSink : IBatchedLogEventSink, ILogEventSink
                     traceAnonymousScope = RequestTemplateFactory.CreateScopeSpans(null);
                     resourceSpans.ScopeSpans.Add(traceAnonymousScope);
                 }
-            
+
                 traceAnonymousScope.Spans.Add(span);
             }
             else
@@ -78,7 +78,7 @@ class OpenTelemetryTracesSink : IBatchedLogEventSink, ILogEventSink
                     spansNamedScopes.Add(scopeName, namedScope);
                     resourceSpans.ScopeSpans.Add(namedScope);
                 }
-            
+
                 namedScope.Spans.Add(span);
             }
         }

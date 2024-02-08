@@ -18,7 +18,7 @@ public static class ZipkinLoggerSinkConfigurationExtensions
 #else
         new HttpClientHandler();
 #endif
-    
+
     /// <summary>
     /// Send trace data to a Zipkin server.
     /// </summary>
@@ -44,7 +44,7 @@ public static class ZipkinLoggerSinkConfigurationExtensions
     {
         var batchingOptions = new PeriodicBatchingSinkOptions();
         configureBatchingOptions?.Invoke(batchingOptions);
-        
+
         messageHandler ??= CreateDefaultHttpMessageHandler();
 
         return @this.Sink(

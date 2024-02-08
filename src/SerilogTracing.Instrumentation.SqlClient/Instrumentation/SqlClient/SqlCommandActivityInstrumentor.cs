@@ -21,17 +21,17 @@ using Serilog.Parsing;
 
 namespace SerilogTracing.Instrumentation.SqlClient;
 
-sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOptions options): IActivityInstrumentor, IInstrumentationEventObserver
+sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOptions options) : IActivityInstrumentor, IInstrumentationEventObserver
 {
     const string DiagnosticListenerName = "SqlClientDiagnosticListener";
 
     static readonly ActivitySource ActivitySource = new(typeof(SqlCommandActivityInstrumentor).Assembly.GetName().Name!);
-    
+
     readonly MessageTemplate _messageTemplateOverride = new MessageTemplateParser().Parse("SQL {Operation}");
     readonly PropertyAccessor<SqlCommand> _getCommand = new("Command");
     readonly PropertyAccessor<Exception> _getException = new("Exception");
     readonly PropertyAccessor<IDictionary> _getStatistics = new("Statistics");
-    
+
     public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
         return diagnosticListenerName == DiagnosticListenerName;
@@ -41,91 +41,91 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
     {
         // Instrumentation is applied in `OnDiagnosticEvent`.
     }
-    
+
     public void OnNext(string eventName, object? eventArgs)
     {
         if (eventArgs == null) return;
-        
+
         switch (eventName)
         {
             case "Microsoft.Data.SqlClient.WriteCommandBefore":
-            {
-                // SqlClient doesn't start its own activities; we'll have to reconcile this with how the activity listener
-                // applies levelling...
-                var child = ActivitySource.StartActivity(_messageTemplateOverride.Text, ActivityKind.Client);
-                if (child == null)
-                    return;
-                
-                child.DisplayName = _messageTemplateOverride.Text;
-
-                if (!child.IsAllDataRequested)
                 {
-                    return;
-                }
-                
-                ActivityInstrumentation.SetMessageTemplateOverride(child, _messageTemplateOverride);
-                
-                if (_getCommand.TryGetValue(eventArgs, out var command) && command is not null)
-                {
-                    var database = command.Connection.Database;
-                    var operation = GetOperation(command, options.InferOperation);
-                    ActivityInstrumentation.SetLogEventProperties(child,
-                        new LogEventProperty("Operation", new ScalarValue(operation)),
-                        new LogEventProperty("Database", new ScalarValue(database)));
+                    // SqlClient doesn't start its own activities; we'll have to reconcile this with how the activity listener
+                    // applies levelling...
+                    var child = ActivitySource.StartActivity(_messageTemplateOverride.Text, ActivityKind.Client);
+                    if (child == null)
+                        return;
 
-                    if (options.IncludeCommandText)
+                    child.DisplayName = _messageTemplateOverride.Text;
+
+                    if (!child.IsAllDataRequested)
                     {
-                        ActivityInstrumentation.SetLogEventProperty(child, new LogEventProperty("CommandText", new ScalarValue(command.CommandText)));
+                        return;
                     }
-                }
 
-                break;
-            }
+                    ActivityInstrumentation.SetMessageTemplateOverride(child, _messageTemplateOverride);
+
+                    if (_getCommand.TryGetValue(eventArgs, out var command) && command is not null)
+                    {
+                        var database = command.Connection.Database;
+                        var operation = GetOperation(command, options.InferOperation);
+                        ActivityInstrumentation.SetLogEventProperties(child,
+                            new LogEventProperty("Operation", new ScalarValue(operation)),
+                            new LogEventProperty("Database", new ScalarValue(database)));
+
+                        if (options.IncludeCommandText)
+                        {
+                            ActivityInstrumentation.SetLogEventProperty(child, new LogEventProperty("CommandText", new ScalarValue(command.CommandText)));
+                        }
+                    }
+
+                    break;
+                }
             case "Microsoft.Data.SqlClient.WriteCommandAfter":
-            {
-                var activity = Activity.Current;
-                
-                // Unlikely, but possible if an additional child activity started during the command and was not
-                // stopped correctly, or conversely, if someone else stopped our activity before we did.
-                if (activity is null || activity.Source != ActivitySource)
-                    return;
-
-                if (activity.IsAllDataRequested && _getStatistics.TryGetValue(eventArgs, out var statistics) && statistics is not null)
                 {
-                    // See https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/sql/provider-statistics-for-sql-server
-                    var networkServerTimeMilliseconds = statistics["NetworkServerTime"];
-                    if (networkServerTimeMilliseconds != null)
-                    {
-                        var property = new LogEventProperty("NetworkServerTime", new ScalarValue(networkServerTimeMilliseconds));
-                        ActivityInstrumentation.SetLogEventProperty(activity, property);
-                    }
-                }
+                    var activity = Activity.Current;
 
-                activity.Stop();
-                break;
-            }
+                    // Unlikely, but possible if an additional child activity started during the command and was not
+                    // stopped correctly, or conversely, if someone else stopped our activity before we did.
+                    if (activity is null || activity.Source != ActivitySource)
+                        return;
+
+                    if (activity.IsAllDataRequested && _getStatistics.TryGetValue(eventArgs, out var statistics) && statistics is not null)
+                    {
+                        // See https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/sql/provider-statistics-for-sql-server
+                        var networkServerTimeMilliseconds = statistics["NetworkServerTime"];
+                        if (networkServerTimeMilliseconds != null)
+                        {
+                            var property = new LogEventProperty("NetworkServerTime", new ScalarValue(networkServerTimeMilliseconds));
+                            ActivityInstrumentation.SetLogEventProperty(activity, property);
+                        }
+                    }
+
+                    activity.Stop();
+                    break;
+                }
             case "Microsoft.Data.SqlClient.WriteCommandError":
-            {
-                var activity = Activity.Current;
-                if (activity is null || activity.Source != ActivitySource)
-                    return;
-
-                if (activity.IsAllDataRequested)
                 {
-                    if (_getException.TryGetValue(eventArgs, out var exception) && exception is not null)
-                    {
-                        ActivityInstrumentation.TrySetException(activity, exception);
-                        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
-                    }
-                    else
-                    {
-                        activity.SetStatus(ActivityStatusCode.Error);
-                    }
-                }
+                    var activity = Activity.Current;
+                    if (activity is null || activity.Source != ActivitySource)
+                        return;
 
-                activity.Stop();
-                break;
-            }
+                    if (activity.IsAllDataRequested)
+                    {
+                        if (_getException.TryGetValue(eventArgs, out var exception) && exception is not null)
+                        {
+                            ActivityInstrumentation.TrySetException(activity, exception);
+                            activity.SetStatus(ActivityStatusCode.Error, exception.Message);
+                        }
+                        else
+                        {
+                            activity.SetStatus(ActivityStatusCode.Error);
+                        }
+                    }
+
+                    activity.Stop();
+                    break;
+                }
         }
     }
 
@@ -136,7 +136,7 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
 
         if (command.CommandType == CommandType.TableDirect)
             return "DIRECT";
-        
+
         return inferOperationFromCommandText ?
             CommandTextTokenizer.FindFirstOperation(command.CommandText) ?? "BATCH" :
             "BATCH";

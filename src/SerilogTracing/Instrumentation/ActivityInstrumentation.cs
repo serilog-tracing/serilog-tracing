@@ -42,7 +42,7 @@ public static class ActivityInstrumentation
     {
         activity.SetCustomProperty(Constants.MessageTemplateOverridePropertyName, messageTemplate);
     }
-    
+
     /// <summary>
     /// Get a <see cref="MessageTemplate"/> previously associated with the given <see cref="Activity"/> by
     /// <see cref="ActivityInstrumentation.SetMessageTemplateOverride"/>.
@@ -145,11 +145,11 @@ public static class ActivityInstrumentation
     public static bool TrySetException(Activity activity, Exception exception)
     {
         if (activity.Events.Any(e => e.Name == Constants.ExceptionEventName)) return false;
-        
+
         activity.AddEvent(EventFromException(exception));
         return true;
     }
-    
+
     static ActivityEvent EventFromException(Exception exception)
     {
         var tags = new ActivityTagsCollection
@@ -174,19 +174,19 @@ public static class ActivityInstrumentation
 
         return exception != null;
     }
-    
+
     static Exception? ExceptionFromEvents(Activity activity)
     {
         var first = activity.Events.FirstOrDefault(e => e.Name == "exception");
         if (first.Name != "exception")
             return null;
-        
+
         return new TextException(
             first.Tags.FirstOrDefault(t => t.Key == "exception.message").Value as string,
             first.Tags.FirstOrDefault(t => t.Key == "exception.type").Value as string,
             first.Tags.FirstOrDefault(t => t.Key == "exception.stacktrace").Value as string);
     }
-    
+
     class TextException(
         string? message,
         string? type,
@@ -204,7 +204,7 @@ public static class ActivityInstrumentation
             activity.AddTag(name, ToActivityTagValue(value));
         }
     }
-    
+
     internal static bool HasAttachedLoggerActivity(Activity activity)
     {
         return activity.GetCustomProperty(Constants.SelfPropertyName) is LoggerActivity;

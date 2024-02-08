@@ -32,7 +32,7 @@ public static class TracingLoggerEnrichmentConfigurationExtensions
     {
         return enrichment.With(new SpanTimingMillisecondsEnricher(propertyName ?? "Elapsed"));
     }
-    
+
     /// <summary>
     /// Enrich log events with the span duration as a <see cref="TimeSpan"/>.
     /// </summary>

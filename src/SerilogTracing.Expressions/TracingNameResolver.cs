@@ -29,7 +29,7 @@ namespace SerilogTracing.Expressions;
 /// <c>ulong or long Nanoseconds(TimeSpan)</c>. Note that the <c>Nanoseconds</c> function is undefined on overflow or
 /// underflow.
 /// </summary>
-public class TracingNameResolver: NameResolver
+public class TracingNameResolver : NameResolver
 {
     readonly NameResolver _tracingFunctions = new StaticMemberNameResolver(typeof(TracingFunctions));
 

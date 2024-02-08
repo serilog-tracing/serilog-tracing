@@ -43,7 +43,7 @@ public static class ActivityListenerInstrumentationConfigurationAspNetCoreExtens
     {
         var httpOptions = new HttpRequestInActivityInstrumentationOptions();
         configure.Invoke(httpOptions);
-        
+
         return configuration.With(new HttpRequestInActivityInstrumentor(httpOptions));
     }
 }

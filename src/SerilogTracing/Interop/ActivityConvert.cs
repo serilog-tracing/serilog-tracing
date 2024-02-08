@@ -26,21 +26,21 @@ static class ActivityConvert
     internal static LogEvent ActivityToLogEvent(ILogger logger, Activity activity, LogEventLevel level)
     {
         var start = activity.StartTimeUtc;
-        
+
         // Note that races around time zone changes may cause local-time display issues, but the instant will
         // be recorded correctly and this is what machine-readable outputs will see.
         var end = new DateTimeOffset(start + activity.Duration).ToLocalTime();
-        
+
         ActivityInstrumentation.TryGetMessageTemplateOverride(activity, out var messageTemplate);
         var template = messageTemplate ?? new MessageTemplate(new[] { new TextToken(activity.DisplayName) });
         ActivityInstrumentation.TryGetException(activity, out var exception);
         var properties = ActivityInstrumentation.TryGetLogEventPropertyCollection(activity, out var activityProperties)
             ? activityProperties
             : new Dictionary<string, LogEventPropertyValue>();
-        
+
         return ActivityToLogEvent(logger, activity, start, end, activity.TraceId, activity.SpanId, activity.ParentSpanId, level, exception, template, properties);
     }
-    
+
     internal static LogEvent ActivityToLogEvent(ILogger logger, LoggerActivity loggerActivity, DateTimeOffset end, LogEventLevel level, Exception? exception)
     {
         var activity = loggerActivity.Activity!;

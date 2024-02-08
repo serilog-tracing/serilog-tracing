@@ -25,13 +25,13 @@ public sealed class ActivityListenerInstrumentationConfiguration
     readonly ActivityListenerConfiguration _activityListenerConfiguration;
     readonly List<IActivityInstrumentor> _instrumentors = [];
     bool _withDefaultInstrumentors = true;
-    
+
     static IEnumerable<IActivityInstrumentor> GetDefaultInstrumentors() => [new HttpRequestOutActivityInstrumentor()];
-    
+
     internal IEnumerable<IActivityInstrumentor> GetInstrumentors() =>
         _withDefaultInstrumentors ?
             GetDefaultInstrumentors().Concat(_instrumentors) : _instrumentors;
-    
+
     internal ActivityListenerInstrumentationConfiguration(ActivityListenerConfiguration activityListenerConfiguration)
     {
         _activityListenerConfiguration = activityListenerConfiguration;
@@ -73,7 +73,7 @@ public sealed class ActivityListenerInstrumentationConfiguration
 
             _instrumentors.Add(instrumentor);
         }
-        
+
         return _activityListenerConfiguration;
     }
 

@@ -28,7 +28,7 @@ public class LoggerActivityTests
         using var activity = Some.Activity();
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.Start();
-        
+
         var loggerActivity = new LoggerActivity(logger, initialLevel, activity, MessageTemplate.Empty, []);
         loggerActivity.Complete(completionLevel);
 
@@ -36,7 +36,7 @@ public class LoggerActivityTests
         Assert.Equal(expectedLevel, span.Level);
         Assert.Equal(expectedStatusCode, activity.Status);
     }
-    
+
     [Fact]
     public void ActivityStatusIsLeftUnsetOnDispose()
     {
@@ -49,7 +49,7 @@ public class LoggerActivityTests
 
         using var activity = Some.Activity();
         activity.Start();
-        
+
         var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, activity, MessageTemplate.Empty, []);
         loggerActivity.Dispose();
 
@@ -68,7 +68,7 @@ public class LoggerActivityTests
 
         var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, null, MessageTemplate.Empty, []);
         loggerActivity.Complete(LogEventLevel.Information);
-        
+
         Assert.Empty(sink.Events);
     }
 
@@ -81,18 +81,18 @@ public class LoggerActivityTests
             .MinimumLevel.Is(LevelAlias.Minimum)
             .WriteTo.Sink(sink)
             .CreateLogger();
-        
+
         using var activity = Some.Activity();
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.IsAllDataRequested = false;
         activity.Start();
 
         var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, activity, MessageTemplate.Empty, []);
-        
+
         loggerActivity.AddProperty("Discarded", true);
-        
+
         loggerActivity.Complete(LogEventLevel.Information);
-        
+
         var span = sink.SingleEvent;
         Assert.DoesNotContain("Discarded", span.Properties);
     }

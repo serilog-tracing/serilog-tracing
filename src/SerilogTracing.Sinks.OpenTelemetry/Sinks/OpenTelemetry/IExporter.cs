@@ -21,7 +21,7 @@ interface IExporter
 {
     void Export(ExportLogsServiceRequest request);
     Task ExportAsync(ExportLogsServiceRequest request);
-    
+
     void Export(ExportTraceServiceRequest request);
     Task ExportAsync(ExportTraceServiceRequest request);
 }

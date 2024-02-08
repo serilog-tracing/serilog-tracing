@@ -16,10 +16,10 @@ using System.Diagnostics;
 
 namespace SerilogTracing.Instrumentation;
 
-sealed class DiagnosticEventObserver: IObserver<KeyValuePair<string,object?>>
+sealed class DiagnosticEventObserver : IObserver<KeyValuePair<string, object?>>
 {
     readonly IActivityInstrumentor _instrumentor;
-    
+
     internal DiagnosticEventObserver(IActivityInstrumentor instrumentor)
     {
         _instrumentor = instrumentor;
@@ -39,7 +39,7 @@ sealed class DiagnosticEventObserver: IObserver<KeyValuePair<string,object?>>
 
         OnNext(Activity.Current, value.Key, value.Value);
     }
-    
+
     internal void OnNext(Activity activity, string eventName, object eventValue)
     {
         if (!ActivityInstrumentation.IsDataSuppressed(activity))

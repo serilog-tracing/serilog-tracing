@@ -16,7 +16,7 @@ namespace SerilogTracing.Instrumentation;
 
 // This alternative implementation to DiagnosticEventObserver avoids an extra downcast or flow control in that
 // type, for instrumentors that require raw events.
-sealed class DirectDiagnosticEventObserver: IObserver<KeyValuePair<string, object?>>
+sealed class DirectDiagnosticEventObserver : IObserver<KeyValuePair<string, object?>>
 {
     readonly IObserver<KeyValuePair<string, object?>> _inner;
     readonly IInstrumentationEventObserver _observer;

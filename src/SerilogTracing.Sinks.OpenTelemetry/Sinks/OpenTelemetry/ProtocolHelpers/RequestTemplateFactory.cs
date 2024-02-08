@@ -23,7 +23,7 @@ namespace SerilogTracing.Sinks.OpenTelemetry.ProtocolHelpers;
 static class RequestTemplateFactory
 {
     const string OpenTelemetrySchemaUrl = "https://opentelemetry.io/schemas/v1.13.0";
-    
+
     public static ScopeLogs CreateScopeLogs(string? scopeName)
     {
         var scope = scopeName != null ? new InstrumentationScope
@@ -36,7 +36,7 @@ static class RequestTemplateFactory
             Scope = scope
         };
     }
-    
+
     public static ScopeSpans CreateScopeSpans(string? scopeName)
     {
         var scope = scopeName != null ? new InstrumentationScope
@@ -63,7 +63,7 @@ static class RequestTemplateFactory
 
         return resourceLogs;
     }
-    
+
     public static ResourceSpans CreateResourceSpans(IReadOnlyDictionary<string, object> resourceAttributes)
     {
         var resourceSpans = new ResourceSpans();

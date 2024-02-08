@@ -14,15 +14,15 @@ public class SpanTimingEnricherTests
 
         var logEvent = Some.SerilogEvent("Message", timestamp: start + TimeSpan.FromSeconds(5),
             properties: new LogEventProperty[] { new("SpanStartTimestamp", new ScalarValue(start)) });
-        
+
         new SpanTimingEnricher("Elapsed").Enrich(logEvent, new ScalarLogEventPropertyFactory());
-        
+
         Assert.Equal(TimeSpan.FromSeconds(5), ((ScalarValue)logEvent.Properties["Elapsed"]).Value);
-        
+
         logEvent = Some.SerilogEvent("Message", timestamp: start + TimeSpan.FromSeconds(5));
-        
+
         new SpanTimingEnricher("Elapsed").Enrich(logEvent, new ScalarLogEventPropertyFactory());
-        
+
         Assert.False(logEvent.Properties.ContainsKey("Elapsed"));
     }
 }

@@ -18,15 +18,15 @@ using SerilogTracing.Instrumentation;
 
 namespace SerilogTracing.Enrichers;
 
-class SpanTimingMillisecondsEnricher: ILogEventEnricher
+class SpanTimingMillisecondsEnricher : ILogEventEnricher
 {
     public SpanTimingMillisecondsEnricher(string propertyName)
     {
         _propertyName = propertyName;
     }
-    
+
     readonly string _propertyName;
-    
+
     public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
     {
         if (LogEventTracingProperties.TryGetElapsed(logEvent, out var elapsed))

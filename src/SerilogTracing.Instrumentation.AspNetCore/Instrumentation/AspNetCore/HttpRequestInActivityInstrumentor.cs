@@ -22,7 +22,7 @@ namespace SerilogTracing.Instrumentation.AspNetCore;
 /// <summary>
 /// An activity instrumentor that populates the current activity with context from incoming HTTP requests.
 /// </summary>
-sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
+sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
 {
     /// <summary>
     /// Create an instance of the instrumentor.
@@ -53,10 +53,10 @@ sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
         {
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Start":
                 if (eventArgs is not HttpContext start) return;
-                
+
                 ActivityInstrumentation.SetMessageTemplateOverride(activity, _messageTemplateOverride);
                 activity.DisplayName = _messageTemplateOverride.Text;
-                
+
                 ActivityInstrumentation.SetLogEventProperties(activity, _getRequestProperties(start.Request).ToArray());
 
                 break;
@@ -70,7 +70,7 @@ sealed class HttpRequestInActivityInstrumentor: IActivityInstrumentor
                 break;
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Stop":
                 if (eventArgs is not HttpContext stop) return;
-                
+
                 ActivityInstrumentation.SetLogEventProperties(activity, _getResponseProperties(stop.Response).ToArray());
 
                 if (stop.Response.StatusCode >= 500)

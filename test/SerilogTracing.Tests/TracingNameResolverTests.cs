@@ -19,11 +19,11 @@ public class TracingNameResolverTests
         var rootSpanId = ActivitySpanId.CreateRandom();
         var childSpanId = ActivitySpanId.CreateRandom();
         var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        
+
         var root = new LogEvent(end, LogEventLevel.Debug, null, template,
             [new LogEventProperty(Constants.SpanStartTimestampPropertyName, new ScalarValue(start))],
             traceId, rootSpanId);
-        
+
         var child = new LogEvent(end, LogEventLevel.Debug, null, template,
             [
                 new LogEventProperty(Constants.SpanStartTimestampPropertyName, new ScalarValue(start)),
@@ -32,7 +32,7 @@ public class TracingNameResolverTests
             traceId, childSpanId);
 
         var nonSpan = new LogEvent(end, LogEventLevel.Debug, null, template, []);
-        
+
         return new object[][]
         {
             [root, "IsSpan()", true ],
@@ -49,7 +49,7 @@ public class TracingNameResolverTests
             [root, "FromUnixEpoch(SpanStartTimestamp)", start - epoch]
         };
     }
-    
+
     [Theory]
     [MemberData(nameof(Cases))]
     public void TracingFunctionsAreEvaluatedCorrectly(LogEvent logEvent, string expression, object? expected)

@@ -27,6 +27,28 @@ namespace SerilogTracing;
 /// <summary>
 /// Configure integration between SerilogTracing and the .NET tracing infrastructure.
 /// </summary>
+/// <remarks>
+/// <p>
+///     There are two main integration points between SerilogTracing and the rest of
+///     .NET.
+/// </p>
+/// <p>
+///     The first is the <c>"Serilog"</c> <see cref="ActivitySource"/>, which the
+///     <see cref="LoggerTracingExtensions.StartActivity(ILogger, string)"/> method uses to
+///     publish activities created using SerilogTracing to the rest of .NET."/>
+/// </p>
+/// <p>
+///     The second integration point, which this type, <see cref="ActivityListenerConfiguration"/>
+///     configures, is an <see cref="ActivityListener"/> through which SerilogTracing
+///     receives activities from other .NET components.
+/// </p>
+/// <p>
+///     Configuration options specified using this type always apply to external activities from
+///     other .NET components. In cases where these options also apply to SerilogTracing's own
+///     activities, the configuration sub-object (for example <see cref="Sample"/>) will carry
+///     documentation describing this.
+/// </p>
+/// </remarks>
 public class ActivityListenerConfiguration
 {
     /// <summary>
@@ -40,29 +62,20 @@ public class ActivityListenerConfiguration
     }
 
     /// <summary>
-    /// Configures instrumentation of <see cref="Activity">activities</see>.
+    /// Configures instrumentation applied to externally-created activities.
     /// </summary>
     public ActivityListenerInstrumentationConfiguration Instrument { get; }
 
     /// <summary>
-    /// Configures sampling.
+    /// Configures sampling. These options apply to both external activities from other .NET components,
+    /// and to the `"Serilog"` activity source that produces SerilogTracing's own activities.
     /// </summary>
     public ActivityListenerSamplingConfiguration Sample { get; }
 
     /// <summary>
-    /// Configures the initial level assigned to externally created activities.
+    /// Configures the initial level assigned to externally-created activities.
     /// </summary>
     public ActivityListenerInitialLevelConfiguration InitialLevel { get; }
-
-    /// <summary>
-    /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
-    /// </summary>
-    /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
-    [Obsolete("Use TraceTo(ILogger) or TraceToSharedLogger()")]
-    public IDisposable EnableTracing(ILogger? logger = null)
-    {
-        return logger != null ? TraceTo(logger) : TraceToSharedLogger();
-    }
 
     /// <summary>
     /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.
@@ -123,7 +136,7 @@ public class ActivityListenerConfiguration
         activityListener.ActivityStopped += activity =>
         {
             if (!activity.Recorded) return;
-            
+
             if (ActivityInstrumentation.HasAttachedLoggerActivity(activity))
                 return; // `LoggerActivity` completion writes these to the activity-specific logger.
 

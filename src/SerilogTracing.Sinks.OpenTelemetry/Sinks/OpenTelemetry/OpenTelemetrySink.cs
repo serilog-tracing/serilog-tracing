@@ -69,7 +69,7 @@ class OpenTelemetrySink : ILogEventSink, IDisposable
             }
         }
     }
-    
+
     static bool IsSpan(LogEvent logEvent)
     {
         return logEvent is { TraceId: not null, SpanId: not null } &&

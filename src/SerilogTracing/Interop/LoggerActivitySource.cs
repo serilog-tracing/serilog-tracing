@@ -25,7 +25,7 @@ static class LoggerActivitySource
     {
         // `ActivityKind` might be passed through here in the future. The `Activity` constructor does
         // not accept this.
-        
+
         if (Instance.HasListeners())
         {
             // Tracing is enabled; if this returns `null`, sampling is suppressing the activity and so therefore
@@ -42,12 +42,12 @@ static class LoggerActivitySource
 
             return listenerActivity;
         }
-        
+
         // Tracing is not enabled. Levels are everything, and the level check has already been performed by the
         // caller, so we're in business!
 
         var manualActivity = new Activity(name);
-        if (Activity.Current is {} parent)
+        if (Activity.Current is { } parent)
         {
             manualActivity.SetParentId(parent.TraceId, parent.SpanId, parent.ActivityTraceFlags);
         }

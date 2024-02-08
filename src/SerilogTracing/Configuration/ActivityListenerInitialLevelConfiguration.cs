@@ -28,7 +28,7 @@ public class ActivityListenerInitialLevelConfiguration
     LogEventLevel _initialLevel = LogEventLevel.Information;
 
     internal LevelOverrideMap GetOverrideMap() => new(_overrides, _initialLevel, null);
-    
+
     internal ActivityListenerInitialLevelConfiguration(ActivityListenerConfiguration activityListenerConfiguration)
     {
         _activityListenerConfiguration = activityListenerConfiguration;
@@ -57,7 +57,7 @@ public class ActivityListenerInitialLevelConfiguration
         _overrides[activitySourceName] = levelSwitch;
         return _activityListenerConfiguration;
     }
-    
+
     /// <summary>
     /// Override the initial level for activities from a specific <see cref="System.Diagnostics.ActivitySource"/>.
     /// </summary>

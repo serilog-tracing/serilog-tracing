@@ -41,7 +41,7 @@ public static class LoggerTracingExtensions
             activity = null;
             return false;
         }
-        
+
         if (!logger.IsEnabled(level))
         {
             activity = null;
@@ -51,7 +51,7 @@ public static class LoggerTracingExtensions
         activity = LoggerActivitySource.TryStartActivity(messageTemplate);
         return activity != null;
     }
-   
+
     // This method performs all of the allocations on behalf of the new activity and is intended to be infallible, since the returned
     // object manages the lifetime of the already-started `Activity`.
     static LoggerActivity BindLoggerActivity(ILogger logger, LogEventLevel level, string messageTemplate, object?[]? propertyValues, Activity activity)
@@ -64,7 +64,7 @@ public static class LoggerTracingExtensions
 
         return new LoggerActivity(logger, level, activity, parsedTemplate, captures);
     }
-    
+
     /// <summary>
     /// Start an activity.
     /// </summary>
@@ -85,7 +85,7 @@ public static class LoggerTracingExtensions
             LoggerActivity.None :
             BindLoggerActivity(logger, level, messageTemplate, propertyValues, activity);
     }
-    
+
     /// <summary>
     /// Start an activity.
     /// </summary>
@@ -98,7 +98,7 @@ public static class LoggerTracingExtensions
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
     public static LoggerActivity StartActivity(this ILogger logger, string messageTemplate, params object?[]? propertyValues)
         => StartActivity(logger, LogEventLevel.Information, messageTemplate, propertyValues);
-    
+
     /// <summary>
     /// Start an activity.
     /// </summary>
@@ -110,13 +110,13 @@ public static class LoggerTracingExtensions
     /// <param name="messageTemplate">A message template that will be used to format the activity name.</param>
     /// <returns>A <see cref="LoggerActivity"/>.</returns>
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
-    public static LoggerActivity StartActivity(this ILogger logger, LogEventLevel level, string messageTemplate) 
+    public static LoggerActivity StartActivity(this ILogger logger, LogEventLevel level, string messageTemplate)
     {
         return !TryStartActivity(logger, level, messageTemplate, out var activity) ?
             LoggerActivity.None :
             BindLoggerActivity(logger, level, messageTemplate, [], activity);
     }
-    
+
     /// <summary>
     /// Start an activity.
     /// </summary>
@@ -125,7 +125,7 @@ public static class LoggerTracingExtensions
     /// <param name="messageTemplate">A message template that will be used to format the activity name.</param>
     /// <returns>A <see cref="LoggerActivity"/>.</returns>
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
-    public static LoggerActivity StartActivity(this ILogger logger, string messageTemplate) 
+    public static LoggerActivity StartActivity(this ILogger logger, string messageTemplate)
         => StartActivity(logger, LogEventLevel.Information, messageTemplate);
 
     /// <summary>
@@ -141,13 +141,13 @@ public static class LoggerTracingExtensions
     /// These properties will also be attached to the resulting span.</param>
     /// <returns>A <see cref="LoggerActivity"/>.</returns>
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
-    public static LoggerActivity StartActivity<T>(this ILogger logger, LogEventLevel level, string messageTemplate, T propertyValue) 
+    public static LoggerActivity StartActivity<T>(this ILogger logger, LogEventLevel level, string messageTemplate, T propertyValue)
     {
         return !TryStartActivity(logger, level, messageTemplate, out var activity) ?
             LoggerActivity.None :
             BindLoggerActivity(logger, level, messageTemplate, [propertyValue], activity);
     }
-    
+
     /// <summary>
     /// Start an activity.
     /// </summary>
@@ -158,7 +158,7 @@ public static class LoggerTracingExtensions
     /// These properties will also be attached to the resulting span.</param>
     /// <returns>A <see cref="LoggerActivity"/>.</returns>
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
-    public static LoggerActivity StartActivity<T>(this ILogger logger, string messageTemplate, T propertyValue) 
+    public static LoggerActivity StartActivity<T>(this ILogger logger, string messageTemplate, T propertyValue)
         => StartActivity(logger, LogEventLevel.Information, messageTemplate, propertyValue);
 
     /// <summary>
@@ -181,7 +181,7 @@ public static class LoggerTracingExtensions
             LoggerActivity.None :
             BindLoggerActivity(logger, level, messageTemplate, [propertyValue0, propertyValue1], activity);
     }
-    
+
     /// <summary>
     /// Start an activity.
     /// </summary>
@@ -217,7 +217,7 @@ public static class LoggerTracingExtensions
             LoggerActivity.None :
             BindLoggerActivity(logger, level, messageTemplate, [propertyValue0, propertyValue1, propertyValue2], activity);
     }
-    
+
     /// <summary>
     /// Start an activity.
     /// </summary>

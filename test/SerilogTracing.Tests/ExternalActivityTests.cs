@@ -13,7 +13,7 @@ public class ExternalActivityTests
     public void ExternalActivitiesAreEmitted()
     {
         using var source = Some.ActivitySource();
-        
+
         var sink = new CollectingSink();
 
         var logger = new LoggerConfiguration()
@@ -26,7 +26,7 @@ public class ExternalActivityTests
         using var activity = source.StartActivity()!;
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.Stop();
-        
+
         Assert.Equal(LogEventLevel.Information, sink.SingleEvent.Level);
         Assert.Equal(activity.DisplayName, sink.SingleEvent.RenderMessage());
     }
@@ -35,7 +35,7 @@ public class ExternalActivityTests
     public void ExternalActivitiesUseInitialLevel()
     {
         var source = new ActivitySource($"{typeof(ExternalActivityTests).FullName}.${nameof(ExternalActivitiesUseInitialLevel)}");
-        
+
         var sink = new CollectingSink();
 
         var logger = new LoggerConfiguration()
@@ -50,7 +50,7 @@ public class ExternalActivityTests
         using var activity = source.StartActivity()!;
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.Stop();
-        
+
         Assert.Equal(LogEventLevel.Debug, sink.SingleEvent.Level);
     }
 
@@ -60,7 +60,7 @@ public class ExternalActivityTests
     public void ErroredExternalActivitiesUseErrorLevel(LogEventLevel initialLevel, LogEventLevel completionLevel)
     {
         var source = new ActivitySource($"{typeof(ExternalActivityTests).FullName}.${nameof(ErroredExternalActivitiesUseErrorLevel)}.${initialLevel}.${completionLevel}");
-        
+
         var sink = new CollectingSink();
 
         var logger = new LoggerConfiguration()
@@ -76,7 +76,7 @@ public class ExternalActivityTests
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.SetStatus(ActivityStatusCode.Error);
         activity.Stop();
-        
+
         Assert.Equal(completionLevel, sink.SingleEvent.Level);
     }
 
@@ -84,7 +84,7 @@ public class ExternalActivityTests
     public void ExternalActivitiesUseInitialLevelOverride()
     {
         var source = new ActivitySource($"{typeof(ExternalActivityTests).FullName}.${nameof(ExternalActivitiesUseInitialLevelOverride)}");
-        
+
         var sink = new CollectingSink();
 
         var logger = new LoggerConfiguration()
@@ -99,7 +99,7 @@ public class ExternalActivityTests
         using var activity = source.StartActivity()!;
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.Stop();
-        
+
         Assert.Equal(LogEventLevel.Debug, sink.SingleEvent.Level);
     }
 
@@ -107,7 +107,7 @@ public class ExternalActivityTests
     public void ExternalActivitiesSampleInitialLevel()
     {
         using var source = Some.ActivitySource();
-        
+
         var sink = new CollectingSink();
 
         var logger = new LoggerConfiguration()

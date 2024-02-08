@@ -31,9 +31,9 @@ public static class ActivityListenerInstrumentationConfigurationSqlClientExtensi
     /// <returns>Configuration object allowing method chaining.</returns>
     public static ActivityListenerConfiguration SqlClientCommands(this ActivityListenerInstrumentationConfiguration configuration)
     {
-        return configuration.With(new SqlCommandActivityInstrumentor(new ()));
+        return configuration.With(new SqlCommandActivityInstrumentor(new()));
     }
-    
+
     /// <summary>
     /// Add instrumentation for <see cref="SqlCommand"/> commands.
     /// </summary>
@@ -45,7 +45,7 @@ public static class ActivityListenerInstrumentationConfigurationSqlClientExtensi
     {
         var options = new SqlCommandActivityInstrumentationOptions();
         configure.Invoke(options);
-        
+
         return configuration.With(new SqlCommandActivityInstrumentor(options));
     }
 }

@@ -130,7 +130,7 @@ public static class OpenTelemetryLoggerConfigurationExtensions
             resourceAttributes?.AddTo(options.ResourceAttributes);
         });
     }
-    
+
     /// <summary>
     /// Audit to an OTLP exporter, waiting for each event to be acknowledged, and propagating errors to the caller.
     /// </summary>
@@ -145,7 +145,7 @@ public static class OpenTelemetryLoggerConfigurationExtensions
         if (configure == null) throw new ArgumentNullException(nameof(configure));
 
         var options = new OpenTelemetrySinkOptions();
-        
+
         configure(options);
 
         var exporter = Exporter.Create(
@@ -179,7 +179,7 @@ public static class OpenTelemetryLoggerConfigurationExtensions
 
         return loggerAuditSinkConfiguration.Sink(sink, options.RestrictedToMinimumLevel, options.LevelSwitch);
     }
-    
+
     /// <summary>
     /// Audit to an OTLP exporter, waiting for each event to be acknowledged, and propagating errors to the caller.
     /// </summary>

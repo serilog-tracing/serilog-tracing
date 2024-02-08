@@ -15,7 +15,7 @@ static class SemanticConventions
     /// OpenTelemetry standard exception type attribute.
     /// </summary>
     public const string AttributeExceptionMessage = "exception.message";
-    
+
     /// <summary>
     /// OpenTelemetry standard exception type attribute.
     /// </summary>
@@ -24,7 +24,7 @@ static class SemanticConventions
     /// <summary>
     /// A https://messagetemplates.org template, as text. For example, the string <c>Hello {Name}!</c>.
     /// </summary>
-    public  const string AttributeMessageTemplateText = "message_template.text";
+    public const string AttributeMessageTemplateText = "message_template.text";
 
     /// <summary>
     /// A https://messagetemplates.org template, hashed using MD5 and encoded as a 128-bit hexadecimal value.

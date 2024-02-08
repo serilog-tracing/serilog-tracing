@@ -2,7 +2,7 @@ using SerilogTracing.Instrumentation;
 
 namespace SerilogTracing.Tests.Support;
 
-class CollectingInstrumentationEventObserver: IInstrumentationEventObserver
+class CollectingInstrumentationEventObserver : IInstrumentationEventObserver
 {
     public void OnNext(string eventName, object? eventArgs)
     {

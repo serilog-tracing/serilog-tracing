@@ -31,7 +31,7 @@ namespace SerilogTracing.Expressions;
 static class TracingFunctions
 {
     static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-    
+
     public static LogEventPropertyValue? Elapsed(LogEvent logEvent)
     {
         if (logEvent.Properties.TryGetValue(Constants.SpanStartTimestampPropertyName, out var sst) &&

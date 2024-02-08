@@ -29,7 +29,7 @@ sealed class GrpcExporter : IExporter, IDisposable
 
     readonly LogsService.LogsServiceClient? _logsClient;
     readonly TraceService.TraceServiceClient? _tracesClient;
-    
+
     readonly Metadata _headers;
 
     /// <summary>
@@ -92,7 +92,7 @@ sealed class GrpcExporter : IExporter, IDisposable
     {
         return _logsClient?.ExportAsync(request, _headers).ResponseAsync ?? Task.CompletedTask;
     }
-    
+
     public void Export(ExportTraceServiceRequest request)
     {
         _tracesClient?.Export(request, _headers);
