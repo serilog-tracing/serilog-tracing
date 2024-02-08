@@ -63,10 +63,10 @@ public class ActivityInstrumentationTests
         Assert.True(ActivityInstrumentation.TryGetLogEventPropertyCollection(activity, out logEventProperties));
         
         // All set properties are present
-        Assert.Equal(b, ((ScalarValue)logEventProperties.Values.First(p => p.Name == "b").Value).Value);
-        Assert.Equal(c, ((ScalarValue)logEventProperties.Values.First(p => p.Name == "c").Value).Value);
-        Assert.Equal(d, ((ScalarValue)logEventProperties.Values.First(p => p.Name == "d").Value).Value);
-        Assert.NotNull(logEventProperties.Values.First(p => p.Name == "e").Value);
+        Assert.Equal(b, ((ScalarValue)logEventProperties.First(p => p.Key == "b").Value).Value);
+        Assert.Equal(c, ((ScalarValue)logEventProperties.First(p => p.Key == "c").Value).Value);
+        Assert.Equal(d, ((ScalarValue)logEventProperties.First(p => p.Key == "d").Value).Value);
+        Assert.NotNull(logEventProperties.First(p => p.Key == "e").Value);
     }
 
     [Fact]

@@ -37,7 +37,7 @@ public sealed class LoggerActivity : IDisposable
 
         foreach (var capture in captures)
         {
-            Properties[capture.Name] = capture;
+            Properties[capture.Name] = capture.Value;
         }
 
         if (activity != null)
@@ -51,7 +51,7 @@ public sealed class LoggerActivity : IDisposable
     bool IsComplete { get; set; }
 
     internal MessageTemplate MessageTemplate { get; }
-    internal Dictionary<string, LogEventProperty> Properties { get; }
+    internal Dictionary<string, LogEventPropertyValue> Properties { get; }
     
     bool IsSuppressed => ActivityInstrumentation.IsSuppressed(Activity) || IsComplete;
 
