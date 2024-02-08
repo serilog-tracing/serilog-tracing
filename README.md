@@ -181,7 +181,14 @@ using var _ = new ActivityListenerConfiguration()
     .TraceToSharedLogger();
 ```
 
-## How are traces represented as `LogEvent`s?
+## How an `Activity` becomes a `LogEvent`
+
+![SerilogTracing pipeline](https://raw.githubusercontent.com/serilog-tracing/serilog-tracing/dev/assets/pipeline-architecture.png)
+
+Applications using SerilogTracing add tracing using `ILogger.StartActivity()`. These activities are always converted into `LogEvent`s and emitted through the original `ILogger` that created them.
+.NET libraries and frameworks add tracing using `System.Diagnostics.ActivitySource`s. These activities can also be emitted as `LogEvent`s using `SerilogTracing.ActivityListenerConfiguration`.
+
+### Mapping trace concepts to event properties
 
 Traces are collections of spans, connected by a common trace id. SerilogTracing maps the typical properties associated with a span onto Serilog `LogEvent` instances:
 
@@ -197,7 +204,7 @@ Traces are collections of spans, connected by a common trace id. SerilogTracing 
 | Status description or error event | `Exception` |
 | Tags | `Properties[*]` |
 
-## Levelling for external activity sources
+### Levelling for external activity sources
 
 SerilogTracing can consume activities from .NET itself, and libraries that don't themselves use SerilogTracing. By default, you'll see spans for all activities, from all sources, in your Serilog output.
 
@@ -209,7 +216,7 @@ To "turn down" the level of tracing performed by an external activity source, us
 
 In this example, when activities from the [Npgsql](https://github.com/npgsql/npgsql) activity source are assigned an initial level of `Debug`, they'll be suppressed unless your Serilog logger has debug logging enabled.
 
-### Why is this an _initial_ level?
+#### Why is this an _initial_ level?
 
 The initial level assigned to a source determines whether activities are created by the source. When the activity is completed, it may be recorded at a higher level; for example, a span created at an initial `Information` level may complete as an `Error` (but not at a lower level such as `Debug`, because doing so may suppress the span cause the trace hierarchy to become incoherent).
 
