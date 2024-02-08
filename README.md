@@ -41,7 +41,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
     .CreateLogger();
 
-using var _ = new TracingConfiguration().TraceToSharedLogger();
+using var _ = new ActivityListenerConfiguration().TraceToSharedLogger();
 
 using var activity = Log.Logger.StartActivity("Check {Host}", "example.com");
 try
@@ -87,12 +87,12 @@ Log.Logger = new LoggerConfiguration()
 
 The `Formatters.CreateConsoleTextFormatter()` function comes from `SerilogTracing.Expressions`; you can ignore this and use a regular console output template, but the one we're using here produces nice output for spans that includes timing information. Dig into the implementation of the `CreateConsoleTextFormatter()` function if you'd like to see how to set up your own trace-specific formatting, it's pretty straightforward.
 
-### Enabling tracing with `TracingConfiguration.TraceToSharedLogger()`
+### Enabling tracing with `ActivityListenerConfiguration.TraceToSharedLogger()`
 
 This line sets up SerilogTracing's integration with .NET's diagnostic sources, and starts an activity listener in the background that will write spans from the framework and third-party libraries through your Serilog pipeline:
 
 ```csharp
-using var _ = new TracingConfiguration().TraceToSharedLogger();
+using var _ = new ActivityListenerConfiguration().TraceToSharedLogger();
 ```
 
 This step is optional, but you'll need this if you want to view your SerilogTracing output as hierarchical, distributed traces: without it, `HttpClient` won't generate spans, and won't propagate trace ids along with outbound HTTP requests.
@@ -108,7 +108,7 @@ await using var logger = new LoggerConfiguration()
     .WriteTo.Console(Formatters.CreateConsoleTextFormatter())
     .CreateLogger();
 
-using var _ = new TracingConfiguration().TraceTo(logger);
+using var _ = new ActivityListenerConfiguration().TraceTo(logger);
 ```
 
 ### Starting and completing activities
@@ -157,26 +157,26 @@ If you're writing an ASP.NET Core application, you'll notice that the spans gene
 dotnet add package SerilogTracing.Instrumentation.AspNetCore --prerelease
 ```
 
-Then add `Instrument.AspNetCoreRequests()` to your `TracingConfiguration`:
+Then add `Instrument.AspNetCoreRequests()` to your `ActivityListenerConfiguration`:
 
 ```csharp
-using var _ = new TracingConfiguration()
+using var _ = new ActivityListenerConfiguration()
     .Instrument.AspNetCoreRequests()
     .TraceToSharedLogger();
 ```
 
 ## Adding instrumentation for `Microsoft.Data.SqlClient`
 
-Microsoft's client libraray for SQL Server doesn't generate spans by default. To turn on tracing of database commands, install `SerilogTracing.Instrumentation.SqlClient`:
+Microsoft's client library for SQL Server doesn't generate spans by default. To turn on tracing of database commands, install `SerilogTracing.Instrumentation.SqlClient`:
 
 ```sh
 dotnet add package SerilogTracing.Instrumentation.SqlClient --prerelease
 ```
 
-Then add `Instrument.SqlClientCommands()` to your `TracingConfiguration`:
+Then add `Instrument.SqlClientCommands()` to your `ActivityListenerConfiguration`:
 
 ```csharp
-using var _ = new TracingConfiguration()
+using var _ = new ActivityListenerConfiguration()
     .Instrument.SqlClientCommands()
     .TraceToSharedLogger();
 ```

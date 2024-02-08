@@ -47,7 +47,7 @@ public class LoggerTracingExtensionsTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        var configuration = new TracingConfiguration();
+        var configuration = new ActivityListenerConfiguration();
         if (includedInSample is { } always)
         {
             var result = always ? ActivitySamplingResult.AllData : ActivitySamplingResult.None;

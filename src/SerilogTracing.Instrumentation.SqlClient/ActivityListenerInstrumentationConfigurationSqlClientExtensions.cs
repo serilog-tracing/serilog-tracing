@@ -5,17 +5,17 @@ using SerilogTracing.Instrumentation.SqlClient;
 namespace SerilogTracing;
 
 /// <summary>
-/// Extends <see cref="TracingInstrumentationConfiguration"/> with methods to support ASP.NET
+/// Extends <see cref="ActivityListenerInstrumentationConfiguration"/> with methods to support ASP.NET
 /// Core instrumentation.
 /// </summary>
-public static class TracingInstrumentationConfigurationSqlClientExtensions
+public static class ActivityListenerInstrumentationConfigurationSqlClientExtensions
 {
     /// <summary>
     /// Add instrumentation for <see cref="SqlCommand"/> commands.
     /// </summary>
     /// <param name="configuration"></param>
     /// <returns>Configuration object allowing method chaining.</returns>
-    public static TracingConfiguration SqlClientCommands(this TracingInstrumentationConfiguration configuration)
+    public static ActivityListenerConfiguration SqlClientCommands(this ActivityListenerInstrumentationConfiguration configuration)
     {
         return configuration.With(new SqlCommandActivityInstrumentor(new ()));
     }
@@ -26,8 +26,8 @@ public static class TracingInstrumentationConfigurationSqlClientExtensions
     /// <param name="configuration"></param>
     /// <param name="configure">A callback to configure the instrumentation.</param>
     /// <returns>Configuration object allowing method chaining.</returns>
-    public static TracingConfiguration SqlClientCommands(
-        this TracingInstrumentationConfiguration configuration, Action<SqlCommandActivityInstrumentationOptions> configure)
+    public static ActivityListenerConfiguration SqlClientCommands(
+        this ActivityListenerInstrumentationConfiguration configuration, Action<SqlCommandActivityInstrumentationOptions> configure)
     {
         var options = new SqlCommandActivityInstrumentationOptions();
         configure.Invoke(options);

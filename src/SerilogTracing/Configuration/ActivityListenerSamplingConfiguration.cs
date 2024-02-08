@@ -3,18 +3,18 @@
 namespace SerilogTracing.Configuration;
 
 /// <summary>
-/// Options for <see cref="TracingConfiguration"/> configuration.
+/// Options for <see cref="ActivityListenerConfiguration"/> configuration.
 /// </summary>
-public class TracingSamplingConfiguration
+public class ActivityListenerSamplingConfiguration
 {
-    readonly TracingConfiguration _tracingConfiguration;
+    readonly ActivityListenerConfiguration _activityListenerConfiguration;
     SampleActivity<ActivityContext>? _sample;
     
     internal SampleActivity<ActivityContext>? ActivityContext => _sample;
 
-    internal TracingSamplingConfiguration(TracingConfiguration tracingConfiguration)
+    internal ActivityListenerSamplingConfiguration(ActivityListenerConfiguration activityListenerConfiguration)
     {
-        _tracingConfiguration = tracingConfiguration;
+        _activityListenerConfiguration = activityListenerConfiguration;
     }
 
     /// <summary>
@@ -30,9 +30,9 @@ public class TracingSamplingConfiguration
     /// on the destination logger.
     /// </remarks>
     /// <seealso cref="ActivityListener.Sample"/>
-    public TracingConfiguration Using(SampleActivity<ActivityContext> sample)
+    public ActivityListenerConfiguration Using(SampleActivity<ActivityContext> sample)
     {
         _sample = sample;
-        return _tracingConfiguration;
+        return _activityListenerConfiguration;
     }
 }

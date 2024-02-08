@@ -2,12 +2,12 @@
 
 namespace SerilogTracing.Instrumentation.AspNetCore.Tests;
 
-public class TracingInstrumentationConfigurationAspNetCoreExtensionsTests
+public class ActivityListenerInstrumentationConfigurationAspNetCoreExtensionsTests
 {
     [Fact]
     public void ConfigurationMethodsAreCallable()
     {
-        var configuration = new TracingConfiguration();
+        var configuration = new ActivityListenerConfiguration();
 
         configuration.Instrument.AspNetCoreRequests();
         configuration.Instrument.AspNetCoreRequests(_ => { });

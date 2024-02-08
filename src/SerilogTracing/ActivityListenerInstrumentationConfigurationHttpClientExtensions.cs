@@ -6,12 +6,12 @@ namespace SerilogTracing;
 /// <summary>
 /// Support ASP.NET Core instrumentation.
 /// </summary>
-public static class TracingInstrumentationConfigurationHttpClientExtensions
+public static class ActivityListenerInstrumentationConfigurationHttpClientExtensions
 {
     /// <summary>
     /// Add instrumentation for ASP.NET Core requests.
     /// </summary>
-    public static TracingConfiguration HttpClientRequests(this TracingInstrumentationConfiguration configuration)
+    public static ActivityListenerConfiguration HttpClientRequests(this ActivityListenerInstrumentationConfiguration configuration)
     {
         return configuration.With(new HttpRequestOutActivityInstrumentor());
     }

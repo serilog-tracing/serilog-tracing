@@ -17,7 +17,7 @@ Log.Logger = new LoggerConfiguration()
     })
     .CreateLogger();
 
-using var _ = new TracingConfiguration()
+using var _ = new ActivityListenerConfiguration()
     .Instrument.AspNetCoreRequests()
     .TraceToSharedLogger();
 

@@ -21,7 +21,7 @@ public class ExternalActivityTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        using var _ = new TracingConfiguration().TraceTo(logger);
+        using var _ = new ActivityListenerConfiguration().TraceTo(logger);
 
         using var activity = source.StartActivity()!;
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
@@ -43,7 +43,7 @@ public class ExternalActivityTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        using var _ = new TracingConfiguration()
+        using var _ = new ActivityListenerConfiguration()
             .InitialLevel.Is(LogEventLevel.Debug)
             .TraceTo(logger);
 
@@ -68,7 +68,7 @@ public class ExternalActivityTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        using var _ = new TracingConfiguration()
+        using var _ = new ActivityListenerConfiguration()
             .InitialLevel.Is(initialLevel)
             .TraceTo(logger);
 
@@ -92,7 +92,7 @@ public class ExternalActivityTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        using var _ = new TracingConfiguration()
+        using var _ = new ActivityListenerConfiguration()
             .InitialLevel.Override(typeof(ExternalActivityTests).FullName!, LogEventLevel.Debug)
             .TraceTo(logger);
 
@@ -115,7 +115,7 @@ public class ExternalActivityTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        using var _ = new TracingConfiguration()
+        using var _ = new ActivityListenerConfiguration()
             .InitialLevel.Is(LogEventLevel.Debug)
             .TraceTo(logger);
 

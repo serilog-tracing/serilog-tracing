@@ -16,7 +16,7 @@ public static class TracingLoggerEnrichmentConfigurationExtensions
     /// <param name="propertyName">The name of the property to add.</param>
     public static LoggerConfiguration WithSpanTimingMilliseconds(this LoggerEnrichmentConfiguration enrichment, string? propertyName = null)
     {
-        return enrichment.With(new SpanTimingMilliseconds(propertyName ?? "Elapsed"));
+        return enrichment.With(new SpanTimingMillisecondsEnricher(propertyName ?? "Elapsed"));
     }
     
     /// <summary>
@@ -26,6 +26,6 @@ public static class TracingLoggerEnrichmentConfigurationExtensions
     /// <param name="propertyName">The name of the property to add.</param>
     public static LoggerConfiguration WithSpanTiming(this LoggerEnrichmentConfiguration enrichment, string? propertyName = null)
     {
-        return enrichment.With(new SpanTiming(propertyName ?? "Elapsed"));
+        return enrichment.With(new SpanTimingEnricher(propertyName ?? "Elapsed"));
     }
 }

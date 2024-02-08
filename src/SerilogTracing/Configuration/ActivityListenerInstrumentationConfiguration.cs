@@ -6,9 +6,9 @@ namespace SerilogTracing.Configuration;
 /// <summary>
 /// Controls instrumentation configuration.
 /// </summary>
-public sealed class TracingInstrumentationConfiguration
+public sealed class ActivityListenerInstrumentationConfiguration
 {
-    readonly TracingConfiguration _tracingConfiguration;
+    readonly ActivityListenerConfiguration _activityListenerConfiguration;
     readonly List<IActivityInstrumentor> _instrumentors = [];
     bool _withDefaultInstrumentors = true;
     
@@ -18,9 +18,9 @@ public sealed class TracingInstrumentationConfiguration
         _withDefaultInstrumentors ?
             GetDefaultInstrumentors().Concat(_instrumentors) : _instrumentors;
     
-    internal TracingInstrumentationConfiguration(TracingConfiguration tracingConfiguration)
+    internal ActivityListenerInstrumentationConfiguration(ActivityListenerConfiguration activityListenerConfiguration)
     {
-        _tracingConfiguration = tracingConfiguration;
+        _activityListenerConfiguration = activityListenerConfiguration;
     }
 
     /// <summary>
@@ -28,10 +28,10 @@ public sealed class TracingInstrumentationConfiguration
     /// </summary>
     /// <param name="withDefaults">If true, default activity instrumentors will be used.</param>
     /// <returns>Configuration object allowing method chaining.</returns>
-    public TracingConfiguration WithDefaultInstrumentation(bool withDefaults)
+    public ActivityListenerConfiguration WithDefaultInstrumentation(bool withDefaults)
     {
         _withDefaultInstrumentors = withDefaults;
-        return _tracingConfiguration;
+        return _activityListenerConfiguration;
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ public sealed class TracingInstrumentationConfiguration
     /// <returns>Configuration object allowing method chaining.</returns>
     /// <exception cref="ArgumentNullException">When <paramref name="instrumentors"/> is <code>null</code></exception>
     /// <exception cref="ArgumentException">When any element of <paramref name="instrumentors"/> is <code>null</code></exception>
-    public TracingConfiguration With(params IActivityInstrumentor[] instrumentors)
+    public ActivityListenerConfiguration With(params IActivityInstrumentor[] instrumentors)
     {
         if (instrumentors == null)
         {
@@ -60,7 +60,7 @@ public sealed class TracingInstrumentationConfiguration
             _instrumentors.Add(instrumentor);
         }
         
-        return _tracingConfiguration;
+        return _activityListenerConfiguration;
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ public sealed class TracingInstrumentationConfiguration
     /// <typeparam name="TInstrumentor">Instrumentor type to apply to all events passing through
     /// the logger.</typeparam>
     /// <returns>Configuration object allowing method chaining.</returns>
-    public TracingConfiguration With<TInstrumentor>()
+    public ActivityListenerConfiguration With<TInstrumentor>()
         where TInstrumentor : IActivityInstrumentor, new()
     {
         return With(new TInstrumentor());
