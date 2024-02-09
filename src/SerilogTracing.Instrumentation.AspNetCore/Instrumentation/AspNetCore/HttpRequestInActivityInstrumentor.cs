@@ -32,6 +32,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
         _getRequestProperties = options.GetRequestProperties;
         _getResponseProperties = options.GetResponseProperties;
         _messageTemplateOverride = new MessageTemplateParser().Parse(options.MessageTemplate);
+        _incomingTraceParent = options.IncomingTraceParent;
     }
 
     readonly Func<HttpRequest, IEnumerable<LogEventProperty>> _getRequestProperties;
@@ -39,6 +40,9 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
     readonly MessageTemplate _messageTemplateOverride;
     readonly PropertyAccessor<Exception> _exceptionAccessor = new("exception");
     readonly PropertyAccessor<HttpContext> _httpContextAccessor = new("httpContext");
+    readonly IncomingTraceParent _incomingTraceParent;
+
+    const string RegeneratedActivityPropertyName = "SerilogTracing.Instrumentation.AspNetCore.Regenerated";
 
     /// <inheritdoc />
     public bool ShouldSubscribeTo(string diagnosticListenerName)
@@ -54,12 +58,63 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Start":
                 if (eventArgs is not HttpContext start) return;
 
+                switch (_incomingTraceParent)
+                {
+                    // Don't trust the incoming traceparent
+                    // Generate a new root activity, using no information from the one populated by traceparent
+                    case IncomingTraceParent.Ignore:
+                        activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+
+                        var regenerated = activity.Source.CreateActivity(activity.DisplayName, activity.Kind);
+                        if (regenerated != null)
+                        {
+                            regenerated.SetParentId(ActivityTraceId.CreateRandom(), default, ActivityTraceFlags.Recorded);
+                            
+                            foreach (var (name, value) in activity.EnumerateTagObjects())
+                            {
+                                regenerated.SetTag(name, value);
+                            }
+                            
+                            // NOTE: Baggage is ignored
+                            
+                            regenerated.SetCustomProperty(RegeneratedActivityPropertyName, activity);
+                        }
+
+                        Activity.Current?.Start();
+                        
+                        break;
+                    
+                    // Partially trust the incoming traceparent
+                    // Use the propagated trace and parent ids, but ignore any flags
+                    case IncomingTraceParent.Accept:
+                        // NOTE: This intentionally replaces all flags with just `Recorded`
+                        // It's `=` and not `|=` intentionally
+                        activity.ActivityTraceFlags = ActivityTraceFlags.Recorded;
+                        
+                        break;
+                    
+                    // Fully trust the incoming traceparent
+                    case IncomingTraceParent.Trust:
+                        // If the incoming request has no traceparent at all then
+                        // treat it as recorded
+                        if (start.Request.Headers.TraceParent.Count == 0)
+                        {
+                            activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
+                        }
+                        
+                        break;
+                    
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
                 ActivityInstrumentation.SetMessageTemplateOverride(activity, _messageTemplateOverride);
                 activity.DisplayName = _messageTemplateOverride.Text;
 
                 ActivityInstrumentation.SetLogEventProperties(activity, _getRequestProperties(start.Request).ToArray());
 
                 break;
+            
             case "Microsoft.AspNetCore.Diagnostics.UnhandledException":
                 if (_exceptionAccessor.TryGetValue(eventArgs, out var exception) &&
                     _httpContextAccessor.TryGetValue(eventArgs, out var httpContext) &&
@@ -67,7 +122,9 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
                 {
                     ActivityInstrumentation.TrySetException(activity, exception);
                 }
+                
                 break;
+            
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Stop":
                 if (eventArgs is not HttpContext stop) return;
 
@@ -76,6 +133,11 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
                 if (stop.Response.StatusCode >= 500)
                 {
                     activity.SetStatus(ActivityStatusCode.Error);
+                }
+
+                if (activity.GetCustomProperty(RegeneratedActivityPropertyName) is Activity)
+                {
+                    activity.Stop();
                 }
 
                 break;
