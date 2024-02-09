@@ -9,7 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{81CA4013-44B
 		LICENSE = LICENSE
 		README.md = README.md
 		.gitattributes = .gitattributes
-		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
 		global.json = global.json
 		Setup.ps1 = Setup.ps1
@@ -56,6 +55,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Instrumentat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.PublicApi.Tests", "test\SerilogTracing.PublicApi.Tests\SerilogTracing.PublicApi.Tests.csproj", "{0128EB76-9B60-4553-B089-2D1707CD0D65}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{6BB7BDF8-8AEE-4D76-9E81-EA9984A66BF6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".workflows", ".workflows", "{ECE478F5-0719-4E59-8AEF-6AB12BE33B62}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +85,7 @@ Global
 		{46536060-BF0C-4B38-9D0A-BA5667527D68} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
 		{9D94FDB0-546F-46FD-AFF1-9E48C7BA24E6} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
 		{0128EB76-9B60-4553-B089-2D1707CD0D65} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
+		{ECE478F5-0719-4E59-8AEF-6AB12BE33B62} = {6BB7BDF8-8AEE-4D76-9E81-EA9984A66BF6}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
