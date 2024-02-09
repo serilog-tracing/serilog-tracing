@@ -63,12 +63,14 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
                     // Don't trust the incoming traceparent
                     // Generate a new root activity, using no information from the one populated by traceparent
                     case IncomingTraceParent.Ignore:
-                        activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+                        Activity.Current = activity.Parent;
 
+                        activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+                        
                         var regenerated = activity.Source.CreateActivity(activity.DisplayName, activity.Kind);
                         if (regenerated != null)
                         {
-                            regenerated.SetParentId(ActivityTraceId.CreateRandom(), default, ActivityTraceFlags.Recorded);
+                            regenerated.ActivityTraceFlags = ActivityTraceFlags.Recorded;
                             
                             foreach (var (name, value) in activity.EnumerateTagObjects())
                             {
@@ -78,10 +80,16 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
                             // NOTE: Baggage is ignored
                             
                             regenerated.SetCustomProperty(RegeneratedActivityPropertyName, activity);
+                            
+                            regenerated.Start();
+
+                            activity = regenerated;
+                        }
+                        else
+                        {
+                            Activity.Current = activity;
                         }
 
-                        Activity.Current?.Start();
-                        
                         break;
                     
                     // Partially trust the incoming traceparent
@@ -135,9 +143,10 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
                     activity.SetStatus(ActivityStatusCode.Error);
                 }
 
-                if (activity.GetCustomProperty(RegeneratedActivityPropertyName) is Activity)
+                if (activity.GetCustomProperty(RegeneratedActivityPropertyName) is Activity original)
                 {
                     activity.Stop();
+                    Activity.Current = original;
                 }
 
                 break;

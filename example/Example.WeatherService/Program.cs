@@ -10,15 +10,13 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", typeof(Program).Assembly.GetName().Name)
     .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
     .WriteTo.SeqTracing("http://localhost:5341")
-    .WriteTo.Zipkin("http://localhost:9411")
-    .WriteTo.OpenTelemetry("http://localhost:5341/ingest/otlp/v1/logs", "http://localhost:5341/ingest/otlp/v1/traces", OtlpProtocol.HttpProtobuf, null, new Dictionary<string, object>()
-    {
-        { "service.name", typeof(Program).Assembly.GetName().Name ?? "unknown_service" }
-    })
     .CreateLogger();
 
 using var _ = new ActivityListenerConfiguration()
-    .Instrument.AspNetCoreRequests()
+    .Instrument.AspNetCoreRequests(config =>
+    {
+        config.IncomingTraceParent = IncomingTraceParent.Ignore;
+    })
     .TraceToSharedLogger();
 
 Log.Information("Weather service starting up");
