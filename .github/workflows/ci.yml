@@ -25,7 +25,7 @@ jobs:
           dotnet-version: 8.0.x
       - name: Compute build number
         run: |
-          echo ::set-env name=CI_BUILD_NUMBER::$((CI_BUILD_NUMBER_BASE+200))
+          echo echo "CI_BUILD_NUMBER=$(($CI_BUILD_NUMBER_BASE+200))" >> $GITHUB_ENV
       - name: Build and Publish
         env:
           DOTNET_CLI_TELEMETRY_OPTOUT: true
