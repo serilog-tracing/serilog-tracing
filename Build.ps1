@@ -35,13 +35,18 @@ foreach ($src in Get-ChildItem src/*) {
     Pop-Location
 }
 
+Write-Output "build: Checking complete solution builds"
+& dotnet build
+if($LASTEXITCODE -ne 0) { throw "Solution build failed" }
+
+
 foreach ($test in Get-ChildItem test/*.Tests) {
     Push-Location $test
 
 	Write-Output "build: Testing project in $test"
 
     & dotnet test -c Release
-
+    if($LASTEXITCODE -ne 0) { throw "Testing failed" }
 
     Pop-Location
 }
