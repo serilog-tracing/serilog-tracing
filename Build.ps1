@@ -2,7 +2,7 @@ Write-Output "build: Build started"
 
 Push-Location $PSScriptRoot
 
-Write-Output: "build: Tool versions follow"
+Write-Output "build: Tool versions follow"
 
 dotnet --version
 dotnet --list-sdks
