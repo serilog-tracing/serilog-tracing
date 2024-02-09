@@ -50,6 +50,6 @@ if ($NUGET_API_KEY) {
     Write-Output "build: Publishing NuGet packages"
     
     foreach ($nupkg in Get-ChildItem artifacts/*.nupkg) {
-        & dotnet nuget push -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json "$nupkg" --skip-symbols
+        & dotnet nuget push -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json "$nupkg" --skip-symbols
     }
 }
