@@ -25,6 +25,7 @@ jobs:
           dotnet-version: 8.0.x
       - name: Build and Publish
         env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: true
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         shell: pwsh
         run: |
