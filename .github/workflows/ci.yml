@@ -1,0 +1,31 @@
+# If this file is renamed, the incrementing run attempt number will be reset.
+
+name: CI
+
+on:
+  push:
+    branches: [ "dev", "main" ]
+  pull_request:
+    branches: [ "dev", "main" ]
+      
+env:
+  CI_BUILD_NUMBER: ${{ github.run_attempt }}
+  CI_TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+      - name: Build and Publish
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        shell: pwsh
+        run: |
+          ./Build.ps1

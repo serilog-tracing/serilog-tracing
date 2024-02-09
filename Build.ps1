@@ -1,7 +1,5 @@
 Write-Output "build: Build started"
 
-$env:Path = "$pwd/.dotnetcli;$env:Path"
-
 Push-Location $PSScriptRoot
 
 if(Test-Path .\artifacts) {
@@ -11,8 +9,8 @@ if(Test-Path .\artifacts) {
 
 & dotnet restore --no-cache
 
-$branch = @{ $true = $env:APPVEYOR_REPO_BRANCH; $false = $(git symbolic-ref --short -q HEAD) }[$NULL -ne $env:APPVEYOR_REPO_BRANCH];
-$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10); $false = "local" }[$NULL -ne $env:APPVEYOR_BUILD_NUMBER];
+$branch = @{ $true = $env:CI_TARGET_BRANCH; $false = $(git symbolic-ref --short -q HEAD) }[$NULL -ne $env:CI_TARGET_BRANCH];
+$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:CI_BUILD_NUMBER, 10); $false = "local" }[$NULL -ne $env:CI_BUILD_NUMBER];
 $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch.Length)))-$revision"}[$branch -eq "main" -and $revision -ne "local"]
 
 Write-Output "build: Package version suffix is $suffix"
@@ -44,3 +42,14 @@ foreach ($test in Get-ChildItem test/*.Tests) {
 }
 
 Pop-Location
+
+if ($NUGET_API_KEY) {
+    # GitHub Actions will only supply this to branch builds and not PRs. We publish
+    # builds from any branch this action targets (i.e. main and dev).
+    
+    Write-Output "build: Publishing NuGet packages"
+    
+    foreach ($nupkg in Get-ChildItem artifacts/*.nupkg) {
+        & dotnet nuget push -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json "$nupkg" --skip-symbols
+    }
+}
