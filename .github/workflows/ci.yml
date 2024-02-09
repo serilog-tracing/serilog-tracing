@@ -9,7 +9,7 @@ on:
     branches: [ "dev", "main" ]
       
 env:
-  CI_BUILD_NUMBER: ${{ github.run_attempt }}
+  CI_BUILD_NUMBER: ${{ 200 + github.run_number }}
   CI_TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
 
 jobs:
