@@ -24,12 +24,12 @@ namespace SerilogTracing.Interop;
 sealed class LoggerActivityListener: IDisposable
 {
     readonly ActivityListener? _listener;
-    readonly DiagnosticListenerObserver? _subscription;
+    readonly IDisposable? _diagnosticListenerSubscription;
 
-    LoggerActivityListener(ActivityListener? listener, DiagnosticListenerObserver? subscription)
+    LoggerActivityListener(ActivityListener? listener, IDisposable? subscription)
     {
         _listener = listener;
-        _subscription = subscription;
+        _diagnosticListenerSubscription = subscription;
     }
     
     internal static LoggerActivityListener Configure(ActivityListenerConfiguration configuration, Func<ILogger> logger)
@@ -43,7 +43,7 @@ sealed class LoggerActivityListener: IDisposable
         }
 
         var activityListener = new ActivityListener();
-        var subscription = new DiagnosticListenerObserver(configuration.Instrument.GetInstrumentors().ToArray());
+        var subscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver(configuration.Instrument.GetInstrumentors().ToArray()));
 
         try
         {
@@ -65,7 +65,7 @@ sealed class LoggerActivityListener: IDisposable
 
             activityListener.ActivityStopped += activity =>
             {
-                if (!activity.Recorded) return;
+                if (ActivityInstrumentation.IsDataSuppressed(activity)) return;
 
                 if (ActivityInstrumentation.HasAttachedLoggerActivity(activity))
                     return; // `LoggerActivity` completion writes these to the activity-specific logger.
@@ -114,6 +114,6 @@ sealed class LoggerActivityListener: IDisposable
     public void Dispose()
     {
         _listener?.Dispose();
-        _subscription?.Dispose();
+        _diagnosticListenerSubscription?.Dispose();
     }
 }
