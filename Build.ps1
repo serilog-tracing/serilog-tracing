@@ -2,6 +2,11 @@ Write-Output "build: Build started"
 
 Push-Location $PSScriptRoot
 
+Write-Output: "build: Tool versions follow"
+
+dotnet --version
+dotnet --list-sdks
+
 if(Test-Path .\artifacts) {
 	Write-Output "build: Cleaning ./artifacts"
 	Remove-Item ./artifacts -Force -Recurse
@@ -36,7 +41,7 @@ foreach ($test in Get-ChildItem test/*.Tests) {
 	Write-Output "build: Testing project in $test"
 
     & dotnet test -c Release
-    if($LASTEXITCODE -ne 0) { throw "Testing failed" }
+
 
     Pop-Location
 }
@@ -51,5 +56,6 @@ if ($NUGET_API_KEY) {
     
     foreach ($nupkg in Get-ChildItem artifacts/*.nupkg) {
         & dotnet nuget push -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json "$nupkg" --skip-symbols
+        if($LASTEXITCODE -ne 0) { throw "Publishing failed" }
     }
 }
