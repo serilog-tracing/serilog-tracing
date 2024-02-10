@@ -53,14 +53,14 @@ foreach ($test in Get-ChildItem test/*.Tests) {
 
 Pop-Location
 
-if ($NUGET_API_KEY) {
+if ($env:NUGET_API_KEY) {
     # GitHub Actions will only supply this to branch builds and not PRs. We publish
     # builds from any branch this action targets (i.e. main and dev).
     
     Write-Output "build: Publishing NuGet packages"
     
     foreach ($nupkg in Get-ChildItem artifacts/*.nupkg) {
-        & dotnet nuget push -k $NUGET_API_KEY -s https://api.nuget.org/v3/index.json "$nupkg" --skip-symbols
+        & dotnet nuget push -k $env:NUGET_API_KEY -s https://api.nuget.org/v3/index.json "$nupkg" --skip-symbols
         if($LASTEXITCODE -ne 0) { throw "Publishing failed" }
     }
 }
