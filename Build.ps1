@@ -60,7 +60,7 @@ if ($env:NUGET_API_KEY) {
     Write-Output "build: Publishing NuGet packages"
     
     foreach ($nupkg in Get-ChildItem artifacts/*.nupkg) {
-        & dotnet nuget push -k $env:NUGET_API_KEY -s https://api.nuget.org/v3/index.json "$nupkg" --skip-symbols
+        & dotnet nuget push -k $env:NUGET_API_KEY -s https://api.nuget.org/v3/index.json "$nupkg" --no-symbols
         if($LASTEXITCODE -ne 0) { throw "Publishing failed" }
     }
 }
