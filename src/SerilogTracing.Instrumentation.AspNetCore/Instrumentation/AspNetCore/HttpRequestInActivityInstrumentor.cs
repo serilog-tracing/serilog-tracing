@@ -69,6 +69,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
                         activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
                         activity.IsAllDataRequested = false;
                         
+                        // TODO: If the `Activity.Source` is the default then pick a different one
                         var regenerated = activity.Source.CreateActivity(activity.DisplayName, activity.Kind);
                         if (regenerated != null)
                         {
@@ -101,12 +102,15 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
                         // It's `=` and not `|=` intentionally
                         activity.ActivityTraceFlags = ActivityTraceFlags.Recorded;
                         
+                        // TODO: Need to clear baggage here; means recreating the activity
+                        
                         break;
                     
                     // Fully trust the incoming traceparent
                     case IncomingTraceParent.Trust:
                         // If the incoming request has no traceparent at all then
                         // still treat it as recorded
+                        // TODO: In this case, recreate the activity so sampling is applied
                         if (start.Request.Headers.TraceParent.Count == 0)
                         {
                             activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
