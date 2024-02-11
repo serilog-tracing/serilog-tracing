@@ -212,11 +212,11 @@ public static class ActivityInstrumentation
 
     internal static bool IsSuppressed(Activity? activity)
     {
-        return activity is null;
+        return activity is not { Recorded: true };
     }
 
     internal static bool IsDataSuppressed(Activity? activity)
     {
-        return activity is not { IsAllDataRequested: true };
+        return activity is not { IsAllDataRequested: true, Recorded: true };
     }
 }

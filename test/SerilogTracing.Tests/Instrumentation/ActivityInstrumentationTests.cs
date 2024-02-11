@@ -5,7 +5,7 @@ using SerilogTracing.Instrumentation;
 using SerilogTracing.Tests.Support;
 using Xunit;
 
-namespace SerilogTracing.Tests;
+namespace SerilogTracing.Tests.Instrumentation;
 
 [Collection("Shared")]
 public class ActivityInstrumentationTests
@@ -93,5 +93,65 @@ public class ActivityInstrumentationTests
         Assert.True(ActivityInstrumentation.TryGetException(activity, out var exception));
 
         Assert.Equal("Test Error", exception.Message);
+    }
+
+    [Fact]
+    public void RecordedActivityIsNotSuppressed()
+    {
+        using var activity = Some.Activity();
+        
+        Assert.False(ActivityInstrumentation.IsSuppressed(activity));
+    }
+    
+    [Fact]
+    public void NonAllDataRequestedActivityIsNotSuppressed()
+    {
+        using var activity = Some.Activity(allData: false);
+        
+        Assert.False(ActivityInstrumentation.IsSuppressed(activity));
+    }
+
+    [Fact]
+    public void NullActivityIsSuppressed()
+    {
+        Assert.True(ActivityInstrumentation.IsSuppressed(null));
+    }
+
+    [Fact]
+    public void NonRecordedActivityIsSuppressed()
+    {
+        using var activity = Some.Activity(recorded: false);
+        
+        Assert.True(ActivityInstrumentation.IsSuppressed(activity));
+    }
+
+    [Fact]
+    public void AllDataRequestedActivityIsNotDataSuppressed()
+    {
+        using var activity = Some.Activity();
+        
+        Assert.False(ActivityInstrumentation.IsDataSuppressed(activity));
+    }
+
+    [Fact]
+    public void NullActivityIsDataSuppressed()
+    {
+        Assert.True(ActivityInstrumentation.IsDataSuppressed(null));
+    }
+
+    [Fact]
+    public void NonRecordedActivityIsDataSuppressed()
+    {
+        using var activity = Some.Activity(recorded: false);
+        
+        Assert.True(ActivityInstrumentation.IsDataSuppressed(activity));
+    }
+
+    [Fact]
+    public void NonAllDataRequestedActivityIsDataSuppressed()
+    {
+        using var activity = Some.Activity(allData: false);
+        
+        Assert.True(ActivityInstrumentation.IsDataSuppressed(activity));
     }
 }

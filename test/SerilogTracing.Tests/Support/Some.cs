@@ -23,9 +23,18 @@ static class Some
 
     static int _integer = new Random().Next(int.MaxValue / 2);
 
-    public static Activity Activity(string? name = null)
+    public static Activity Activity(string? name = null, bool recorded = true, bool allData = true)
     {
-        return new Activity(name ?? String());
+        var activity = new Activity(name ?? String());
+
+        if (recorded)
+        {
+            activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
+        }
+
+        activity.IsAllDataRequested = allData;
+
+        return activity;
     }
 
     public static LogEvent SerilogEvent(string messageTemplate, DateTimeOffset? timestamp = null, Exception? ex = null)

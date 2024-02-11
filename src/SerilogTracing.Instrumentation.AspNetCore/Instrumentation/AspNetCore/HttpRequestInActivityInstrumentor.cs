@@ -65,7 +65,9 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
                     case IncomingTraceParent.Ignore:
                         Activity.Current = activity.Parent;
 
+                        // Suppress the activity created by ASP.NET Core
                         activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+                        activity.IsAllDataRequested = false;
                         
                         var regenerated = activity.Source.CreateActivity(activity.DisplayName, activity.Kind);
                         if (regenerated != null)
@@ -104,7 +106,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
                     // Fully trust the incoming traceparent
                     case IncomingTraceParent.Trust:
                         // If the incoming request has no traceparent at all then
-                        // treat it as recorded
+                        // still treat it as recorded
                         if (start.Request.Headers.TraceParent.Count == 0)
                         {
                             activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
