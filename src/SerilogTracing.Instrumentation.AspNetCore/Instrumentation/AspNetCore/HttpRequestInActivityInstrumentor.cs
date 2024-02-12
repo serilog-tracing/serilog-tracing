@@ -44,16 +44,18 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
 
     const string RegeneratedActivityPropertyName = "SerilogTracing.Instrumentation.AspNetCore.Regenerated";
 
+    const string SourceName = "Microsoft.AspNetCore";
+
     // NOTE: Using the same name as the source used by ASP.NET Core so filtering on it works
-    static readonly ActivitySource ImpersonatedSource = new("Microsoft.AspNetCore");
+    static readonly ActivitySource ImpersonatedSource = new(SourceName);
 
     static ActivitySource GetSource(Activity activity) =>
-        activity.Source.Name == "Microsoft.AspNetCore" ? activity.Source : ImpersonatedSource;
+        activity.Source.Name == SourceName ? activity.Source : ImpersonatedSource;
 
     /// <inheritdoc />
     public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
-        return diagnosticListenerName == "Microsoft.AspNetCore";
+        return diagnosticListenerName == SourceName;
     }
 
     /// <inheritdoc />
@@ -103,7 +105,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
                         // This ensures:
                         // 1. Sampling is properly applied, even if the activity was manually created by ASP.NET Core
                         // 2. Clients that don't send any traceparent header may still produce a recorded activity
-                        if (activity.Source.Name != "Microsoft.AspNetCore" || start.Request.Headers.TraceParent.Count == 0)
+                        if (activity.Source.Name != SourceName || start.Request.Headers.TraceParent.Count == 0)
                         {
                             recreated = RecreateActivity(activity);
 
