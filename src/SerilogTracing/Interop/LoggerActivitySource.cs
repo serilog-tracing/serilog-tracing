@@ -32,12 +32,6 @@ static class LoggerActivitySource
             // should the logging layer.
             var listenerActivity = Instance.CreateActivity(name, ActivityKind.Internal);
 
-            // If this is the root activity then mark it as recorded
-            if (listenerActivity is { ParentId: null })
-            {
-                listenerActivity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
-            }
-
             listenerActivity?.Start();
 
             return listenerActivity;

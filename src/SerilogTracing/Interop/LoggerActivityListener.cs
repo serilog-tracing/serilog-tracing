@@ -60,7 +60,7 @@ sealed class LoggerActivityListener: IDisposable
                         .IsEnabled(GetInitialLevel(levelMap, activity.Source.Name)))
                     return ActivitySamplingResult.None;
 
-                return sample?.Invoke(ref activity) ?? ActivitySamplingResult.AllData;
+                return sample?.Invoke(ref activity) ?? ActivitySamplingResult.AllDataAndRecorded;
             };
 
             activityListener.ActivityStopped += activity =>
