@@ -39,6 +39,13 @@ public sealed class HttpRequestInActivityInstrumentationOptions
         };
 
     /// <summary>
+    /// What distributed context to respect from incoming traceparent headers.
+    ///
+    /// See the <see cref="IncomingTraceParent"/> type for details on available options.
+    /// </summary>
+    public IncomingTraceParent IncomingTraceParent { get; set; } = IncomingTraceParent.Accept;
+
+    /// <summary>
     /// The message template to associate with request activities.
     /// </summary>
     public string MessageTemplate { get; set; } = DefaultRequestCompletionMessageTemplate;
