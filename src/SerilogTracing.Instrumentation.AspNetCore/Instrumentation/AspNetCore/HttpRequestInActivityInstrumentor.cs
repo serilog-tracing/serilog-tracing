@@ -22,7 +22,7 @@ namespace SerilogTracing.Instrumentation.AspNetCore;
 /// <summary>
 /// An activity instrumentor that populates the current activity with context from incoming HTTP requests.
 /// </summary>
-sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
+sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrumentationEventObserver
 {
     /// <summary>
     /// Create an instance of the instrumentor.
@@ -58,10 +58,22 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
     {
         return diagnosticListenerName == DiagnosticListenerName;
     }
-
-    /// <inheritdoc />
+    
     public void InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
+        // Instrumentation is applied in `OnDiagnosticEvent`.
+    }
+
+    /// <inheritdoc />
+    public void OnNext(string eventName, object? eventArgs)
+    {
+        var activity = Activity.Current;
+
+        if (activity == null || eventArgs == null)
+        {
+            return;
+        }
+        
         switch (eventName)
         {
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Start":
