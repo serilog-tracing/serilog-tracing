@@ -27,7 +27,7 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
 
     static readonly ActivitySource ActivitySource = new(typeof(SqlCommandActivityInstrumentor).Assembly.GetName().Name!);
 
-    readonly MessageTemplate _messageTemplateOverride = new MessageTemplateParser().Parse("SQL {Operation}");
+    readonly MessageTemplate _messageTemplateOverride = new MessageTemplateParser().Parse("SQL {Operation} {Database}");
     readonly PropertyAccessor<SqlCommand> _getCommand = new("Command");
     readonly PropertyAccessor<Exception> _getException = new("Exception");
     readonly PropertyAccessor<IDictionary> _getStatistics = new("Statistics");
