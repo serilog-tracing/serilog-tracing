@@ -45,6 +45,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
     const string RegeneratedActivityPropertyName = "SerilogTracing.Instrumentation.AspNetCore.Regenerated";
 
     const string SourceName = "Microsoft.AspNetCore";
+    const string DiagnosticListenerName = "Microsoft.AspNetCore";
 
     // NOTE: Using the same name as the source used by ASP.NET Core so filtering on it works
     static readonly ActivitySource ImpersonatedSource = new(SourceName);
@@ -55,7 +56,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
     /// <inheritdoc />
     public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
-        return diagnosticListenerName == SourceName;
+        return diagnosticListenerName == DiagnosticListenerName;
     }
 
     /// <inheritdoc />

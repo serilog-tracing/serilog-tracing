@@ -13,6 +13,7 @@ public enum IncomingTraceParent
     /// It's suitable for publicly accessible services where clients may craft malicious traceparent headers.
     /// </remarks>
     Ignore,
+    
     /// <summary>
     /// Accept the trace id and parent span id, ignoring trace flags and baggage. This is the default scheme.
     /// </summary>
@@ -27,6 +28,7 @@ public enum IncomingTraceParent
     /// or <see cref="IncomingTraceParent.Trust"/> depending on their level of public accessibility.
     /// </remarks>
     Accept,
+    
     /// <summary>
     /// Accept the trace id, parent span id, trace flags and baggage.
     /// </summary>
