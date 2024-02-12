@@ -1,4 +1,5 @@
 using Serilog;
+using Serilog.Events;
 using Serilog.Templates.Themes;
 using SerilogTracing;
 using SerilogTracing.Expressions;
@@ -13,10 +14,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 using var _ = new ActivityListenerConfiguration()
-    .Instrument.AspNetCoreRequests(config =>
-    {
-        config.IncomingTraceParent = IncomingTraceParent.Ignore;
-    })
+    .Instrument.AspNetCoreRequests()
     .TraceToSharedLogger();
 
 Log.Information("Weather service starting up");

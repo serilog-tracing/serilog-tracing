@@ -44,6 +44,12 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
 
     const string RegeneratedActivityPropertyName = "SerilogTracing.Instrumentation.AspNetCore.Regenerated";
 
+    // NOTE: Using the same name as the source used by ASP.NET Core so filtering on it works
+    static readonly ActivitySource ImpersonatedSource = new("Microsoft.AspNetCore");
+
+    static ActivitySource GetSource(Activity activity) =>
+        activity.Source.Name == "Microsoft.AspNetCore" ? activity.Source : ImpersonatedSource;
+
     /// <inheritdoc />
     public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
@@ -58,77 +64,89 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Start":
                 if (eventArgs is not HttpContext start) return;
 
+                Activity? recreated;
                 switch (_incomingTraceParent)
                 {
                     // Don't trust the incoming traceparent
-                    // Generate a new root activity, using no information from the one populated by traceparent
+                    // Generate a new root activity, using no information from the traceparent
                     case IncomingTraceParent.Ignore:
-                        Activity.Current = activity.Parent;
+                        recreated = RecreateActivity(activity);
+                        recreated?.Start();
 
-                        // Suppress the activity created by ASP.NET Core
-                        activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
-                        activity.IsAllDataRequested = false;
-                        
-                        // TODO: If the `Activity.Source` is the default then pick a different one
-                        var regenerated = activity.Source.CreateActivity(activity.DisplayName, activity.Kind);
-                        if (regenerated != null)
+                        break;
+
+                    // Partially trust the incoming traceparent
+                    // Use the propagated trace and parent ids, but ignore any flags or baggage
+                    case IncomingTraceParent.Accept:
+                        recreated = RecreateActivity(activity);
+
+                        if (recreated != null)
                         {
-                            regenerated.ActivityTraceFlags = ActivityTraceFlags.Recorded;
-                            
-                            foreach (var (name, value) in activity.EnumerateTagObjects())
-                            {
-                                regenerated.SetTag(name, value);
-                            }
-                            
-                            // NOTE: Baggage is ignored
-                            
-                            regenerated.SetCustomProperty(RegeneratedActivityPropertyName, activity);
-                            
-                            regenerated.Start();
+                            recreated.SetParentId(activity.TraceId, activity.ParentSpanId,
+                                activity.ActivityTraceFlags | ActivityTraceFlags.Recorded);
 
-                            activity = regenerated;
+                            // NOTE: Baggage is ignored here
+
+                            recreated.Start();
+                        }
+
+                        recreated = activity;
+
+                        break;
+
+                    // Fully trust the incoming traceparent
+                    // Only generate a new 
+                    case IncomingTraceParent.Trust:
+                        // If the incoming request has no traceparent at all or
+                        // if the generated activity doesn't come from the expected source then recreate it
+                        //
+                        // This ensures:
+                        // 1. Sampling is properly applied, even if the activity was manually created by ASP.NET Core
+                        // 2. Clients that don't send any traceparent header may still produce a recorded activity
+                        if (activity.Source.Name != "Microsoft.AspNetCore" || start.Request.Headers.TraceParent.Count == 0)
+                        {
+                            recreated = RecreateActivity(activity);
+
+                            if (recreated != null)
+                            {
+                                // We don't really expect there to be a trace id or baggage here
+                                // since the client never supplied a `traceparent` header, but if
+                                // the server is configured with some alternative distributed context propagator
+                                // then it could conceivably come from elsewhere. In these cases we still regenerate
+                                // the activity, but retain any context pulled externally
+                                recreated.SetParentId(activity.TraceId, activity.ParentSpanId,
+                                    activity.ActivityTraceFlags | ActivityTraceFlags.Recorded);
+
+                                foreach (var (k, v) in activity.Baggage)
+                                {
+                                    recreated.SetBaggage(k, v);
+                                }
+
+                                recreated.Start();
+                            }
                         }
                         else
                         {
-                            Activity.Current = activity;
+                            recreated = activity;
                         }
 
                         break;
-                    
-                    // Partially trust the incoming traceparent
-                    // Use the propagated trace and parent ids, but ignore any flags
-                    case IncomingTraceParent.Accept:
-                        // NOTE: This intentionally replaces all flags with just `Recorded`
-                        // It's `=` and not `|=` intentionally
-                        activity.ActivityTraceFlags = ActivityTraceFlags.Recorded;
-                        
-                        // TODO: Need to clear baggage here; means recreating the activity
-                        
-                        break;
-                    
-                    // Fully trust the incoming traceparent
-                    case IncomingTraceParent.Trust:
-                        // If the incoming request has no traceparent at all then
-                        // still treat it as recorded
-                        // TODO: In this case, recreate the activity so sampling is applied
-                        if (start.Request.Headers.TraceParent.Count == 0)
-                        {
-                            activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
-                        }
-                        
-                        break;
-                    
+
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
 
-                ActivityInstrumentation.SetMessageTemplateOverride(activity, _messageTemplateOverride);
-                activity.DisplayName = _messageTemplateOverride.Text;
+                if (recreated != null)
+                {
+                    ActivityInstrumentation.SetMessageTemplateOverride(recreated, _messageTemplateOverride);
+                    recreated.DisplayName = _messageTemplateOverride.Text;
 
-                ActivityInstrumentation.SetLogEventProperties(activity, _getRequestProperties(start.Request).ToArray());
+                    ActivityInstrumentation.SetLogEventProperties(recreated,
+                        _getRequestProperties(start.Request).ToArray());
+                }
 
                 break;
-            
+
             case "Microsoft.AspNetCore.Diagnostics.UnhandledException":
                 if (_exceptionAccessor.TryGetValue(eventArgs, out var exception) &&
                     _httpContextAccessor.TryGetValue(eventArgs, out var httpContext) &&
@@ -136,9 +154,9 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
                 {
                     ActivityInstrumentation.TrySetException(activity, exception);
                 }
-                
+
                 break;
-            
+
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Stop":
                 if (eventArgs is not HttpContext stop) return;
 
@@ -157,5 +175,35 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor
 
                 break;
         }
+    }
+
+    static Activity? RecreateActivity(Activity activity)
+    {
+        Activity.Current = activity.Parent;
+
+        // Suppress the activity created by ASP.NET Core
+        activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+        activity.IsAllDataRequested = false;
+
+        var regenerated = GetSource(activity).CreateActivity(activity.DisplayName, activity.Kind);
+        if (regenerated != null)
+        {
+            regenerated.ActivityTraceFlags = ActivityTraceFlags.Recorded;
+
+            foreach (var (name, value) in activity.EnumerateTagObjects())
+            {
+                regenerated.SetTag(name, value);
+            }
+
+            // NOTE: Baggage is ignored
+
+            regenerated.SetCustomProperty(RegeneratedActivityPropertyName, activity);
+        }
+        else
+        {
+            Activity.Current = activity;
+        }
+
+        return regenerated;
     }
 }
