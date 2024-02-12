@@ -55,12 +55,17 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
                     var child = ActivitySource.StartActivity(_messageTemplateOverride.Text, ActivityKind.Client);
                     if (child == null)
                         return;
-
+                    
                     child.DisplayName = _messageTemplateOverride.Text;
 
                     if (!child.IsAllDataRequested)
                     {
                         return;
+                    }
+                    
+                    if (child.Parent == null)
+                    {
+                        child.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
                     }
 
                     ActivityInstrumentation.SetMessageTemplateOverride(child, _messageTemplateOverride);
