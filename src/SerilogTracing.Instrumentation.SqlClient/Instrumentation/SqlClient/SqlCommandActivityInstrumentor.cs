@@ -62,11 +62,6 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
                     {
                         return;
                     }
-                    
-                    if (child.Parent == null)
-                    {
-                        child.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
-                    }
 
                     ActivityInstrumentation.SetMessageTemplateOverride(child, _messageTemplateOverride);
 

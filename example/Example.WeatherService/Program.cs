@@ -18,7 +18,7 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 using var _ = new ActivityListenerConfiguration()
-    .Instrument.AspNetCoreRequests()
+    .Instrument.AspNetCoreRequests(opts => opts.IncomingTraceParent = IncomingTraceParent.Trust)
     .TraceToSharedLogger();
 
 Log.Information("Weather service starting up");
