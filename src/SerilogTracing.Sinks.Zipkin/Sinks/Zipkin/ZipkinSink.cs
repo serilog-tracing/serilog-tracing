@@ -1,6 +1,5 @@
 using System.Text;
 using Serilog.Events;
-using Serilog.Expressions;
 using Serilog.Sinks.PeriodicBatching;
 using Serilog.Templates;
 using SerilogTracing.Core;
@@ -23,7 +22,7 @@ class ZipkinSink : IBatchedLogEventSink
             duration: Microseconds(Elapsed()),
             kind: ToUpperInvariant(SpanKind),
             localEndpoint: {serviceName: Application},
-            tags: rest()
+            tags: AsStringTags(rest())
         }
     }
     """, nameResolver: new TracingNameResolver());
