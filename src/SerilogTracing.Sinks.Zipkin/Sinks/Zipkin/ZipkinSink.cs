@@ -25,7 +25,7 @@ class ZipkinSink : IBatchedLogEventSink
             tags: AsStringTags(rest())
         }
     }
-    """, nameResolver: new TracingNameResolver());
+    """, nameResolver: new ZipkinNameResolver());
 
     public ZipkinSink(Uri endpoint, HttpMessageHandler messageHandler)
     {

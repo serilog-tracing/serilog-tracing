@@ -181,6 +181,46 @@ using var _ = new ActivityListenerConfiguration()
     .TraceToSharedLogger();
 ```
 
+## Formatting output
+
+SerilogTracing includes extensions to [_Serilog.Expressions_](https://github.com/serilog/serilog-expressions) aimed at producing useful text and JSON output from
+spans:
+
+```
+dotnet add package SerilogTracing.Expressions --prerelease
+```
+
+For console output, `Formatters.CreateConsoleTextFormatter()` provides span timings in a pleasant ANSI-colored format:
+
+```csharp
+Log.Logger = new LoggerConfiguration()
+    // The `Formatters` class is from `SerilogTracing.Expressions`
+    .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
+    .CreateLogger();
+```
+
+Alternatively, `TracingNameResolver` can be used with `ExpressionTemplate` to create text or JSON output. The
+example above expands into the (admittedly quite dense) template below:
+
+```csharp
+var formatter = new ExpressionTemplate(
+    "[{@t:HH:mm:ss} {@l:u3}] " +
+    "{#if IsRootSpan()}\u2514\u2500 {#else if IsSpan()}\u251c {#else if @sp is not null}\u2502 {#else}\u250A {#end}" +
+    "{@m}" +
+    "{#if IsSpan()} ({Milliseconds(Elapsed()):0.###} ms){#end}" +
+    "\n" +
+    "{@x}",
+    theme: TemplateTheme.Code,
+    nameResolver: new TracingNameResolver());
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console(formatter)
+    .CreateLogger();
+```
+
+For an example showing how to produce JSON with `ExpressionTemplate`, see the implementation of `ZipkinSink` in this repository,
+and [this article introducing _Serilog.Expressions_ JSON support](https://nblumhardt.com/2021/06/customize-serilog-json-output/).
+
 ## How an `Activity` becomes a `LogEvent`
 
 ![SerilogTracing pipeline](https://raw.githubusercontent.com/serilog-tracing/serilog-tracing/dev/assets/pipeline-architecture.png)
@@ -192,17 +232,18 @@ Applications using SerilogTracing add tracing using `ILogger.StartActivity()`. T
 
 Traces are collections of spans, connected by a common trace id. SerilogTracing maps the typical properties associated with a span onto Serilog `LogEvent` instances:
 
-| Span feature | `LogEvent` property |
-| --- | --- |
-| Trace id | `TraceId` |
-| Span id | `SpanId` |
-| Parent id | `Properties["ParentSpanId"]` |
-| Name | `MessageTemplate` |
-| Start | `Properties["SpanStartTimestamp"]` |
-| End | `Timestamp` |
-| Status | `Level` |
-| Status description or error event | `Exception` |
-| Tags | `Properties[*]` |
+| Span feature                      | `LogEvent` property                |
+|-----------------------------------|------------------------------------|
+| Trace id                          | `TraceId`                          |
+| Span id                           | `SpanId`                           |
+| Parent id                         | `Properties["ParentSpanId"]`       |
+| Kind                              | `Properties["SpanKind"]`           |
+| Name                              | `MessageTemplate`                  |
+| Start                             | `Properties["SpanStartTimestamp"]` |
+| End                               | `Timestamp`                        |
+| Status                            | `Level`                            |
+| Status description or error event | `Exception`                        |
+| Tags                              | `Properties[*]`                    |
 
 ### Levelling for external activity sources
 
