@@ -23,6 +23,15 @@ namespace SerilogTracing.Interop;
 
 static class ActivityConvert
 {
+    static readonly ScalarValue[] Kinds =
+    [
+        new ScalarValue((ActivityKind)0),
+        new ScalarValue((ActivityKind)1),
+        new ScalarValue((ActivityKind)2),
+        new ScalarValue((ActivityKind)3),
+        new ScalarValue((ActivityKind)4)
+    ];
+    
     internal static LogEvent ActivityToLogEvent(ILogger logger, Activity activity, LogEventLevel level)
     {
         var start = activity.StartTimeUtc;
@@ -38,7 +47,19 @@ static class ActivityConvert
             ? activityProperties
             : new Dictionary<string, LogEventPropertyValue>();
 
-        return ActivityToLogEvent(logger, activity, start, end, activity.TraceId, activity.SpanId, activity.ParentSpanId, level, exception, template, properties);
+        return ActivityToLogEvent(
+            logger,
+            activity,
+            start,
+            end,
+            activity.TraceId,
+            activity.SpanId,
+            activity.ParentSpanId,
+            activity.Kind,
+            level,
+            exception, 
+            template,
+            properties);
     }
 
     internal static LogEvent ActivityToLogEvent(ILogger logger, LoggerActivity loggerActivity, DateTimeOffset end, LogEventLevel level, Exception? exception)
@@ -49,12 +70,25 @@ static class ActivityConvert
         var traceId = activity.TraceId;
         var spanId = activity.SpanId;
         var parentSpanId = activity.ParentSpanId;
+        var kind = activity.Kind;
         var template = loggerActivity.MessageTemplate;
         if (exception == null)
         {
             ActivityInstrumentation.TryGetException(activity, out exception);
         }
-        return ActivityToLogEvent(logger, loggerActivity.Activity, start, end, traceId, spanId, parentSpanId, level, exception, template, loggerActivity.Properties);
+        return ActivityToLogEvent(
+            logger,
+            loggerActivity.Activity,
+            start,
+            end,
+            traceId,
+            spanId,
+            parentSpanId,
+            kind,
+            level,
+            exception,
+            template,
+            loggerActivity.Properties);
     }
 
     internal static LogEvent ActivityToLogEvent(
@@ -65,6 +99,7 @@ static class ActivityConvert
         ActivityTraceId? traceId,
         ActivitySpanId? spanId,
         ActivitySpanId? parentSpanId,
+        ActivityKind kind,
         LogEventLevel level,
         Exception? exception,
         MessageTemplate messageTemplate,
@@ -92,6 +127,11 @@ static class ActivityConvert
         if (parentSpanId != null && parentSpanId.Value != default)
         {
             properties[ParentSpanIdPropertyName] = new ScalarValue(parentSpanId.Value);
+        }
+
+        if (kind != ActivityKind.Internal && (int)kind >= 0 && (int)kind < Kinds.Length)
+        {
+            properties[SpanKindPropertyName] = Kinds[(int)kind];
         }
 
         var evt = new LogEvent(

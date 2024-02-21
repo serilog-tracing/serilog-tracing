@@ -44,7 +44,7 @@ static class OtlpEventBuilder
         return (logRecord, scopeName);
     }
 
-    public static (Span span, string? scopeName) ToSpan(LogEvent logEvent, IFormatProvider? formatProvider, IncludedData includedData)
+    public static (Span span, string? scopeName) ToSpan(LogEvent logEvent, IncludedData includedData)
     {
         var span = new Span();
 
@@ -56,6 +56,7 @@ static class OtlpEventBuilder
         ProcessException(span.Attributes, logEvent);
         ProcessIncludedFields(span, logEvent, includedData);
         ProcessParentSpanId(span, logEvent);
+        ProcessKind(span, logEvent);
 
         return (span, scopeName);
     }
@@ -111,13 +112,13 @@ static class OtlpEventBuilder
                 }
             }
 
-            if (property is { Key: SerilogTracing.Core.Constants.SpanStartTimestampPropertyName })
+            if (property is { Key: Core.Constants.SpanStartTimestampPropertyName })
             {
                 continue;
             }
 
             if (property is
-                { Key: SerilogTracing.Core.Constants.ParentSpanIdPropertyName })
+                { Key: Core.Constants.ParentSpanIdPropertyName })
             {
                 continue;
             }
@@ -140,11 +141,22 @@ static class OtlpEventBuilder
 
     static void ProcessStartTime(Span span, LogEvent logEvent)
     {
-        if (logEvent.Properties.TryGetValue(SerilogTracing.Core.Constants.SpanStartTimestampPropertyName,
+        if (logEvent.Properties.TryGetValue(Core.Constants.SpanStartTimestampPropertyName,
                 out var sst) && sst is ScalarValue { Value: DateTime start })
         {
             span.StartTimeUnixNano = PrimitiveConversions.ToUnixNano(start);
         }
+    }
+    
+    static void ProcessKind(Span span, LogEvent logEvent)
+    {
+        var kind = ActivityKind.Internal;
+        if (logEvent.Properties.TryGetValue(Core.Constants.SpanKindPropertyName,
+                out var sst) && sst is ScalarValue { Value: ActivityKind explicitKind })
+        {
+            kind = explicitKind;
+        }
+        span.Kind = PrimitiveConversions.ToOpenTelemetrySpanKind(kind);
     }
 
     public static void ProcessException(RepeatedField<KeyValue> attrs, LogEvent logEvent)
@@ -274,7 +286,7 @@ static class OtlpEventBuilder
 
     public static void ProcessParentSpanId(Span span, LogEvent logEvent)
     {
-        if (logEvent.Properties.TryGetValue(SerilogTracing.Core.Constants.ParentSpanIdPropertyName, out var ps) &&
+        if (logEvent.Properties.TryGetValue(Core.Constants.ParentSpanIdPropertyName, out var ps) &&
             ps is ScalarValue { Value: ActivitySpanId psId })
         {
             span.ParentSpanId = PrimitiveConversions.ToOpenTelemetrySpanId(psId.ToHexString());

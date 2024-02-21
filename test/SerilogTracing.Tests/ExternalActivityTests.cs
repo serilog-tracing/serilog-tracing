@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Serilog;
 using Serilog.Events;
+using SerilogTracing.Core;
 using SerilogTracing.Tests.Support;
 using Xunit;
 
@@ -23,12 +24,13 @@ public class ExternalActivityTests
 
         using var _ = new ActivityListenerConfiguration().TraceTo(logger);
 
-        using var activity = source.StartActivity()!;
+        using var activity = source.StartActivity(ActivityKind.Client)!;
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.Stop();
 
         Assert.Equal(LogEventLevel.Information, sink.SingleEvent.Level);
         Assert.Equal(activity.DisplayName, sink.SingleEvent.RenderMessage());
+        Assert.Equal(ActivityKind.Client, ((ScalarValue)sink.SingleEvent.Properties[Constants.SpanKindPropertyName]).Value);
     }
 
     [Fact]

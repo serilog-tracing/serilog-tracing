@@ -33,11 +33,11 @@ public class OtlpEventBuilderTests
         var logEvent = Some.DefaultSerilogEvent();
 
         logEvent.AddOrUpdateProperty(new LogEventProperty("property_name", new ScalarValue("ok")));
-        logEvent.AddOrUpdateProperty(new LogEventProperty(SerilogTracing.Core.Constants.SpanStartTimestampPropertyName, new ScalarValue(new DateTime(2024, 8, 22, 10, 30, 0))));
+        logEvent.AddOrUpdateProperty(new LogEventProperty(Core.Constants.SpanStartTimestampPropertyName, new ScalarValue(new DateTime(2024, 8, 22, 10, 30, 0))));
 
-        var span = OtlpEventBuilder.ToSpan(logEvent, null, OpenTelemetrySinkOptions.DefaultIncludedData);
-        var propertyKeyValue = PrimitiveConversions.NewStringAttribute("property_name", "ok");
-
+        var (span, _) = OtlpEventBuilder.ToSpan(logEvent, OpenTelemetrySinkOptions.DefaultIncludedData);
+        Assert.Equal(logEvent.MessageTemplate.Text, span.Name);
+        Assert.Equal(Span.Types.SpanKind.Internal, span.Kind);
     }
 
     [Fact]
@@ -104,7 +104,7 @@ public class OtlpEventBuilderTests
 
         var logRecord = new LogRecord();
         var logEvent = Some.SerilogEvent(Some.TestMessageTemplate, timestamp: now);
-        logEvent.AddOrUpdateProperty(new LogEventProperty(SerilogTracing.Core.Constants.SpanStartTimestampPropertyName, new ScalarValue(DateTime.UtcNow)));
+        logEvent.AddOrUpdateProperty(new LogEventProperty(Core.Constants.SpanStartTimestampPropertyName, new ScalarValue(DateTime.UtcNow)));
 
         OtlpEventBuilder.ProcessTimestamp(logRecord, logEvent);
 

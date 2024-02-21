@@ -19,6 +19,7 @@ using Serilog.Sinks.PeriodicBatching;
 using SerilogTracing.Collections;
 using SerilogTracing.Sinks.OpenTelemetry;
 using SerilogTracing.Sinks.OpenTelemetry.Exporters;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace SerilogTracing;
 
@@ -74,7 +75,6 @@ public static class OpenTelemetryLoggerConfigurationExtensions
         {
             var openTelemetryTracesSink = new OpenTelemetryTracesSink(
                 exporter: exporter,
-                formatProvider: options.FormatProvider,
                 resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
                 includedData: options.IncludedData);
 
@@ -170,7 +170,6 @@ public static class OpenTelemetryLoggerConfigurationExtensions
         {
             tracesSink = new OpenTelemetryTracesSink(
                 exporter: exporter,
-                formatProvider: options.FormatProvider,
                 resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
                 includedData: options.IncludedData);
         }

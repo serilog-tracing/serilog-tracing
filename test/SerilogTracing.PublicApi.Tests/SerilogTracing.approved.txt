@@ -88,6 +88,7 @@ namespace SerilogTracing.Core
     {
         public const string ParentSpanIdPropertyName = "ParentSpanId";
         public const string SerilogActivitySourceName = "Serilog";
+        public const string SpanKindPropertyName = "SpanKind";
         public const string SpanStartTimestampPropertyName = "SpanStartTimestamp";
     }
 }

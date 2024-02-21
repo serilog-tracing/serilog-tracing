@@ -57,7 +57,7 @@ public class LoggerActivityTests
     }
 
     [Fact]
-    public void ActivitySuppression()
+    public void NullActivityCausesLogEventSuppression()
     {
         var sink = new CollectingSink();
 
@@ -73,7 +73,7 @@ public class LoggerActivityTests
     }
 
     [Fact]
-    public void ActivityDataSuppression()
+    public void IsAllDataRequestedFalseCausesEnrichmentSuppression()
     {
         var sink = new CollectingSink();
 

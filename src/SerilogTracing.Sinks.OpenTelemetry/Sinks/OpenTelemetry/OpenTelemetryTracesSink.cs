@@ -23,19 +23,16 @@ namespace SerilogTracing.Sinks.OpenTelemetry;
 
 class OpenTelemetryTracesSink : IBatchedLogEventSink, ILogEventSink
 {
-    readonly IFormatProvider? _formatProvider;
     readonly ResourceSpans _resourceSpansTemplate;
     readonly IExporter _exporter;
     readonly IncludedData _includedData;
 
     public OpenTelemetryTracesSink(
         IExporter exporter,
-        IFormatProvider? formatProvider,
         IReadOnlyDictionary<string, object> resourceAttributes,
         IncludedData includedData)
     {
         _exporter = exporter;
-        _formatProvider = formatProvider;
         _includedData = includedData;
 
         if ((includedData & IncludedData.SpecRequiredResourceAttributes) == IncludedData.SpecRequiredResourceAttributes)
@@ -58,7 +55,7 @@ class OpenTelemetryTracesSink : IBatchedLogEventSink, ILogEventSink
 
         foreach (var logEvent in batch)
         {
-            var (span, scopeName) = OtlpEventBuilder.ToSpan(logEvent, _formatProvider, _includedData);
+            var (span, scopeName) = OtlpEventBuilder.ToSpan(logEvent, _includedData);
             if (scopeName == null)
             {
                 if (traceAnonymousScope == null)
@@ -94,7 +91,7 @@ class OpenTelemetryTracesSink : IBatchedLogEventSink, ILogEventSink
     /// </summary>
     public void Emit(LogEvent logEvent)
     {
-        var (span, scopeName) = OtlpEventBuilder.ToSpan(logEvent, _formatProvider, _includedData);
+        var (span, scopeName) = OtlpEventBuilder.ToSpan(logEvent, _includedData);
         var scopeSpans = RequestTemplateFactory.CreateScopeSpans(scopeName);
         scopeSpans.Spans.Add(span);
         var resourceSpans = _resourceSpansTemplate.Clone();
