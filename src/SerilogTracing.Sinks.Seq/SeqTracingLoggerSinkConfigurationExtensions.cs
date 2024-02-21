@@ -30,7 +30,8 @@ namespace SerilogTracing;
 public static class SeqTracingLoggerSinkConfigurationExtensions
 {
     static ITextFormatter CreatePayloadFormatter() => new ExpressionTemplate(
-        "{ {@t, @mt, @l: if @l = 'Information' then undefined() else @l, @x, @sp, @tr, @ps: ParentSpanId, @st: SpanStartTimestamp, ..rest()} }\n");
+        // SpanKind is dropped out; Seq may at some point accept this in a top-level property.
+        "{ {@t, @mt, @l: if @l = 'Information' then undefined() else @l, @x, @sp, @tr, @ps: ParentSpanId, @st: SpanStartTimestamp, SpanKind: undefined(), ..rest()} }\n");
 
     static HttpMessageHandler? CreateDefaultHttpMessageHandler() =>
 #if FEATURE_SOCKETS_HTTP_HANDLER

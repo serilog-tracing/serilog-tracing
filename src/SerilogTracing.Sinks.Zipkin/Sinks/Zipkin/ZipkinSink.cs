@@ -21,6 +21,7 @@ class ZipkinSink : IBatchedLogEventSink
             name: @m,
             timestamp: Microseconds(FromUnixEpoch(SpanStartTimestamp)),
             duration: Microseconds(Elapsed()),
+            kind: ToUpperInvariant(SpanKind),
             localEndpoint: {serviceName: Application},
             tags: rest()
         }

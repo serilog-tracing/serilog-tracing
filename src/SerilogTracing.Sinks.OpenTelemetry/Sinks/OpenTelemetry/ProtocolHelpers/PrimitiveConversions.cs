@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
@@ -237,5 +238,17 @@ static class PrimitiveConversions
         md5.Initialize();
         var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(s));
         return string.Join(string.Empty, Array.ConvertAll(hash, x => x.ToString("x2")));
+    }
+
+    public static Span.Types.SpanKind ToOpenTelemetrySpanKind(ActivityKind kind)
+    {
+        return kind switch
+        {
+            ActivityKind.Server => Span.Types.SpanKind.Server,
+            ActivityKind.Client => Span.Types.SpanKind.Client,
+            ActivityKind.Producer => Span.Types.SpanKind.Producer,
+            ActivityKind.Consumer => Span.Types.SpanKind.Consumer,
+            _ => Span.Types.SpanKind.Internal,
+        };
     }
 }

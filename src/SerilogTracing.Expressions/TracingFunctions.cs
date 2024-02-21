@@ -108,4 +108,17 @@ static class TracingFunctions
 
         return null;
     }
+
+    public static LogEventPropertyValue? ToUpperInvariant(LogEventPropertyValue? value)
+    {
+        // In Serilog.Expressions we'd use Coerce.String() here.
+        var s = value switch
+        {
+            ScalarValue { Value: string str } => str,
+            ScalarValue { Value: { } v } when v.GetType().IsEnum => v.ToString(),
+            _ => null
+        };
+
+        return s is null ? null : new ScalarValue(s.ToUpperInvariant());
+    }
 }

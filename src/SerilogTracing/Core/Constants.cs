@@ -38,6 +38,14 @@ public static class Constants
     /// span's start timestamp. All spans emitted by SerilogTracing carry this property.
     /// </summary>
     public const string SpanStartTimestampPropertyName = "SpanStartTimestamp";
+    
+    /// <summary>
+    /// The name of the entry in <see cref="LogEvent.Properties"/> that carries a
+    /// span's kind. The value will be an <see cref="ActivityKind"/>. The span kind is
+    /// unset for <see cref="ActivityKind.Internal"/> spans: any span without an explicit
+    /// kind should be assumed to be internal.
+    /// </summary>
+    public const string SpanKindPropertyName = "SpanKind";
 
     internal const string LogEventPropertyCollectionName = "SerilogTracing.LogEventPropertyCollection";
     internal const string SelfPropertyName = "SerilogTracing.LoggerActivity.Self";
