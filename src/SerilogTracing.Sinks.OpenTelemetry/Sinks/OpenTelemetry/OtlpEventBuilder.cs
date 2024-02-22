@@ -112,13 +112,10 @@ static class OtlpEventBuilder
                 }
             }
 
-            if (property is { Key: Core.Constants.SpanStartTimestampPropertyName })
-            {
-                continue;
-            }
-
-            if (property is
-                { Key: Core.Constants.ParentSpanIdPropertyName })
+            if (property is { Key:
+                    Core.Constants.SpanStartTimestampPropertyName or
+                    Core.Constants.ParentSpanIdPropertyName or
+                    Core.Constants.SpanKindPropertyName })
             {
                 continue;
             }

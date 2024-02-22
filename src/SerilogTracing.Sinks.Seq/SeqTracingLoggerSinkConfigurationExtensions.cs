@@ -19,8 +19,6 @@ using Serilog;
 using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
-using Serilog.Formatting;
-using Serilog.Templates;
 
 namespace SerilogTracing;
 
@@ -29,18 +27,6 @@ namespace SerilogTracing;
 /// </summary>
 public static class SeqTracingLoggerSinkConfigurationExtensions
 {
-    static ITextFormatter CreatePayloadFormatter() => new ExpressionTemplate(
-        // SpanKind is dropped out; Seq may at some point accept this in a top-level property.
-        "{ {@t, @mt, @l: if @l = 'Information' then undefined() else @l, @x, @sp, @tr, @ps: ParentSpanId, @st: SpanStartTimestamp, SpanKind: undefined(), ..rest()} }\n");
-
-    static HttpMessageHandler? CreateDefaultHttpMessageHandler() =>
-#if FEATURE_SOCKETS_HTTP_HANDLER
-        new SocketsHttpHandler { ActivityHeadersPropagator = null };
-#else
-        null;
-#endif
-
-#pragma warning disable CS1574
     /// <summary>
     /// Write log events and traces to a <a href="https://datalust.co/seq">Seq</a> server.
     /// </summary>
@@ -73,12 +59,9 @@ public static class SeqTracingLoggerSinkConfigurationExtensions
     /// <returns>Logger configuration, allowing configuration to continue.</returns>
     /// <exception cref="T:System.ArgumentNullException">A required parameter is null.</exception>
     /// <remarks>
-    /// This extension differs from the default one by overriding the payload formatter with a tracing-aware one. The
-    /// extension also defaults <paramref name="messageHandler"/> to an uninstrumented one, so that outbound requests
-    /// from the sink don't end up generating spans. If a custom message handler is passed, ensure
-    /// <see cref="SocketsHttpHandler.ActivityHeadersPropagator"/> or its equivalent is set to <c>null</c>.
+    /// The functionality of this method is now provided by Serilog.Sinks.Seq version 7+.
     /// </remarks>
-#pragma warning restore CS1574
+    // Soon: [Obsolete("Use Serilog.Sinks.Seq version 7.0.0 or later, and WriteTo.Seq() instead.")]
     public static LoggerConfiguration SeqTracing(
       this LoggerSinkConfiguration loggerSinkConfiguration,
       string serverUrl,
@@ -107,9 +90,8 @@ public static class SeqTracingLoggerSinkConfigurationExtensions
             bufferSizeLimitBytes,
             eventBodyLimitBytes,
             controlLevelSwitch,
-            messageHandler ?? CreateDefaultHttpMessageHandler(),
+            messageHandler,
             retainedInvalidPayloadsLimitBytes,
-            queueSizeLimit,
-            CreatePayloadFormatter());
+            queueSizeLimit);
     }
 }
