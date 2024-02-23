@@ -25,7 +25,7 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
 {
     const string DiagnosticListenerName = "SqlClientDiagnosticListener";
 
-    static readonly ActivitySource ActivitySource = new(typeof(SqlCommandActivityInstrumentor).Assembly.GetName().Name!);
+    static readonly ActivitySource ActivitySource = new("SerilogTracing.Instrumentation.SqlClient");
 
     readonly MessageTemplate _messageTemplateOverride = new MessageTemplateParser().Parse("SQL {Operation} {Database}");
     readonly PropertyAccessor<SqlCommand> _getCommand = new("Command");

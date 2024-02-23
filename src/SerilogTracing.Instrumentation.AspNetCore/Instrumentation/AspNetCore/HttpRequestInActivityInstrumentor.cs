@@ -42,94 +42,79 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
     readonly PropertyAccessor<HttpContext> _httpContextAccessor = new("httpContext");
     readonly IncomingTraceParent _incomingTraceParent;
 
-    const string RegeneratedActivityPropertyName = "SerilogTracing.Instrumentation.AspNetCore.Regenerated";
+    const string ReplacedActivityPropertyName = "SerilogTracing.Instrumentation.AspNetCore.Replaced";
+    const string ReplacementActivitySourceName = "SerilogTracing.Instrumentation.AspNetCore";
+    const string TargetDiagnosticListenerName = "Microsoft.AspNetCore";
+    const string DefaultActivityName = "SerilogTracing.Instrumentation.AspNetCore.HttpRequestIn";
 
-    const string SourceName = "Microsoft.AspNetCore";
-    const string DiagnosticListenerName = "Microsoft.AspNetCore";
-
-    // NOTE: Using the same name as the source used by ASP.NET Core so filtering on it works
-    static readonly ActivitySource ImpersonatedSource = new(SourceName);
-
-    static ActivitySource GetSource(Activity activity) =>
-        activity.Source.Name == SourceName ? activity.Source : ImpersonatedSource;
+    static readonly ActivitySource ReplacementActivitySource = new(ReplacementActivitySourceName);
 
     /// <inheritdoc />
     public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
-        return diagnosticListenerName == DiagnosticListenerName;
+        return diagnosticListenerName == TargetDiagnosticListenerName;
     }
 
     /// <inheritdoc />
     public void OnNext(string eventName, object? eventArgs)
     {
-        var activity = Activity.Current;
-        
         if (eventName !=  "Microsoft.AspNetCore.Hosting.HttpRequestIn.Start" || 
             eventArgs is not HttpContext start) return;
 
-        Activity? recreated;
+        // Here we make a hard assumption that this is from the Microsoft.AspNetCore activity
+        // source; it's not possible to check decisively, since although the incoming source
+        // will usually be named Microsoft.AspNetCore, on some paths the source name will be the
+        // default "" empty string.
+        var inbound = Activity.Current;
+        
+        // Important to do this first, otherwise our activity source will consult the inherited
+        // activity when making sampling decisions.
+        Activity.Current = inbound?.Parent;
+        
+        Activity? replacement;
         switch (_incomingTraceParent)
         {
             // Don't trust the incoming traceparent
-            // Generate a new root activity, using no information from the traceparent
             case IncomingTraceParent.Ignore:
-                recreated = RecreateActivity(activity);
-                recreated?.Start();
-                activity = recreated;
+                // Generate a new root activity, using no information from the traceparent
+                replacement = CreateReplacementActivity(inbound, false, false, false);
                 break;
 
             // Partially trust the incoming traceparent
-            // Use the propagated trace and parent ids, but ignore any flags or baggage
             case IncomingTraceParent.Accept:
-                recreated = RecreateActivity(activity);
-
-                if (recreated != null && activity != null)
-                {
-                    recreated.SetParentId(activity.TraceId, activity.ParentSpanId, recreated.ActivityTraceFlags);
-                    // NOTE: Baggage is ignored here
-                }
-
-                recreated?.Start();
-                activity = recreated;
+                // Use the propagated trace and parent ids, but ignore any flags or baggage
+                replacement = CreateReplacementActivity(inbound, true, false, false);
                 break;
 
             // Fully trust the incoming traceparent
-            // Only generate a new 
             case IncomingTraceParent.Trust:
-                // If the incoming request has no traceparent at all or
-                // if the generated activity doesn't come from the expected source then recreate it
-                //
-                // This ensures:
+                // The inbound activity is still replaced, so that:
                 // 1. Sampling is properly applied, even if the activity was manually created by ASP.NET Core
                 // 2. Clients that don't send any traceparent header may still produce a recorded activity
-                if (activity == null || activity.Source.Name != SourceName)
-                {
-                    recreated = RecreateActivity(activity);
-                    if (recreated != null && activity != null)
-                    {
-                        recreated.SetParentId(activity.TraceId, activity.ParentSpanId, activity.ActivityTraceFlags);
-                        foreach (var (k, v) in activity.Baggage)
-                        {
-                            recreated.SetBaggage(k, v);
-                        }
-                    }
-                    recreated?.Start();
-                    activity = recreated;
-                }
-
+                replacement = CreateReplacementActivity(inbound, true, true, true);
                 break;
 
             default:
                 throw new ArgumentOutOfRangeException();
         }
 
-        if (activity != null)
+        if (inbound != null)
         {
-            ActivityInstrumentation.SetMessageTemplateOverride(activity, _messageTemplateOverride);
-            activity.DisplayName = _messageTemplateOverride.Text;
+            // Suppress the activity created by ASP.NET Core. Important to do this last, because
+            // we use the inbound flags in the preceding code.
+            inbound.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+            inbound.IsAllDataRequested = false;
+        }
 
-            ActivityInstrumentation.SetLogEventProperties(activity,
+        if (replacement != null)
+        {
+            ActivityInstrumentation.SetMessageTemplateOverride(replacement, _messageTemplateOverride);
+            replacement.DisplayName = _messageTemplateOverride.Text;
+
+            ActivityInstrumentation.SetLogEventProperties(replacement,
                 _getRequestProperties(start.Request).ToArray());
+
+            replacement.Start();
         }
     }
     
@@ -159,7 +144,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
                     activity.SetStatus(ActivityStatusCode.Error);
                 }
 
-                if (activity.GetCustomProperty(RegeneratedActivityPropertyName) is Activity original)
+                if (activity.GetCustomProperty(ReplacedActivityPropertyName) is Activity original)
                 {
                     activity.Stop();
                     Activity.Current = original;
@@ -169,30 +154,39 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
         }
     }
 
-    static Activity? RecreateActivity(Activity? activity)
+    public static Activity? CreateReplacementActivity(Activity? inbound, bool inheritParent, bool inheritFlags, bool inheritBaggage)
     {
-        Activity.Current = activity?.Parent;
+        var replacement = ReplacementActivitySource.CreateActivity(DefaultActivityName, ActivityKind.Server);
 
-        if (activity != null)
+        if (inbound == null)
         {
-            // Suppress the activity created by ASP.NET Core
-            activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
-            activity.IsAllDataRequested = false;
+            return replacement;
+        }
 
-            var regenerated = GetSource(activity).CreateActivity(activity.DisplayName, activity.Kind);
-            if (regenerated != null)
+        if (replacement != null)
+        {
+            replacement.SetCustomProperty(ReplacedActivityPropertyName, inbound);
+            
+            foreach (var (name, value) in inbound.EnumerateTagObjects())
             {
-                foreach (var (name, value) in activity.EnumerateTagObjects())
-                {
-                    regenerated.SetTag(name, value);
-                }
-
-                regenerated.SetCustomProperty(RegeneratedActivityPropertyName, activity);
+                replacement.SetTag(name, value);
             }
 
-            return regenerated;
+            if (inheritParent)
+            {
+                var flags = inheritFlags ? inbound.ActivityTraceFlags : replacement.ActivityTraceFlags;
+                replacement.SetParentId(inbound.TraceId, inbound.ParentSpanId, flags);
+            }
+
+            if (inheritBaggage)
+            {
+                foreach (var (k, v) in inbound.Baggage)
+                {
+                    replacement.SetBaggage(k, v);
+                }
+            }
         }
         
-        return ImpersonatedSource.CreateActivity("Microsoft.AspNetCore.Hosting.HttpRequestIn", ActivityKind.Server);
+        return replacement;
     }
 }
