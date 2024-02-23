@@ -4,7 +4,7 @@ using Serilog.Parsing;
 
 namespace SerilogTracing.Tests.Support;
 
-static class Some
+public static class Some
 {
     public static string String()
     {

@@ -17,7 +17,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\SerilogTracing.Instrumentation.AspNetCore\SerilogTracing.Instrumentation.AspNetCore.csproj" />
+        <ProjectReference Include="..\..\src\SerilogTracing.Instrumentation.AspNetCore\SerilogTracing.Instrumentation.AspNetCore.csproj" />
+        <ProjectReference Include="..\SerilogTracing.Tests\SerilogTracing.Tests.csproj" />
     </ItemGroup>
 
 </Project>

@@ -43,7 +43,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
     readonly IncomingTraceParent _incomingTraceParent;
 
     const string ReplacedActivityPropertyName = "SerilogTracing.Instrumentation.AspNetCore.Replaced";
-    const string ReplacementActivitySourceName = "SerilogTracing.Instrumentation.AspNetCore";
+    internal const string ReplacementActivitySourceName = "SerilogTracing.Instrumentation.AspNetCore";
     const string TargetDiagnosticListenerName = "Microsoft.AspNetCore";
     const string DefaultActivityName = "SerilogTracing.Instrumentation.AspNetCore.HttpRequestIn";
 
@@ -65,45 +65,20 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
         // source; it's not possible to check decisively, since although the incoming source
         // will usually be named Microsoft.AspNetCore, on some paths the source name will be the
         // default "" empty string.
-        var inbound = Activity.Current;
+        var incoming = Activity.Current;
         
         // Important to do this first, otherwise our activity source will consult the inherited
         // activity when making sampling decisions.
-        Activity.Current = inbound?.Parent;
-        
-        Activity? replacement;
-        switch (_incomingTraceParent)
-        {
-            // Don't trust the incoming traceparent
-            case IncomingTraceParent.Ignore:
-                // Generate a new root activity, using no information from the traceparent
-                replacement = CreateReplacementActivity(inbound, false, false, false);
-                break;
+        Activity.Current = incoming?.Parent;
 
-            // Partially trust the incoming traceparent
-            case IncomingTraceParent.Accept:
-                // Use the propagated trace and parent ids, but ignore any flags or baggage
-                replacement = CreateReplacementActivity(inbound, true, false, false);
-                break;
+        var replacement = CreateReplacementActivity(incoming, _incomingTraceParent);
 
-            // Fully trust the incoming traceparent
-            case IncomingTraceParent.Trust:
-                // The inbound activity is still replaced, so that:
-                // 1. Sampling is properly applied, even if the activity was manually created by ASP.NET Core
-                // 2. Clients that don't send any traceparent header may still produce a recorded activity
-                replacement = CreateReplacementActivity(inbound, true, true, true);
-                break;
-
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-
-        if (inbound != null)
+        if (incoming != null)
         {
             // Suppress the activity created by ASP.NET Core. Important to do this last, because
-            // we use the inbound flags in the preceding code.
-            inbound.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
-            inbound.IsAllDataRequested = false;
+            // we use the incoming flags in the preceding code.
+            incoming.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+            incoming.IsAllDataRequested = false;
         }
 
         if (replacement != null)
@@ -118,7 +93,6 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
         }
     }
     
-        
     public void InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
         switch (eventName)
@@ -154,33 +128,65 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
         }
     }
 
-    public static Activity? CreateReplacementActivity(Activity? inbound, bool inheritParent, bool inheritFlags, bool inheritBaggage)
+    internal static Activity? CreateReplacementActivity(Activity? incoming, IncomingTraceParent incomingTraceParent)
+    {
+        return incomingTraceParent switch
+        {
+            // Don't trust the incoming traceparent
+            IncomingTraceParent.Ignore =>
+                // Generate a new root activity, using no information from the traceparent
+                CreateReplacementActivity(incoming, false, false, false, false),
+            
+            // Partially trust the incoming traceparent
+            IncomingTraceParent.Accept =>
+                // Use the propagated trace and parent ids, but ignore any flags or baggage
+                CreateReplacementActivity(incoming, true, true, false, false),
+            
+            // Fully trust the incoming traceparent
+            IncomingTraceParent.Trust =>
+                // The incoming activity is still replaced, so that:
+                // 1. Sampling is properly applied, even if the activity was manually created by ASP.NET Core
+                // 2. Clients that don't send any traceparent header may still produce a recorded activity
+                CreateReplacementActivity(incoming, true, true, true, true),
+            
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    static Activity? CreateReplacementActivity(Activity? incoming, bool inheritTags, bool inheritParent, bool inheritFlags, bool inheritBaggage)
     {
         var replacement = ReplacementActivitySource.CreateActivity(DefaultActivityName, ActivityKind.Server);
+        if (replacement?.IsAllDataRequested == true)
+        {
+            replacement.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
+        }
 
-        if (inbound == null)
+        if (incoming == null)
         {
             return replacement;
         }
 
         if (replacement != null)
         {
-            replacement.SetCustomProperty(ReplacedActivityPropertyName, inbound);
-            
-            foreach (var (name, value) in inbound.EnumerateTagObjects())
+            replacement.SetCustomProperty(ReplacedActivityPropertyName, incoming);
+
+            if (inheritTags)
             {
-                replacement.SetTag(name, value);
+                foreach (var (name, value) in incoming.EnumerateTagObjects())
+                {
+                    replacement.SetTag(name, value);
+                }
             }
 
             if (inheritParent)
             {
-                var flags = inheritFlags ? inbound.ActivityTraceFlags : replacement.ActivityTraceFlags;
-                replacement.SetParentId(inbound.TraceId, inbound.ParentSpanId, flags);
+                var flags = inheritFlags ? incoming.ActivityTraceFlags : replacement.ActivityTraceFlags;
+                replacement.SetParentId(incoming.TraceId, incoming.ParentSpanId, flags);
             }
 
             if (inheritBaggage)
             {
-                foreach (var (k, v) in inbound.Baggage)
+                foreach (var (k, v) in incoming.Baggage)
                 {
                     replacement.SetBaggage(k, v);
                 }
