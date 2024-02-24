@@ -10,6 +10,7 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
         <ProjectReference Include="..\SerilogTracing\SerilogTracing.csproj" />
+        <InternalsVisibleTo Include="SerilogTracing.Instrumentation.AspNetCore.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100a754c81a195a80e95b1638ebfa4d94281b4852f386a3de19794418f68acb0564da8a4ced775b1de531d640768186ceef422cdabb8c115055cf734971913672c4be1385d08902ef2a792786339725fb989d5cf64aea4e0703ee7d4e8b16426d8e6b61cb3479f33cdec568e2dd631f0fbb9f092702734a19e9964fadbd30bc619c" />
     </ItemGroup>
 
 </Project>
