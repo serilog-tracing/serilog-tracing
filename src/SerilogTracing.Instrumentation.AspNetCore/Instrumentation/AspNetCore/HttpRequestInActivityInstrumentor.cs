@@ -156,10 +156,6 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
     static Activity? CreateReplacementActivity(Activity? incoming, bool inheritTags, bool inheritParent, bool inheritFlags, bool inheritBaggage)
     {
         var replacement = ReplacementActivitySource.CreateActivity(DefaultActivityName, ActivityKind.Server);
-        if (replacement?.IsAllDataRequested == true)
-        {
-            replacement.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
-        }
 
         if (incoming == null)
         {
