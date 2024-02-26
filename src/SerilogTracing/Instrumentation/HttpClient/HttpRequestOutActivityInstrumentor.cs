@@ -82,14 +82,10 @@ sealed class HttpRequestOutActivityInstrumentor : IActivityInstrumentor
 
                     if (activity.Status == ActivityStatusCode.Unset)
                     {
-                        if (statusCode >= 400)
+                        if (statusCode >= 400 ||
+                            _requestTaskStatusAccessor.TryGetValue(eventArgs, out var requestTaskStatus) && requestTaskStatus == TaskStatus.Faulted)
                         {
                             activity.SetStatus(ActivityStatusCode.Error);
-                        }
-                        else if (_requestTaskStatusAccessor.TryGetValue(eventArgs, out var requestTaskStatus))
-                        {
-                            if (requestTaskStatus == TaskStatus.Faulted || response is { IsSuccessStatusCode: false })
-                                activity.SetStatus(ActivityStatusCode.Error);
                         }
                     }
 
