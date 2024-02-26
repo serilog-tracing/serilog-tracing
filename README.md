@@ -181,6 +181,10 @@ using var _ = new ActivityListenerConfiguration()
     .TraceToSharedLogger();
 ```
 
+## Adding instrumentation for `Npgsql`
+
+Npgsql is internally instrumented using `System.Diagnostics.Activity`, so no additional packages or steps are required to enable instrumentation of Npgsql commands. If you're missing spans from Npgsql, check that the `"Npgsql"` namespace isn't suppressed by your `MinimumLevel.Override()` configuration.
+
 ## Formatting output
 
 SerilogTracing includes extensions to [_Serilog.Expressions_](https://github.com/serilog/serilog-expressions) aimed at producing useful text and JSON output from
