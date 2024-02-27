@@ -12,14 +12,16 @@ namespace SerilogTracing.Benchmarks;
 [MemoryDiagnoser]
 public class LoggerActivityTracingOnBenchmarks: IDisposable
 {
-    readonly ILogger _log = new LoggerConfiguration().MinimumLevel.Is(LevelAlias.Minimum).CreateLogger();
+    readonly ILogger _log = new LoggerConfiguration().CreateLogger();
     readonly Exception _exception = new();
     readonly IDisposable _activityListener;
-    readonly ActivitySource _activitySource = new(nameof(LoggerActivityTracingOnBenchmarks));
+    readonly ActivitySource _enabledSource = new(nameof(LoggerActivityTracingOnBenchmarks) + ".Included");
+    readonly ActivitySource _ignoredSource = new(nameof(LoggerActivityTracingOnBenchmarks) + ".Ignored");
 
     public LoggerActivityTracingOnBenchmarks()
     {
         _activityListener = new ActivityListenerConfiguration()
+            .InitialLevel.Override(_ignoredSource.Name, LogEventLevel.Verbose)
             .Instrument.WithDefaultInstrumentation(false)
             .TraceTo(_log);
     }
@@ -27,7 +29,15 @@ public class LoggerActivityTracingOnBenchmarks: IDisposable
     [Benchmark(Baseline = true)]
     public Activity? ActivitySourceBaseline()
     {
-        var activity = _activitySource.StartActivity();
+        var activity = _ignoredSource.StartActivity();
+        activity?.Dispose();
+        return activity;
+    }
+
+    [Benchmark]
+    public Activity? ActivityListenerOnly()
+    {
+        var activity = _enabledSource.StartActivity();
         activity?.Dispose();
         return activity;
     }
@@ -51,6 +61,7 @@ public class LoggerActivityTracingOnBenchmarks: IDisposable
     public void Dispose()
     {
         _activityListener.Dispose();
-        _activitySource.Dispose();
+        _ignoredSource.Dispose();
+        _enabledSource.Dispose();
     }
 }

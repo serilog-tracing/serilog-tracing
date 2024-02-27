@@ -12,6 +12,16 @@ public class LoggerActivityTracingOnBenchmarksTests
         var benchmarks = new LoggerActivityTracingOnBenchmarks();
         var activity = benchmarks.ActivitySourceBaseline();
         Assert.NotNull(activity);
+        // Would be nice to assert effect on the logging pipeline here.
+    }
+
+    [Fact]
+    public void ActivityListenerOnly()
+    {
+        var benchmarks = new LoggerActivityTracingOnBenchmarks();
+        var activity = benchmarks.ActivityListenerOnly();
+        Assert.NotNull(activity);
+        // Would be nice to assert effect on the logging pipeline here.
     }
 
     [Fact]
