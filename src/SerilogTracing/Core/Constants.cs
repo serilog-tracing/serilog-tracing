@@ -25,7 +25,7 @@ public static class Constants
     /// <summary>
     /// The name of the <see cref="ActivitySource"/> through which SerilogTracing publishes logger activities.
     /// </summary>
-    public const string SerilogActivitySourceName = "Serilog";
+    public const string SerilogTracingActivitySourceName = "SerilogTracing";
 
     /// <summary>
     /// The name of the entry in <see cref="LogEvent.Properties"/> that carries a

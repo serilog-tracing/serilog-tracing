@@ -19,7 +19,7 @@ namespace SerilogTracing.Interop;
 
 static class LoggerActivitySource
 {
-    static ActivitySource Instance { get; } = new(Constants.SerilogActivitySourceName, null);
+    static ActivitySource Instance { get; } = new(Constants.SerilogTracingActivitySourceName, null);
 
     public static Activity? TryStartActivity(string name)
     {
