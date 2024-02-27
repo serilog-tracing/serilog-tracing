@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using BenchmarkDotNet.Attributes;
 using Serilog;
 using Serilog.Events;
@@ -14,12 +15,21 @@ public class LoggerActivityTracingOnBenchmarks: IDisposable
     readonly ILogger _log = new LoggerConfiguration().MinimumLevel.Is(LevelAlias.Minimum).CreateLogger();
     readonly Exception _exception = new();
     readonly IDisposable _activityListener;
+    readonly ActivitySource _activitySource = new(nameof(LoggerActivityTracingOnBenchmarks));
 
     public LoggerActivityTracingOnBenchmarks()
     {
         _activityListener = new ActivityListenerConfiguration()
             .Instrument.WithDefaultInstrumentation(false)
             .TraceTo(_log);
+    }
+    
+    [Benchmark(Baseline = true)]
+    public Activity? ActivitySourceBaseline()
+    {
+        var activity = _activitySource.StartActivity();
+        activity?.Dispose();
+        return activity;
     }
 
     [Benchmark]
@@ -41,5 +51,6 @@ public class LoggerActivityTracingOnBenchmarks: IDisposable
     public void Dispose()
     {
         _activityListener.Dispose();
+        _activitySource.Dispose();
     }
 }

@@ -7,6 +7,14 @@ namespace SerilogTracing.Tests.Benchmarks;
 public class LoggerActivityLeveledOffBenchmarksTests
 {
     [Fact]
+    public void ActivitySourceBaseline()
+    {
+        var benchmarks = new LoggerActivityLeveledOffBenchmarks();
+        var activity = benchmarks.ActivitySourceBaseline();
+        Assert.Null(activity);
+    }
+    
+    [Fact]
     public void LeveledOffStartThenDispose()
     {
         var benchmarks = new LoggerActivityLeveledOffBenchmarks();
