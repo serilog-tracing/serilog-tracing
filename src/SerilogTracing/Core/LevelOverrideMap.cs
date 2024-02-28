@@ -55,7 +55,7 @@ class LevelOverrideMap
 
         // Descending order means that if we have a match, we're sure about it being the most specific.
         _overrides = overrides
-            .OrderByDescending(o => o.Key)
+            .OrderByDescending(o => o.Key, StringComparer.Ordinal)
             .Select(o => new LevelOverride(o.Key, o.Value))
             .ToArray();
     }
@@ -67,7 +67,7 @@ class LevelOverrideMap
     {
         foreach (var levelOverride in _overrides)
         {
-            if (context.StartsWith(levelOverride.Context) &&
+            if (context.StartsWith(levelOverride.Context, StringComparison.Ordinal) &&
                 (context.Length == levelOverride.Context.Length || context[levelOverride.Context.Length] == '.'))
             {
                 minimumLevel = LevelAlias.Minimum;

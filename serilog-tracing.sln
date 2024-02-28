@@ -62,6 +62,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".workflows", ".workflows", 
 		.github\workflows\ci.yml = .github\workflows\ci.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Benchmarks", "test\SerilogTracing.Benchmarks\SerilogTracing.Benchmarks.csproj", "{9052EA54-5BEE-4203-8966-DEC013DE62CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +88,7 @@ Global
 		{9D94FDB0-546F-46FD-AFF1-9E48C7BA24E6} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
 		{0128EB76-9B60-4553-B089-2D1707CD0D65} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
 		{ECE478F5-0719-4E59-8AEF-6AB12BE33B62} = {6BB7BDF8-8AEE-4D76-9E81-EA9984A66BF6}
+		{9052EA54-5BEE-4203-8966-DEC013DE62CB} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -144,5 +147,9 @@ Global
 		{0128EB76-9B60-4553-B089-2D1707CD0D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0128EB76-9B60-4553-B089-2D1707CD0D65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0128EB76-9B60-4553-B089-2D1707CD0D65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9052EA54-5BEE-4203-8966-DEC013DE62CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9052EA54-5BEE-4203-8966-DEC013DE62CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9052EA54-5BEE-4203-8966-DEC013DE62CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9052EA54-5BEE-4203-8966-DEC013DE62CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

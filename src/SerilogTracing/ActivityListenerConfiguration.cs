@@ -82,7 +82,7 @@ public class ActivityListenerConfiguration
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
     public IDisposable TraceTo(ILogger logger)
     {
-        return LoggerActivityListener.Configure(this, () => logger);
+        return LoggerActivityListener.Configure(this, () => logger, ignoreLevelChanges: false);
     }
 
     /// <summary>
@@ -94,6 +94,6 @@ public class ActivityListenerConfiguration
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
     public IDisposable TraceToSharedLogger()
     {
-        return LoggerActivityListener.Configure(this, () => Log.Logger);
+        return LoggerActivityListener.Configure(this, () => Log.Logger, ignoreLevelChanges: false);
     }
 }
