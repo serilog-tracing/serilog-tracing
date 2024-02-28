@@ -32,7 +32,7 @@ sealed class LoggerActivityListener: IDisposable
         _diagnosticListenerSubscription = subscription;
     }
     
-    internal static LoggerActivityListener Configure(ActivityListenerConfiguration configuration, Func<ILogger> logger)
+    internal static LoggerActivityListener Configure(ActivityListenerConfiguration configuration, Func<ILogger> logger, bool ignoreLevelChanges)
     {
         ILogger GetLogger(string name)
         {
@@ -48,20 +48,35 @@ sealed class LoggerActivityListener: IDisposable
         try
         {
             var levelMap = configuration.InitialLevel.GetOverrideMap();
-
-            // We may want an opt-in to performing level checks eagerly here.
-            // It would be a performance win, but would also prevent dynamic log level changes from being effective.
-            activityListener.ShouldListenTo = _ => true;
-
             var sample = configuration.Sample.ActivityContext;
-            activityListener.Sample = (ref ActivityCreationOptions<ActivityContext> activity) =>
-            {
-                if (!GetLogger(activity.Source.Name)
-                        .IsEnabled(GetInitialLevel(levelMap, activity.Source.Name)))
-                    return ActivitySamplingResult.None;
 
-                return sample?.Invoke(ref activity) ?? ActivitySamplingResult.AllDataAndRecorded;
-            };
+            if (ignoreLevelChanges)
+            {
+                activityListener.ShouldListenTo = source => GetLogger(source.Name)
+                    .IsEnabled(GetInitialLevel(levelMap, source.Name));
+
+                if (sample != null)
+                {
+                    activityListener.Sample = (ref ActivityCreationOptions<ActivityContext> activity) => sample.Invoke(ref activity);
+                }
+                else
+                {
+                    activityListener.Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded;
+                }
+            }
+            else
+            {
+                activityListener.ShouldListenTo = _ => true;
+
+                activityListener.Sample = (ref ActivityCreationOptions<ActivityContext> activity) =>
+                {
+                    if (!GetLogger(activity.Source.Name)
+                            .IsEnabled(GetInitialLevel(levelMap, activity.Source.Name)))
+                        return ActivitySamplingResult.None;
+
+                    return sample?.Invoke(ref activity) ?? ActivitySamplingResult.AllDataAndRecorded;
+                };
+            }
 
             activityListener.ActivityStopped += activity =>
             {

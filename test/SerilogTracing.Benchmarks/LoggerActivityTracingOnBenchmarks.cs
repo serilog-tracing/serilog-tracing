@@ -14,16 +14,23 @@ public class LoggerActivityTracingOnBenchmarks: IDisposable
 {
     readonly ILogger _log = new LoggerConfiguration().CreateLogger();
     readonly Exception _exception = new();
-    readonly IDisposable _activityListener;
+    readonly IDisposable _loggerActivityListener;
     readonly ActivitySource _enabledSource = new(nameof(LoggerActivityTracingOnBenchmarks) + ".Included");
     readonly ActivitySource _ignoredSource = new(nameof(LoggerActivityTracingOnBenchmarks) + ".Ignored");
+    readonly ActivityListener _ignoringActivityListener;
 
     public LoggerActivityTracingOnBenchmarks()
     {
-        _activityListener = new ActivityListenerConfiguration()
+        _loggerActivityListener = new ActivityListenerConfiguration()
             .InitialLevel.Override(_ignoredSource.Name, LogEventLevel.Verbose)
             .Instrument.WithDefaultInstrumentation(false)
-            .TraceTo(_log);
+            .TraceTo(_log, ignoreLevelChanges: true);
+
+        _ignoringActivityListener = new ActivityListener();
+        _ignoringActivityListener.ShouldListenTo = source => source == _ignoredSource;
+        _ignoringActivityListener.Sample = (ref ActivityCreationOptions<ActivityContext> _) =>
+            ActivitySamplingResult.AllDataAndRecorded;
+        ActivitySource.AddActivityListener(_ignoringActivityListener);
     }
     
     [Benchmark(Baseline = true)]
@@ -60,8 +67,9 @@ public class LoggerActivityTracingOnBenchmarks: IDisposable
 
     public void Dispose()
     {
-        _activityListener.Dispose();
+        _loggerActivityListener.Dispose();
         _ignoredSource.Dispose();
         _enabledSource.Dispose();
+        _ignoringActivityListener.Dispose();
     }
 }

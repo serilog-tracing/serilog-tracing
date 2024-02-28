@@ -6,7 +6,7 @@ namespace SerilogTracing
         public SerilogTracing.Configuration.ActivityListenerInitialLevelConfiguration InitialLevel { get; }
         public SerilogTracing.Configuration.ActivityListenerInstrumentationConfiguration Instrument { get; }
         public SerilogTracing.Configuration.ActivityListenerSamplingConfiguration Sample { get; }
-        public System.IDisposable TraceTo(Serilog.ILogger logger) { }
+        public System.IDisposable TraceTo(Serilog.ILogger logger, bool ignoreLevelChanges = false) { }
         public System.IDisposable TraceToSharedLogger() { }
     }
     public static class ActivityListenerInstrumentationConfigurationHttpClientExtensions

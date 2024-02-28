@@ -79,10 +79,12 @@ public class ActivityListenerConfiguration
     /// The logger instance to emit traces through. Avoid using the shared <see cref="Log.Logger" /> as
     /// the value here. To emit traces through the shared static logger, call <see cref="TraceToSharedLogger" /> instead.
     /// </param>
+    /// <param name="ignoreLevelChanges">If <c langword="true"/>, the activity listener will assume all initial and
+    /// minimum levels are fixed at the time of activity listener creation. This may slightly improve tracing performance.</param>
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
-    public IDisposable TraceTo(ILogger logger)
+    public IDisposable TraceTo(ILogger logger, bool ignoreLevelChanges = false)
     {
-        return LoggerActivityListener.Configure(this, () => logger);
+        return LoggerActivityListener.Configure(this, () => logger, ignoreLevelChanges);
     }
 
     /// <summary>
@@ -94,6 +96,6 @@ public class ActivityListenerConfiguration
     /// <returns>A handle that must be kept alive while tracing is required, and disposed afterwards.</returns>
     public IDisposable TraceToSharedLogger()
     {
-        return LoggerActivityListener.Configure(this, () => Log.Logger);
+        return LoggerActivityListener.Configure(this, () => Log.Logger, false);
     }
 }
