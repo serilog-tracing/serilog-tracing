@@ -1,0 +1,17 @@
+namespace SerilogTracing
+{
+    public static class ActivityListenerInstrumentationConfigurationSqlClientExtensions
+    {
+        public static SerilogTracing.ActivityListenerConfiguration SqlClientCommands(this SerilogTracing.Configuration.ActivityListenerInstrumentationConfiguration configuration) { }
+        public static SerilogTracing.ActivityListenerConfiguration SqlClientCommands(this SerilogTracing.Configuration.ActivityListenerInstrumentationConfiguration configuration, System.Action<SerilogTracing.Instrumentation.SqlClient.SqlCommandActivityInstrumentationOptions> configure) { }
+    }
+}
+namespace SerilogTracing.Instrumentation.SqlClient
+{
+    public sealed class SqlCommandActivityInstrumentationOptions
+    {
+        public SqlCommandActivityInstrumentationOptions() { }
+        public bool IncludeCommandText { get; set; }
+        public bool InferOperation { get; set; }
+    }
+}

@@ -1,0 +1,25 @@
+namespace SerilogTracing
+{
+    public static class ActivityListenerInstrumentationConfigurationAspNetCoreExtensions
+    {
+        public static SerilogTracing.ActivityListenerConfiguration AspNetCoreRequests(this SerilogTracing.Configuration.ActivityListenerInstrumentationConfiguration configuration) { }
+        public static SerilogTracing.ActivityListenerConfiguration AspNetCoreRequests(this SerilogTracing.Configuration.ActivityListenerInstrumentationConfiguration configuration, System.Action<SerilogTracing.Instrumentation.AspNetCore.HttpRequestInActivityInstrumentationOptions> configure) { }
+    }
+    public enum IncomingTraceParent
+    {
+        Ignore = 0,
+        Accept = 1,
+        Trust = 2,
+    }
+}
+namespace SerilogTracing.Instrumentation.AspNetCore
+{
+    public sealed class HttpRequestInActivityInstrumentationOptions
+    {
+        public HttpRequestInActivityInstrumentationOptions() { }
+        public System.Func<Microsoft.AspNetCore.Http.HttpRequest, System.Collections.Generic.IEnumerable<Serilog.Events.LogEventProperty>> GetRequestProperties { get; set; }
+        public System.Func<Microsoft.AspNetCore.Http.HttpResponse, System.Collections.Generic.IEnumerable<Serilog.Events.LogEventProperty>> GetResponseProperties { get; set; }
+        public SerilogTracing.IncomingTraceParent IncomingTraceParent { get; set; }
+        public string MessageTemplate { get; set; }
+    }
+}

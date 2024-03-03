@@ -1,0 +1,155 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sln", "sln", "{81CA4013-44B4-427D-A931-09BB1E0E2471}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+		.gitattributes = .gitattributes
+		Build.ps1 = Build.ps1
+		global.json = global.json
+		Setup.ps1 = Setup.ps1
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "example", "example", "{E35D98E8-5F3C-4ABD-8A65-63B6E357DC2F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing", "src\SerilogTracing\SerilogTracing.csproj", "{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Tests", "test\SerilogTracing.Tests\SerilogTracing.Tests.csproj", "{13DBE96D-AA92-40E1-AABB-7109C4A12B7A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{415F7764-09CE-4F9C-9122-C99A0E23750B}"
+	ProjectSection(SolutionItems) = preProject
+		assets\icon.png = assets\icon.png
+		assets\SerilogTracing.snk = assets\SerilogTracing.snk
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.WeatherService", "example\Example.WeatherService\Example.WeatherService.csproj", "{12A341FC-1849-439E-9C33-972A597A3DCA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "weather", "example\weather\weather.csproj", "{DA47B450-39F5-4F7B-86B6-615432558136}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Sinks.Zipkin", "src\SerilogTracing.Sinks.Zipkin\SerilogTracing.Sinks.Zipkin.csproj", "{5DBE6610-CCF2-41B9-9592-033B24B79558}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Sinks.OpenTelemetry", "src\SerilogTracing.Sinks.OpenTelemetry\SerilogTracing.Sinks.OpenTelemetry.csproj", "{9139D9D6-A7BA-4FB7-B368-C340ACA523BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Sinks.OpenTelemetry.Tests", "test\SerilogTracing.Sinks.OpenTelemetry.Tests\SerilogTracing.Sinks.OpenTelemetry.Tests.csproj", "{F94303AD-18D0-4A3F-8F35-CA2506E9D8F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Sinks.Seq", "src\SerilogTracing.Sinks.Seq\SerilogTracing.Sinks.Seq.csproj", "{57AB5445-432E-4148-97BC-9953D5C162BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Expressions", "src\SerilogTracing.Expressions\SerilogTracing.Expressions.csproj", "{586FD369-EF68-49E0-B827-A35218E1E4E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Instrumentation.AspNetCore", "src\SerilogTracing.Instrumentation.AspNetCore\SerilogTracing.Instrumentation.AspNetCore.csproj", "{A41C8092-0527-4A83-85A3-6FECBA531E21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Instrumentation.AspNetCore.Tests", "test\SerilogTracing.Instrumentation.AspNetCore.Tests\SerilogTracing.Instrumentation.AspNetCore.Tests.csproj", "{6E4D6C66-3611-4037-BD31-A039A78824A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Instrumentation.SqlClient", "src\SerilogTracing.Instrumentation.SqlClient\SerilogTracing.Instrumentation.SqlClient.csproj", "{46536060-BF0C-4B38-9D0A-BA5667527D68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Instrumentation.SqlClient.Tests", "test\SerilogTracing.Instrumentation.SqlClient.Tests\SerilogTracing.Instrumentation.SqlClient.Tests.csproj", "{9D94FDB0-546F-46FD-AFF1-9E48C7BA24E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.PublicApi.Tests", "test\SerilogTracing.PublicApi.Tests\SerilogTracing.PublicApi.Tests.csproj", "{0128EB76-9B60-4553-B089-2D1707CD0D65}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{6BB7BDF8-8AEE-4D76-9E81-EA9984A66BF6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".workflows", ".workflows", "{ECE478F5-0719-4E59-8AEF-6AB12BE33B62}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Benchmarks", "test\SerilogTracing.Benchmarks\SerilogTracing.Benchmarks.csproj", "{9052EA54-5BEE-4203-8966-DEC013DE62CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
+		{13DBE96D-AA92-40E1-AABB-7109C4A12B7A} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
+		{12A341FC-1849-439E-9C33-972A597A3DCA} = {E35D98E8-5F3C-4ABD-8A65-63B6E357DC2F}
+		{DA47B450-39F5-4F7B-86B6-615432558136} = {E35D98E8-5F3C-4ABD-8A65-63B6E357DC2F}
+		{9139D9D6-A7BA-4FB7-B368-C340ACA523BA} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
+		{F94303AD-18D0-4A3F-8F35-CA2506E9D8F6} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
+		{5DBE6610-CCF2-41B9-9592-033B24B79558} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
+		{57AB5445-432E-4148-97BC-9953D5C162BD} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
+		{586FD369-EF68-49E0-B827-A35218E1E4E5} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
+		{A41C8092-0527-4A83-85A3-6FECBA531E21} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
+		{6E4D6C66-3611-4037-BD31-A039A78824A5} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
+		{46536060-BF0C-4B38-9D0A-BA5667527D68} = {3DF598C8-7046-4DF6-ACB1-8FB1A7BC28A3}
+		{9D94FDB0-546F-46FD-AFF1-9E48C7BA24E6} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
+		{0128EB76-9B60-4553-B089-2D1707CD0D65} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
+		{ECE478F5-0719-4E59-8AEF-6AB12BE33B62} = {6BB7BDF8-8AEE-4D76-9E81-EA9984A66BF6}
+		{9052EA54-5BEE-4203-8966-DEC013DE62CB} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13DBE96D-AA92-40E1-AABB-7109C4A12B7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13DBE96D-AA92-40E1-AABB-7109C4A12B7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13DBE96D-AA92-40E1-AABB-7109C4A12B7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13DBE96D-AA92-40E1-AABB-7109C4A12B7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12A341FC-1849-439E-9C33-972A597A3DCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12A341FC-1849-439E-9C33-972A597A3DCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12A341FC-1849-439E-9C33-972A597A3DCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12A341FC-1849-439E-9C33-972A597A3DCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA47B450-39F5-4F7B-86B6-615432558136}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA47B450-39F5-4F7B-86B6-615432558136}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA47B450-39F5-4F7B-86B6-615432558136}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA47B450-39F5-4F7B-86B6-615432558136}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DBE6610-CCF2-41B9-9592-033B24B79558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DBE6610-CCF2-41B9-9592-033B24B79558}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DBE6610-CCF2-41B9-9592-033B24B79558}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DBE6610-CCF2-41B9-9592-033B24B79558}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9139D9D6-A7BA-4FB7-B368-C340ACA523BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9139D9D6-A7BA-4FB7-B368-C340ACA523BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9139D9D6-A7BA-4FB7-B368-C340ACA523BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9139D9D6-A7BA-4FB7-B368-C340ACA523BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F94303AD-18D0-4A3F-8F35-CA2506E9D8F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F94303AD-18D0-4A3F-8F35-CA2506E9D8F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F94303AD-18D0-4A3F-8F35-CA2506E9D8F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F94303AD-18D0-4A3F-8F35-CA2506E9D8F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57AB5445-432E-4148-97BC-9953D5C162BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57AB5445-432E-4148-97BC-9953D5C162BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57AB5445-432E-4148-97BC-9953D5C162BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57AB5445-432E-4148-97BC-9953D5C162BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{586FD369-EF68-49E0-B827-A35218E1E4E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{586FD369-EF68-49E0-B827-A35218E1E4E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{586FD369-EF68-49E0-B827-A35218E1E4E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{586FD369-EF68-49E0-B827-A35218E1E4E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A41C8092-0527-4A83-85A3-6FECBA531E21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A41C8092-0527-4A83-85A3-6FECBA531E21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A41C8092-0527-4A83-85A3-6FECBA531E21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A41C8092-0527-4A83-85A3-6FECBA531E21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E4D6C66-3611-4037-BD31-A039A78824A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E4D6C66-3611-4037-BD31-A039A78824A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E4D6C66-3611-4037-BD31-A039A78824A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E4D6C66-3611-4037-BD31-A039A78824A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46536060-BF0C-4B38-9D0A-BA5667527D68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46536060-BF0C-4B38-9D0A-BA5667527D68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46536060-BF0C-4B38-9D0A-BA5667527D68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46536060-BF0C-4B38-9D0A-BA5667527D68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D94FDB0-546F-46FD-AFF1-9E48C7BA24E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D94FDB0-546F-46FD-AFF1-9E48C7BA24E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D94FDB0-546F-46FD-AFF1-9E48C7BA24E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D94FDB0-546F-46FD-AFF1-9E48C7BA24E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0128EB76-9B60-4553-B089-2D1707CD0D65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0128EB76-9B60-4553-B089-2D1707CD0D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0128EB76-9B60-4553-B089-2D1707CD0D65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0128EB76-9B60-4553-B089-2D1707CD0D65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9052EA54-5BEE-4203-8966-DEC013DE62CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9052EA54-5BEE-4203-8966-DEC013DE62CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9052EA54-5BEE-4203-8966-DEC013DE62CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9052EA54-5BEE-4203-8966-DEC013DE62CB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

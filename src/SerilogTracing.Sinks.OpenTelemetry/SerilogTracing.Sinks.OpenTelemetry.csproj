@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Description>Sends log events and traces to OTLP (gRPC or HTTP) endpoints.</Description>
+		<Authors>Serilog Contributors</Authors>
+		<LangVersion>10</LangVersion>
+		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+		<PackageTags>serilog;sink;opentelemetry</PackageTags>
+		<PackageIcon>serilog-sink-nuget.png</PackageIcon>
+		<PackageProjectUrl>https://github.com/serilog-tracing/serilog-tracing</PackageProjectUrl>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/serilog-tracing/serilog-tracing</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<RootNamespace>SerilogTracing</RootNamespace>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+		<DefineConstants>$(DefineConstants);FEATURE_CWT_ADDORUPDATE;FEATURE_ACTIVITY;FEATURE_HALF;FEATURE_DATE_AND_TIME_ONLY;FEATURE_SYNC_HTTP_SEND;FEATURE_SOCKETS_HTTP_HANDLER</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="../../assets/serilog-sink-nuget.png" Pack="true" Visible="false" PackagePath="/" />
+		<None Include="../../README.md" Pack="true" Visible="false" PackagePath="/" />
+		<PackageReference Include="Google.Protobuf" Version="3.25.1" />
+		<PackageReference Include="Grpc.Net.Client" Version="2.60.0" />
+		<PackageReference Include="Serilog" Version="3.1.1" />
+		<PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="4.0.0-*" />
+	</ItemGroup>
+	
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'netstandard2.0' ">
+		<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="8.0.0" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\SerilogTracing\SerilogTracing.csproj" />
+	</ItemGroup>
+</Project>
