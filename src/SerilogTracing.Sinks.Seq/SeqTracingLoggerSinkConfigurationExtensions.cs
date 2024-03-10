@@ -61,7 +61,7 @@ public static class SeqTracingLoggerSinkConfigurationExtensions
     /// <remarks>
     /// The functionality of this method is now provided by Serilog.Sinks.Seq version 7+.
     /// </remarks>
-    // Soon: [Obsolete("Use Serilog.Sinks.Seq version 7.0.0 or later, and WriteTo.Seq() instead.")]
+    [Obsolete("Use Serilog.Sinks.Seq version 7.0.0 or later, and WriteTo.Seq() instead.")]
     public static LoggerConfiguration SeqTracing(
       this LoggerSinkConfiguration loggerSinkConfiguration,
       string serverUrl,
