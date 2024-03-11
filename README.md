@@ -145,8 +145,8 @@ On the failure path, we call the overload of `Complete()` that accepts a level a
 
 These sinks have been built or modified to work well with tracing back-ends:
 
+* [`Serilog.Sinks.Seq`](https://www.nuget.org/packages/Serilog.Sinks.Seq/) - call `WriteTo.Seq()` to send logs and traces to Seq; use `Enrich.WithProperty("Application", "your app")` to show service names in traces.
 * [`SerilogTracing.Sinks.OpenTelemetry`](https://www.nuget.org/packages/SerilogTracing.Sinks.OpenTelemetry/) &mdash; call `WriteTo.OpenTelemetry()` and pass `tracingEndpoint` along with `logsEndpoint` to send traces and logs using OTLP.
-* [`SerilogTracing.Sinks.Seq`](https://www.nuget.org/packages/SerilogTracing.Sinks.Seq/) - call `WriteTo.SeqTracing()` to send logs and traces to Seq; use `Enrich.WithProperty("Application", "your app")` to show service names in traces.
 * [`SerilogTracing.Sinks.Zipkin`](https://www.nuget.org/packages/SerilogTracing.Sinks.Zipkin/) - call `WriteTo.Zipkin()` to send traces to Zipkin; logs are ignored by this sink.
 
 ## Adding instrumentation for ASP.NET Core
