@@ -19,7 +19,6 @@
         <ProjectReference Include="..\..\src\SerilogTracing.Instrumentation.AspNetCore\SerilogTracing.Instrumentation.AspNetCore.csproj" />
         <ProjectReference Include="..\..\src\SerilogTracing.Instrumentation.SqlClient\SerilogTracing.Instrumentation.SqlClient.csproj" />
         <ProjectReference Include="..\..\src\SerilogTracing.Sinks.OpenTelemetry\SerilogTracing.Sinks.OpenTelemetry.csproj" />
-        <ProjectReference Include="..\..\src\SerilogTracing.Sinks.Seq\SerilogTracing.Sinks.Seq.csproj" />
         <ProjectReference Include="..\..\src\SerilogTracing.Sinks.Zipkin\SerilogTracing.Sinks.Zipkin.csproj" />
     </ItemGroup>
 
