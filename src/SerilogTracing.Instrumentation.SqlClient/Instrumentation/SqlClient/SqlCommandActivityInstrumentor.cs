@@ -69,13 +69,12 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
                     {
                         var database = command.Connection.Database;
                         var operation = GetOperation(command, options.InferOperation);
-                        ActivityInstrumentation.SetLogEventProperties(child,
-                            new LogEventProperty("Operation", new ScalarValue(operation)),
-                            new LogEventProperty("Database", new ScalarValue(database)));
+                        ActivityInstrumentation.SetLogEventProperty(child, "Operation", new ScalarValue(operation));
+                        ActivityInstrumentation.SetLogEventProperty(child, "Database", new ScalarValue(database));
 
                         if (options.IncludeCommandText)
                         {
-                            ActivityInstrumentation.SetLogEventProperty(child, new LogEventProperty("CommandText", new ScalarValue(command.CommandText)));
+                            ActivityInstrumentation.SetLogEventProperty(child, "CommandText", new ScalarValue(command.CommandText));
                         }
                     }
 
@@ -96,8 +95,7 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
                         var networkServerTimeMilliseconds = statistics["NetworkServerTime"];
                         if (networkServerTimeMilliseconds != null)
                         {
-                            var property = new LogEventProperty("NetworkServerTime", new ScalarValue(networkServerTimeMilliseconds));
-                            ActivityInstrumentation.SetLogEventProperty(activity, property);
+                            ActivityInstrumentation.SetLogEventProperty(activity, "NetworkServerTime", new ScalarValue(networkServerTimeMilliseconds));
                         }
                     }
 
