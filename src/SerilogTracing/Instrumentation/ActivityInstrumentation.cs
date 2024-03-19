@@ -63,27 +63,50 @@ public static class ActivityInstrumentation
     }
 
     /// <summary>
-    /// Set a <see cref="LogEventProperty"/> on the given <see cref="Activity"/>, overwriting any previously set value
+    /// Set a property on the given <see cref="Activity"/>, overwriting any previously set value
     /// with the same name.
-    ///
+    /// </summary>
+    /// <remarks>
     /// Properties are added to a collection in a custom property on the activity.
     /// If the property value is a <see cref="ScalarValue"/> then it will also set a tag on the activity, making
     /// it visible to outside instrumentation.
+    /// </remarks>
+    /// <param name="activity">The activity to instrument.</param>
+    /// <param name="propertyName">The name of the property to assign.</param>
+    /// <param name="propertyValue">The value of the property to assign.</param>
+    /// <remarks>This override requires fewer allocations than those accepting <see cref="LogEventProperty"/>,</remarks>
+    public static void SetLogEventProperty(Activity activity, string propertyName, LogEventPropertyValue propertyValue)
+    {
+        if (LogEventProperty.IsValidName(propertyName))
+        {
+            SetPreValidatedLogEventProperty(activity, propertyName, propertyValue, GetOrInitLogEventPropertyCollection(activity));
+        }
+    }
+    
+    /// <summary>
+    /// Set a <see cref="LogEventProperty"/> on the given <see cref="Activity"/>, overwriting any previously set value
+    /// with the same name.
     /// </summary>
+    /// <remarks>
+    /// Properties are added to a collection in a custom property on the activity.
+    /// If the property value is a <see cref="ScalarValue"/> then it will also set a tag on the activity, making
+    /// it visible to outside instrumentation.
+    /// </remarks>
     /// <param name="activity">The activity to instrument.</param>
     /// <param name="property">The property to assign.</param>
     public static void SetLogEventProperty(Activity activity, LogEventProperty property)
     {
-        SetLogEventProperty(activity, property, GetOrInitLogEventPropertyCollection(activity));
+        SetPreValidatedLogEventProperty(activity, property.Name, property.Value, GetOrInitLogEventPropertyCollection(activity));
     }
 
     /// <summary>
     /// Set multiple <see cref="LogEventProperty">log event properties</see>, overwriting any previously set values
     /// with the same names.
-    ///
-    /// This method behaves like multiple calls to <see cref="ActivityInstrumentation.SetLogEventProperty(Activity, LogEventProperty)"/>, but
-    /// is more efficient.
     /// </summary>
+    /// <remarks>
+    /// This method behaves like multiple calls to <see cref="ActivityInstrumentation.SetLogEventProperty(Activity, LogEventProperty)"/>, but
+    /// avoids additional dictionary lookups once the first property is added.
+    /// </remarks>
     /// <param name="activity">The activity to instrument.</param>
     /// <param name="properties">The properties to assign.</param>
     public static void SetLogEventProperties(Activity activity, params LogEventProperty[] properties)
@@ -92,14 +115,34 @@ public static class ActivityInstrumentation
 
         foreach (var property in properties)
         {
-            SetLogEventProperty(activity, property, collection);
+            SetPreValidatedLogEventProperty(activity, property.Name, property.Value, collection);
+        }
+    } 
+    
+    /// <summary>
+    /// Set multiple <see cref="LogEventProperty">log event properties</see>, overwriting any previously set values
+    /// with the same names.
+    /// </summary>
+    /// <remarks>
+    /// This method behaves like multiple calls to <see cref="ActivityInstrumentation.SetLogEventProperty(Activity, LogEventProperty)"/>, but
+    /// avoids additional dictionary lookups once the first property is added.
+    /// </remarks>
+    /// <param name="activity">The activity to instrument.</param>
+    /// <param name="properties">The properties to assign.</param>
+    public static void SetLogEventProperties(Activity activity, IEnumerable<LogEventProperty> properties)
+    {
+        var collection = GetOrInitLogEventPropertyCollection(activity);
+
+        foreach (var property in properties)
+        {
+            SetPreValidatedLogEventProperty(activity, property.Name, property.Value, collection);
         }
     }
 
-    internal static void SetLogEventProperty(Activity activity, LogEventProperty property, Dictionary<string, LogEventPropertyValue> collection)
+    internal static void SetPreValidatedLogEventProperty(Activity activity, string propertyName, LogEventPropertyValue propertyValue, Dictionary<string, LogEventPropertyValue> collection)
     {
-        activity.SetTag(property.Name, ToActivityTagValue(property.Value));
-        collection[property.Name] = property.Value;
+        activity.SetTag(propertyName, ToActivityTagValue(propertyValue));
+        collection[propertyName] = propertyValue;
     }
 
     static object? ToActivityTagValue(LogEventPropertyValue propertyValue)

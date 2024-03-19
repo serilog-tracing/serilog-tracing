@@ -86,8 +86,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
             ActivityInstrumentation.SetMessageTemplateOverride(replacement, _messageTemplateOverride);
             replacement.DisplayName = _messageTemplateOverride.Text;
 
-            ActivityInstrumentation.SetLogEventProperties(replacement,
-                _getRequestProperties(start.Request).ToArray());
+            ActivityInstrumentation.SetLogEventProperties(replacement, _getRequestProperties(start.Request));
 
             replacement.Start();
         }
@@ -110,8 +109,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Stop":
                 if (eventArgs is not HttpContext stop) return;
 
-                ActivityInstrumentation.SetLogEventProperties(activity,
-                    _getResponseProperties(stop.Response).ToArray());
+                ActivityInstrumentation.SetLogEventProperties(activity, _getResponseProperties(stop.Response));
 
                 if (stop.Response.StatusCode >= 500)
                 {

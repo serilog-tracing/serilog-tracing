@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="serilog.aspnetcore" Version="8.0.0" />
-    <PackageReference Include="serilog" Version="3.1.1" />
     <PackageReference Include="serilog.sinks.console" Version="5.0.0" />
     <PackageReference Include="serilog.sinks.seq" Version="7.0.0" />
     <ProjectReference Include="../../src/SerilogTracing.Expressions/SerilogTracing.Expressions.csproj" />

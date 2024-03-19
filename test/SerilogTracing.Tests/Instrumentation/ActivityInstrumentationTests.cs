@@ -68,6 +68,18 @@ public class ActivityInstrumentationTests
         Assert.Equal(d, ((ScalarValue)logEventProperties.First(p => p.Key == "d").Value).Value);
         Assert.NotNull(logEventProperties.First(p => p.Key == "e").Value);
     }
+    
+    [Fact]
+    public void WhitespacePropertyNamesAreIgnored()
+    {
+        const string ws = " ";
+        using var activity = Some.Activity();
+        
+        ActivityInstrumentation.SetLogEventProperty(activity, ws, new ScalarValue(42));
+
+        Assert.Null(activity.GetTagItem(ws));
+        Assert.False(ActivityInstrumentation.TryGetLogEventPropertyCollection(activity, out _));
+    }
 
     [Fact]
     public void TrySetExceptionDoesNotOverrideExistingEvent()
