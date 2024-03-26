@@ -47,7 +47,7 @@ using var activity = Log.Logger.StartActivity("Check {Host}", "example.com");
 try
 {
     var client = new HttpClient();
-    var content = client.GetStringAsync("https://example.com");
+    var content = await client.GetStringAsync("https://example.com");
     Log.Information("Content length is {ContentLength}", content.Length);
 
     activity.Complete();
