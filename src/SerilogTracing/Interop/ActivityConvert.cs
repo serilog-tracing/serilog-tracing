@@ -64,8 +64,10 @@ static class ActivityConvert
 
     internal static LogEvent ActivityToLogEvent(ILogger logger, LoggerActivity loggerActivity, DateTimeOffset end, LogEventLevel level, Exception? exception)
     {
-        var activity = loggerActivity.Activity!;
-
+        if (loggerActivity.Activity == null)
+            throw new InvalidOperationException("`LoggerActivity.Activity` is only `null` when activity is suppressed, so should never result in mapping to a `LogEvent`.");
+        
+        var activity = loggerActivity.Activity;
         var start = activity.StartTimeUtc;
         var traceId = activity.TraceId;
         var spanId = activity.SpanId;
@@ -78,7 +80,7 @@ static class ActivityConvert
         }
         return ActivityToLogEvent(
             logger,
-            loggerActivity.Activity,
+            activity,
             start,
             end,
             traceId,
@@ -93,40 +95,39 @@ static class ActivityConvert
 
     internal static LogEvent ActivityToLogEvent(
         ILogger logger,
-        Activity? activity,
+        Activity activity,
         DateTime start,
         DateTimeOffset end,
-        ActivityTraceId? traceId,
-        ActivitySpanId? spanId,
-        ActivitySpanId? parentSpanId,
+        ActivityTraceId traceId,
+        ActivitySpanId spanId,
+        ActivitySpanId parentSpanId,
         ActivityKind kind,
         LogEventLevel level,
         Exception? exception,
         MessageTemplate messageTemplate,
         Dictionary<string, LogEventPropertyValue> properties)
     {
-        if (activity != null)
-        {
 #if FEATURE_ACTIVITY_STRUCTENUMERATORS
-            foreach (var tag in activity.EnumerateTagObjects())
+        foreach (var tag in activity.EnumerateTagObjects())
 #else
-            foreach (var tag in activity.TagObjects)
+        foreach (var tag in activity.TagObjects)
 #endif
-            {
-                if (properties.ContainsKey(tag.Key))
-                    continue;
+        {
+            if (properties.ContainsKey(tag.Key))
+                continue;
 
-                if (!logger.BindProperty(tag.Key, tag.Value, destructureObjects: false, out var property))
-                    continue;
+            if (!logger.BindProperty(tag.Key, tag.Value, destructureObjects: false, out var property))
+                continue;
 
-                properties.Add(tag.Key, property.Value);
-            }
+            properties.Add(tag.Key, property.Value);
         }
 
         properties[SpanStartTimestampPropertyName] = new ScalarValue(start);
-        if (parentSpanId != null && parentSpanId.Value != default)
+        if (parentSpanId != default && 
+            // See https://github.com/dotnet/runtime/issues/101219
+            parentSpanId.ToHexString() != default(ActivitySpanId).ToHexString())
         {
-            properties[ParentSpanIdPropertyName] = new ScalarValue(parentSpanId.Value);
+            properties[ParentSpanIdPropertyName] = new ScalarValue(parentSpanId);
         }
 
         if (kind != ActivityKind.Internal && (int)kind >= 0 && (int)kind < Kinds.Length)
@@ -140,8 +141,8 @@ static class ActivityConvert
             exception,
             messageTemplate,
             Enumerable.Empty<LogEventProperty>(),
-            traceId ?? default,
-            spanId ?? default);
+            traceId,
+            spanId);
 
         // NOTE: This is a temporary approach to assembling the `LogEvent` to try avoid
         // some allocations. Ideally we'll have an (unsafe) way to build a `LogEvent`
