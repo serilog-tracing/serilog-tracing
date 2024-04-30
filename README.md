@@ -149,7 +149,7 @@ These sinks have been built or modified to work well with tracing back-ends:
 * [`SerilogTracing.Sinks.OpenTelemetry`](https://www.nuget.org/packages/SerilogTracing.Sinks.OpenTelemetry/) &mdash; call `WriteTo.OpenTelemetry()` and pass `tracingEndpoint` along with `logsEndpoint` to send traces and logs using OTLP.
 * [`SerilogTracing.Sinks.Zipkin`](https://www.nuget.org/packages/SerilogTracing.Sinks.Zipkin/) - call `WriteTo.Zipkin()` to send traces to Zipkin; logs are ignored by this sink.
 
-## Adding instrumentation for ASP.NET Core
+## Adding instrumentation for ASP.NET Core requests
 
 If you're writing an ASP.NET Core application, you'll notice that the spans generated in response to web requests have very generic names, like `HttpRequestIn`. To fix that, first add `SerilogTracing.Instrumentation.AspNetCore`:
 
@@ -165,7 +165,20 @@ using var _ = new ActivityListenerConfiguration()
     .TraceToSharedLogger();
 ```
 
-## Adding instrumentation for `Microsoft.Data.SqlClient`
+## Adding instrumentation for `HttpClient` requests
+
+`HttpClient` requests are instrumented by default. To configure the way `HttpClient` requests are recorded as spans, remove the default instrumentation and add `HttpClient` instrumentation explicitly:
+
+```csharp
+using var _ = new ActivityListenerConfiguration()
+    .Instrument.WithDefaultInstrumentation(false)
+    .Instrument.HttpClientRequests(opts => opts.MessageTemplate = "Hello, world!")
+    .TraceToSharedLogger();
+```
+
+The message template for spans, and mappings from `HttpRequestMessage` and `HttpResponseMessage` into log event properties and the completion level can be configured. 
+
+## Adding instrumentation for `Microsoft.Data.SqlClient` commands
 
 Microsoft's client library for SQL Server doesn't generate spans by default. To turn on tracing of database commands, install `SerilogTracing.Instrumentation.SqlClient`:
 
@@ -181,7 +194,7 @@ using var _ = new ActivityListenerConfiguration()
     .TraceToSharedLogger();
 ```
 
-## Adding instrumentation for `Npgsql`
+## Adding instrumentation for `Npgsql` commands
 
 Npgsql is internally instrumented using `System.Diagnostics.Activity`, so no additional packages or steps are required to enable instrumentation of Npgsql commands. If you're missing spans from Npgsql, check that the `"Npgsql"` namespace isn't suppressed by your `MinimumLevel.Override()` configuration.
 
