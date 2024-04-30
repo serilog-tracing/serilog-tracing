@@ -18,7 +18,7 @@ using Serilog.Events;
 namespace SerilogTracing.Instrumentation.AspNetCore;
 
 /// <summary>
-/// Configuration for <see cref="HttpClient"/> HTTP request instrumentation.
+/// Configuration for ASP.NET Core HTTP request instrumentation.
 /// </summary>
 public sealed class HttpRequestInActivityInstrumentationOptions
 {

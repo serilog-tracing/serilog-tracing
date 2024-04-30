@@ -23,10 +23,26 @@ namespace SerilogTracing;
 public static class ActivityListenerInstrumentationConfigurationHttpClientExtensions
 {
     /// <summary>
-    /// Add instrumentation for ASP.NET Core requests.
+    /// Add instrumentation for <see cref="HttpClient"/> requests.
     /// </summary>
+    /// <returns>Configuration object allowing method chaining.</returns>
     public static ActivityListenerConfiguration HttpClientRequests(this ActivityListenerInstrumentationConfiguration configuration)
     {
-        return configuration.With(new HttpRequestOutActivityInstrumentor());
+        return configuration.HttpClientRequests(_ => { });
+    }
+    
+    /// <summary>
+    /// Add instrumentation for <see cref="HttpClient"/> requests.
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <param name="configure">A callback to configure the instrumentation.</param>
+    /// <returns>Configuration object allowing method chaining.</returns>
+    public static ActivityListenerConfiguration HttpClientRequests(
+        this ActivityListenerInstrumentationConfiguration configuration, Action<HttpRequestOutActivityInstrumentationOptions> configure)
+    {
+        var httpOptions = new HttpRequestOutActivityInstrumentationOptions();
+        configure.Invoke(httpOptions);
+
+        return configuration.With(new HttpRequestOutActivityInstrumentor(httpOptions));
     }
 }
