@@ -47,7 +47,7 @@ public class HttpRequestOutActivityInstrumentationOptions
     static IEnumerable<LogEventProperty> DefaultGetResponseProperties(HttpResponseMessage? response) =>
         new[]
         {
-            new LogEventProperty("StatusCode", new ScalarValue(response?.StatusCode)),
+            new LogEventProperty("StatusCode", new ScalarValue(response?.StatusCode == null ? null : (int)response.StatusCode))
         };
 
     /// <summary>
