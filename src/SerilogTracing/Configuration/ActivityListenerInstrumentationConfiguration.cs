@@ -26,7 +26,7 @@ public sealed class ActivityListenerInstrumentationConfiguration
     readonly List<IActivityInstrumentor> _instrumentors = [];
     bool _withDefaultInstrumentors = true;
 
-    static IEnumerable<IActivityInstrumentor> GetDefaultInstrumentors() => [new HttpRequestOutActivityInstrumentor()];
+    static IEnumerable<IActivityInstrumentor> GetDefaultInstrumentors() => [new HttpRequestOutActivityInstrumentor(new HttpRequestOutActivityInstrumentationOptions())];
 
     internal IEnumerable<IActivityInstrumentor> GetInstrumentors() =>
         _withDefaultInstrumentors ?
