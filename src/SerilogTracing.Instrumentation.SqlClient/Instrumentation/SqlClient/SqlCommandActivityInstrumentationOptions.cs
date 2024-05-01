@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections;
 using Microsoft.Data.SqlClient;
+using Serilog.Events;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
 namespace SerilogTracing.Instrumentation.SqlClient;
 
@@ -21,6 +25,55 @@ namespace SerilogTracing.Instrumentation.SqlClient;
 /// </summary>
 public sealed class SqlCommandActivityInstrumentationOptions
 {
+    const string DefaultCommandMessageTemplate = "SQL {Operation} {Database}";
+
+    /// <summary>
+    /// Construct a <see cref="SqlCommandActivityInstrumentationOptions"/>.
+    /// </summary>
+    public SqlCommandActivityInstrumentationOptions()
+    {
+        GetCommandProperties = DefaultGetCommandProperties;
+    }
+
+    IEnumerable<LogEventProperty> DefaultGetCommandProperties(SqlCommand command)
+    {
+        var database = new LogEventProperty("Database", new ScalarValue(command.Connection.Database));
+        var operation = new LogEventProperty("Operation", new ScalarValue(SqlCommandInspector.GetOperation(command, InferOperation)));
+
+        return IncludeCommandText
+            ? [database, operation, new LogEventProperty("CommandText", new ScalarValue(command.CommandText))]
+            : [database, operation];
+    }
+
+    static IEnumerable<LogEventProperty> DefaultGetStatisticsProperties(IDictionary statistics)
+    {
+        // See https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/sql/provider-statistics-for-sql-server
+        var networkServerTimeMilliseconds = statistics["NetworkServerTime"];
+        if (networkServerTimeMilliseconds != null)
+        {
+            return [new LogEventProperty("NetworkServerTime", new ScalarValue(networkServerTimeMilliseconds))];
+        }
+
+        return [];
+    }
+    
+    /// <summary>
+    /// The message template to associate with command activities.
+    /// </summary>
+    public string MessageTemplate { get; set; } = DefaultCommandMessageTemplate;
+
+    /// <summary>
+    /// A function to populate properties on the activity from an executing <see cref="SqlCommand"/>. The callback
+    /// runs before the command is executed.
+    /// </summary>
+    public Func<SqlCommand, IEnumerable<LogEventProperty>> GetCommandProperties { get; set; }
+
+    /// <summary>
+    /// A function to populate properties on the activity from command statistics. The callback
+    /// runs after the command is executed.
+    /// </summary>
+    public Func<IDictionary, IEnumerable<LogEventProperty>> GetStatisticsProperties { get; set; } = DefaultGetStatisticsProperties;
+
     /// <summary>
     /// Include the command text (i.e. the stored procedure name, SQL statement, or table name) in spans. The risk
     /// of exposing sensitive data, and bloating span size, means that the default value is <c langword="false"/>.
