@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Collections;
-using System.Data;
 using System.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Serilog.Events;
@@ -27,7 +26,7 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
 
     static readonly ActivitySource ActivitySource = new("SerilogTracing.Instrumentation.SqlClient");
 
-    readonly MessageTemplate _messageTemplateOverride = new MessageTemplateParser().Parse("SQL {Operation} {Database}");
+    readonly MessageTemplate _messageTemplateOverride = new MessageTemplateParser().Parse(options.MessageTemplate);
     readonly PropertyAccessor<SqlCommand> _getCommand = new("Command");
     readonly PropertyAccessor<Exception> _getException = new("Exception");
     readonly PropertyAccessor<IDictionary> _getStatistics = new("Statistics");
@@ -67,16 +66,8 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
 
                     if (_getCommand.TryGetValue(eventArgs, out var command) && command is not null)
                     {
-                        var database = command.Connection.Database;
-                        var operation = GetOperation(command, options.InferOperation);
-                        ActivityInstrumentation.SetLogEventProperties(child,
-                            new LogEventProperty("Operation", new ScalarValue(operation)),
-                            new LogEventProperty("Database", new ScalarValue(database)));
-
-                        if (options.IncludeCommandText)
-                        {
-                            ActivityInstrumentation.SetLogEventProperty(child, new LogEventProperty("CommandText", new ScalarValue(command.CommandText)));
-                        }
+                        var props = options.GetCommandProperties(command);
+                        ActivityInstrumentation.SetLogEventProperties(child, props as LogEventProperty[] ?? props.ToArray());
                     }
 
                     break;
@@ -92,13 +83,8 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
 
                     if (activity.IsAllDataRequested && _getStatistics.TryGetValue(eventArgs, out var statistics) && statistics is not null)
                     {
-                        // See https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/sql/provider-statistics-for-sql-server
-                        var networkServerTimeMilliseconds = statistics["NetworkServerTime"];
-                        if (networkServerTimeMilliseconds != null)
-                        {
-                            var property = new LogEventProperty("NetworkServerTime", new ScalarValue(networkServerTimeMilliseconds));
-                            ActivityInstrumentation.SetLogEventProperty(activity, property);
-                        }
+                        var props = options.GetStatisticsProperties(statistics);
+                        ActivityInstrumentation.SetLogEventProperties(activity, props as LogEventProperty[] ?? props.ToArray());
                     }
 
                     activity.Stop();
@@ -127,18 +113,5 @@ sealed class SqlCommandActivityInstrumentor(SqlCommandActivityInstrumentationOpt
                     break;
                 }
         }
-    }
-
-    static string GetOperation(SqlCommand command, bool inferOperationFromCommandText)
-    {
-        if (command.CommandType == CommandType.StoredProcedure)
-            return "EXEC";
-
-        if (command.CommandType == CommandType.TableDirect)
-            return "DIRECT";
-
-        return inferOperationFromCommandText ?
-            CommandTextTokenizer.FindFirstOperation(command.CommandText) ?? "BATCH" :
-            "BATCH";
     }
 }
