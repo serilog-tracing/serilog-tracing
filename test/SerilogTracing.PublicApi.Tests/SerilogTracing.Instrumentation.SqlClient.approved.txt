@@ -11,7 +11,10 @@ namespace SerilogTracing.Instrumentation.SqlClient
     public sealed class SqlCommandActivityInstrumentationOptions
     {
         public SqlCommandActivityInstrumentationOptions() { }
+        public System.Func<Microsoft.Data.SqlClient.SqlCommand, System.Collections.Generic.IEnumerable<Serilog.Events.LogEventProperty>> GetCommandProperties { get; set; }
+        public System.Func<System.Collections.IDictionary, System.Collections.Generic.IEnumerable<Serilog.Events.LogEventProperty>> GetStatisticsProperties { get; set; }
         public bool IncludeCommandText { get; set; }
         public bool InferOperation { get; set; }
+        public string MessageTemplate { get; set; }
     }
 }

@@ -12,6 +12,7 @@ namespace SerilogTracing
     public static class ActivityListenerInstrumentationConfigurationHttpClientExtensions
     {
         public static SerilogTracing.ActivityListenerConfiguration HttpClientRequests(this SerilogTracing.Configuration.ActivityListenerInstrumentationConfiguration configuration) { }
+        public static SerilogTracing.ActivityListenerConfiguration HttpClientRequests(this SerilogTracing.Configuration.ActivityListenerInstrumentationConfiguration configuration, System.Action<SerilogTracing.Instrumentation.HttpClient.HttpRequestOutActivityInstrumentationOptions> configure) { }
     }
     public sealed class LoggerActivity : System.IDisposable
     {
@@ -115,5 +116,16 @@ namespace SerilogTracing.Instrumentation
     {
         public PropertyAccessor(string propertyName) { }
         public bool TryGetValue(object receiver, out T? value) { }
+    }
+}
+namespace SerilogTracing.Instrumentation.HttpClient
+{
+    public class HttpRequestOutActivityInstrumentationOptions
+    {
+        public HttpRequestOutActivityInstrumentationOptions() { }
+        public System.Func<System.Net.Http.HttpRequestMessage, System.Collections.Generic.IEnumerable<Serilog.Events.LogEventProperty>> GetRequestProperties { get; set; }
+        public System.Func<System.Net.Http.HttpResponseMessage?, System.Collections.Generic.IEnumerable<Serilog.Events.LogEventProperty>> GetResponseProperties { get; set; }
+        public System.Func<System.Net.Http.HttpResponseMessage, bool> IsErrorResponse { get; set; }
+        public string MessageTemplate { get; set; }
     }
 }
