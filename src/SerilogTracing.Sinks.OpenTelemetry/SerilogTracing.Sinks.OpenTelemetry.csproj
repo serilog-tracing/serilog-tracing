@@ -28,7 +28,6 @@
 		<None Include="../../README.md" Pack="true" Visible="false" PackagePath="/" />
 		<PackageReference Include="Google.Protobuf" Version="3.25.1" />
 		<PackageReference Include="Grpc.Net.Client" Version="2.60.0" />
-		<PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="4.0.0" />
 	</ItemGroup>
 	
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'netstandard2.0' ">
