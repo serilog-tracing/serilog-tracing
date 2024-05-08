@@ -33,14 +33,17 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
         _getResponseProperties = options.GetResponseProperties;
         _messageTemplateOverride = new MessageTemplateParser().Parse(options.MessageTemplate);
         _incomingTraceParent = options.IncomingTraceParent;
+        _isErrorResponse = options.IsErrorResponse;
     }
 
     readonly Func<HttpRequest, IEnumerable<LogEventProperty>> _getRequestProperties;
     readonly Func<HttpResponse, IEnumerable<LogEventProperty>> _getResponseProperties;
     readonly MessageTemplate _messageTemplateOverride;
+    readonly Func<HttpResponse,bool> _isErrorResponse;
+    readonly IncomingTraceParent _incomingTraceParent;
+    
     readonly PropertyAccessor<Exception> _exceptionAccessor = new("exception");
     readonly PropertyAccessor<HttpContext> _httpContextAccessor = new("httpContext");
-    readonly IncomingTraceParent _incomingTraceParent;
 
     const string ReplacedActivityPropertyName = "SerilogTracing.Instrumentation.AspNetCore.Replaced";
     internal const string ReplacementActivitySourceName = "SerilogTracing.Instrumentation.AspNetCore";
@@ -86,7 +89,8 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
             ActivityInstrumentation.SetMessageTemplateOverride(replacement, _messageTemplateOverride);
             replacement.DisplayName = _messageTemplateOverride.Text;
 
-            ActivityInstrumentation.SetLogEventProperties(replacement, _getRequestProperties(start.Request));
+            var props = _getRequestProperties(start.Request);
+            ActivityInstrumentation.SetLogEventProperties(replacement, props as LogEventProperty[] ?? props.ToArray());
 
             replacement.Start();
         }
@@ -109,9 +113,10 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
             case "Microsoft.AspNetCore.Hosting.HttpRequestIn.Stop":
                 if (eventArgs is not HttpContext stop) return;
 
-                ActivityInstrumentation.SetLogEventProperties(activity, _getResponseProperties(stop.Response));
+                var props = _getResponseProperties(stop.Response);
+                ActivityInstrumentation.SetLogEventProperties(activity, props as LogEventProperty[] ?? props.ToArray());
 
-                if (stop.Response.StatusCode >= 500)
+                if (_isErrorResponse(stop.Response))
                 {
                     activity.SetStatus(ActivityStatusCode.Error);
                 }

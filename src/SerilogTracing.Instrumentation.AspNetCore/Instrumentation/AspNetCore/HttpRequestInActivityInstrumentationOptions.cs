@@ -18,7 +18,7 @@ using Serilog.Events;
 namespace SerilogTracing.Instrumentation.AspNetCore;
 
 /// <summary>
-/// Configuration for <see cref="HttpClient"/> HTTP request instrumentation.
+/// Configuration for ASP.NET Core HTTP request instrumentation.
 /// </summary>
 public sealed class HttpRequestInActivityInstrumentationOptions
 {
@@ -32,11 +32,19 @@ public sealed class HttpRequestInActivityInstrumentationOptions
             new LogEventProperty("RequestPath", new ScalarValue(request.Path)),
         };
 
-    static IEnumerable<LogEventProperty> DefaultGetResponseProperties(HttpResponse response) =>
-        new[]
+    static readonly LogEventProperty RequestAbortedTrue = new("RequestAborted", new ScalarValue(true));
+    static IEnumerable<LogEventProperty> DefaultGetResponseProperties(HttpResponse response)
+    {
+        var statusCode = new LogEventProperty("StatusCode", new ScalarValue(response.StatusCode));
+        return response.HttpContext.RequestAborted.IsCancellationRequested ? new []
         {
-            new LogEventProperty("StatusCode", new ScalarValue(response.StatusCode)),
-        };
+            statusCode,
+            RequestAbortedTrue,
+        } : [statusCode];
+    }
+
+    static bool DefaultIsErrorResponse(HttpResponse response) =>
+        response is { StatusCode: >= 500, HttpContext.RequestAborted.IsCancellationRequested: false };
 
     /// <summary>
     /// What distributed context to respect from incoming traceparent headers.
@@ -63,4 +71,10 @@ public sealed class HttpRequestInActivityInstrumentationOptions
     /// This closure will be invoked at the end of the request pipeline.
     /// </summary>
     public Func<HttpResponse, IEnumerable<LogEventProperty>> GetResponseProperties { get; set; } = DefaultGetResponseProperties;
+
+    /// <summary>
+    /// A callback to determine whether the given HTTP response indicates a failed request. The default returns
+    /// <c langword="true"/> if the status code is 500 or greater, and the request was not aborted.
+    /// </summary>
+    public Func<HttpResponse, bool> IsErrorResponse { get; set; } = DefaultIsErrorResponse;
 }
