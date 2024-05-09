@@ -48,7 +48,7 @@ public class OpenTelemetryLogsSinkTests
         Assert.Single(resourceLogs.ScopeLogs.Single(r => r.Scope == null).LogRecords);
     }
 
-    static async Task<ExportLogsServiceRequest> ExportAsync(IEnumerable<LogEvent> events)
+    static async Task<ExportLogsServiceRequest> ExportAsync(IReadOnlyCollection<LogEvent> events)
     {
         var exporter = new CollectingExporter();
         var sink = new OpenTelemetryLogsSink(exporter, null, new Dictionary<string, object>(), OpenTelemetrySinkOptions.DefaultIncludedData);
