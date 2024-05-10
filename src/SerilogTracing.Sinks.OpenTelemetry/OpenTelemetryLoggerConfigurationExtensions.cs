@@ -15,7 +15,6 @@
 using Serilog;
 using Serilog.Configuration;
 using Serilog.Core;
-using Serilog.Sinks.PeriodicBatching;
 using SerilogTracing.Collections;
 using SerilogTracing.Sinks.OpenTelemetry;
 using SerilogTracing.Sinks.OpenTelemetry.Exporters;
@@ -68,7 +67,12 @@ public static class OpenTelemetryLoggerConfigurationExtensions
                 resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
                 includedData: options.IncludedData);
 
-            logsSink = new PeriodicBatchingSink(openTelemetryLogsSink, options.BatchingOptions);
+            // The need for this pattern suggests we should wrap up something like it into a `GetSink()`...
+            LoggerSinkConfiguration.Wrap(new LoggerConfiguration().WriteTo, s =>
+            {
+                logsSink = s;
+                return s;
+            }, wt => wt.Sink(openTelemetryLogsSink, options.BatchingOptions));
         }
 
         if (options.TracesEndpoint != null)
@@ -78,7 +82,11 @@ public static class OpenTelemetryLoggerConfigurationExtensions
                 resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
                 includedData: options.IncludedData);
 
-            tracesSink = new PeriodicBatchingSink(openTelemetryTracesSink, options.BatchingOptions);
+            LoggerSinkConfiguration.Wrap(new LoggerConfiguration().WriteTo, s =>
+            {
+                tracesSink = s;
+                return s;
+            }, wt => wt.Sink(openTelemetryTracesSink, options.BatchingOptions));
         }
 
         var sink = new OpenTelemetrySink(exporter, logsSink, tracesSink);

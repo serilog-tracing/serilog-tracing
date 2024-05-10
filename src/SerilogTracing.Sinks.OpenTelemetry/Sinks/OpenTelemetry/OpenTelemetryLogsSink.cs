@@ -17,7 +17,6 @@ using OpenTelemetry.Proto.Logs.V1;
 using Serilog.Core;
 using Serilog.Events;
 using SerilogTracing.Sinks.OpenTelemetry.ProtocolHelpers;
-using Serilog.Sinks.PeriodicBatching;
 
 namespace SerilogTracing.Sinks.OpenTelemetry;
 
@@ -50,7 +49,7 @@ class OpenTelemetryLogsSink : IBatchedLogEventSink, ILogEventSink
     /// Transforms and sends the given batch of LogEvent objects
     /// to an OTLP endpoint.
     /// </summary>
-    public Task EmitBatchAsync(IEnumerable<LogEvent> batch)
+    public Task EmitBatchAsync(IReadOnlyCollection<LogEvent> batch)
     {
         var resourceLogs = _resourceLogsTemplate.Clone();
 

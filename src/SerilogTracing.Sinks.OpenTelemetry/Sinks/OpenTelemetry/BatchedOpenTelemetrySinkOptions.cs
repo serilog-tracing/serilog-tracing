@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using Serilog.Sinks.PeriodicBatching;
+using Serilog.Configuration;
 
 namespace SerilogTracing.Sinks.OpenTelemetry;
 
@@ -22,16 +21,16 @@ namespace SerilogTracing.Sinks.OpenTelemetry;
 /// </summary>
 public class BatchedOpenTelemetrySinkOptions : OpenTelemetrySinkOptions
 {
-    const int DefaultBatchSizeLimit = 1000, DefaultPeriodSeconds = 2, DefaultQueueLimit = 100000;
+    const int DefaultBatchSizeLimit = 1000, DefaultBufferingTimeLimitSeconds = 2, DefaultQueueLimit = 100000;
 
     /// <summary>
     /// Options that control the sending of asynchronous log batches. When <c>null</c> a batch size of 1 is used.
     /// </summary>
-    public PeriodicBatchingSinkOptions BatchingOptions { get; } = new()
+    public BatchingOptions BatchingOptions { get; } = new()
     {
         EagerlyEmitFirstEvent = true,
         BatchSizeLimit = DefaultBatchSizeLimit,
-        Period = TimeSpan.FromSeconds(DefaultPeriodSeconds),
+        BufferingTimeLimit = TimeSpan.FromSeconds(DefaultBufferingTimeLimitSeconds),
         QueueLimit = DefaultQueueLimit
     };
 }
