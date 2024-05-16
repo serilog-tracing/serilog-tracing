@@ -67,12 +67,7 @@ public static class OpenTelemetryLoggerConfigurationExtensions
                 resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
                 includedData: options.IncludedData);
 
-            // The need for this pattern suggests we should wrap up something like it into a `GetSink()`...
-            LoggerSinkConfiguration.Wrap(new LoggerConfiguration().WriteTo, s =>
-            {
-                logsSink = s;
-                return s;
-            }, wt => wt.Sink(openTelemetryLogsSink, options.BatchingOptions));
+            logsSink = LoggerSinkConfiguration.CreateSink(wt => wt.Sink(openTelemetryLogsSink, options.BatchingOptions));
         }
 
         if (options.TracesEndpoint != null)
@@ -82,11 +77,7 @@ public static class OpenTelemetryLoggerConfigurationExtensions
                 resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
                 includedData: options.IncludedData);
 
-            LoggerSinkConfiguration.Wrap(new LoggerConfiguration().WriteTo, s =>
-            {
-                tracesSink = s;
-                return s;
-            }, wt => wt.Sink(openTelemetryTracesSink, options.BatchingOptions));
+            tracesSink = LoggerSinkConfiguration.CreateSink(wt => wt.Sink(openTelemetryTracesSink, options.BatchingOptions));
         }
 
         var sink = new OpenTelemetrySink(exporter, logsSink, tracesSink);
