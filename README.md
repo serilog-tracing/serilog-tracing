@@ -24,8 +24,8 @@ This section walks through a very simple SerilogTracing example. To get started 
 mkdir example
 cd example
 dotnet new console
-dotnet add package SerilogTracing --prerelease
-dotnet add package SerilogTracing.Expressions --prerelease
+dotnet add package SerilogTracing
+dotnet add package SerilogTracing.Expressions
 dotnet add package Serilog.Sinks.Console
 ```
 
@@ -41,7 +41,7 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(Formatters.CreateConsoleTextFormatter(TemplateTheme.Code))
     .CreateLogger();
 
-using var _ = new ActivityListenerConfiguration().TraceToSharedLogger();
+using var listener = new ActivityListenerConfiguration().TraceToSharedLogger();
 
 using var activity = Log.Logger.StartActivity("Check {Host}", "example.com");
 try
@@ -160,7 +160,7 @@ dotnet add package SerilogTracing.Instrumentation.AspNetCore --prerelease
 Then add `Instrument.AspNetCoreRequests()` to your `ActivityListenerConfiguration`:
 
 ```csharp
-using var _ = new ActivityListenerConfiguration()
+using var listener = new ActivityListenerConfiguration()
     .Instrument.AspNetCoreRequests()
     .TraceToSharedLogger();
 ```
@@ -170,7 +170,7 @@ using var _ = new ActivityListenerConfiguration()
 `HttpClient` requests are instrumented by default. To configure the way `HttpClient` requests are recorded as spans, remove the default instrumentation and add `HttpClient` instrumentation explicitly:
 
 ```csharp
-using var _ = new ActivityListenerConfiguration()
+using var listener = new ActivityListenerConfiguration()
     .Instrument.WithDefaultInstrumentation(false)
     .Instrument.HttpClientRequests(opts => opts.MessageTemplate = "Hello, world!")
     .TraceToSharedLogger();
@@ -189,7 +189,7 @@ dotnet add package SerilogTracing.Instrumentation.SqlClient --prerelease
 Then add `Instrument.SqlClientCommands()` to your `ActivityListenerConfiguration`:
 
 ```csharp
-using var _ = new ActivityListenerConfiguration()
+using var listener = new ActivityListenerConfiguration()
     .Instrument.SqlClientCommands()
     .TraceToSharedLogger();
 ```
