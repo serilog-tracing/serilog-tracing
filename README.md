@@ -92,7 +92,7 @@ The `Formatters.CreateConsoleTextFormatter()` function comes from `SerilogTracin
 This line sets up SerilogTracing's integration with .NET's diagnostic sources, and starts an activity listener in the background that will write spans from the framework and third-party libraries through your Serilog pipeline:
 
 ```csharp
-using var _ = new ActivityListenerConfiguration().TraceToSharedLogger();
+using var listener = new ActivityListenerConfiguration().TraceToSharedLogger();
 ```
 
 This step is optional, but you'll need this if you want to view your SerilogTracing output as hierarchical, distributed traces: without it, `HttpClient` won't generate spans, and won't propagate trace ids along with outbound HTTP requests.
