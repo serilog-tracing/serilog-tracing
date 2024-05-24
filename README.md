@@ -108,7 +108,7 @@ await using var logger = new LoggerConfiguration()
     .WriteTo.Console(Formatters.CreateConsoleTextFormatter())
     .CreateLogger();
 
-using var _ = new ActivityListenerConfiguration().TraceTo(logger);
+using var listener = new ActivityListenerConfiguration().TraceTo(logger);
 ```
 
 ### Starting and completing activities
