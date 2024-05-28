@@ -54,6 +54,10 @@ public class ActivityListenerConfiguration
         Instrument = new ActivityListenerInstrumentationConfiguration(this);
         Sample = new ActivityListenerSamplingConfiguration(this);
         InitialLevel = new ActivityListenerInitialLevelConfiguration(this);
+        // In .NET 5 and later versions, the default format is ActivityIdFormat.W3C. In previous versions, the default format is ActivityIdFormat.Hierarchical.
+        // This is to ensure that the ActivityIdFormat is set to W3C in all versions.
+        // Read more: https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/5.0/default-activityidformat-changed
+        Activity.DefaultIdFormat = ActivityIdFormat.W3C;
     }
 
     /// <summary>
