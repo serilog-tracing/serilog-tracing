@@ -29,7 +29,9 @@ public sealed class HttpRequestInActivityInstrumentationOptions
         new[]
         {
             new LogEventProperty("RequestMethod", new ScalarValue(request.Method)),
-            new LogEventProperty("RequestPath", new ScalarValue(request.Path)),
+            // `request.Path` is a `PathString` struct; we convert to `string` so that the resulting property value
+            // is easier to work with (i.e. in filter expressions).
+            new LogEventProperty("RequestPath", new ScalarValue(request.Path.ToString())),
         };
 
     static readonly LogEventProperty RequestAbortedTrue = new("RequestAborted", new ScalarValue(true));
