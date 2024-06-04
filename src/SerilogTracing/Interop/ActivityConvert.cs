@@ -93,7 +93,7 @@ static class ActivityConvert
             loggerActivity.Properties);
     }
 
-    internal static LogEvent ActivityToLogEvent(
+    static LogEvent ActivityToLogEvent(
         ILogger logger,
         Activity activity,
         DateTime start,
@@ -134,39 +134,14 @@ static class ActivityConvert
         {
             properties[SpanKindPropertyName] = Kinds[(int)kind];
         }
-
-        var evt = new LogEvent(
+        
+        return LogEvent.UnstableAssembleFromParts(
             end,
             level,
             exception,
             messageTemplate,
-            Enumerable.Empty<LogEventProperty>(),
+            properties,
             traceId,
             spanId);
-
-        // NOTE: This is a temporary approach to assembling the `LogEvent` to try avoid
-        // some allocations. Ideally we'll have an (unsafe) way to build a `LogEvent`
-        // directly from the pre-built `Dictionary<string, LogEventPropertyValue>`.
-        // In the meantime this is still _slightly_ better than storing a `Dictionary<string, LogEventProperty>`.
-        //
-        // The values in this dictionary were originally constructed and validated through `LogEventProperty`,
-        // so there's no potential for any keys to be invalid property names.
-        if (evt.Properties is Dictionary<string, LogEventPropertyValue> evtProperties)
-        {
-            foreach (var kv in properties)
-            {
-                evtProperties.Add(kv.Key, kv.Value);
-            }
-        }
-        // We never actually expect to hit this branch, but it's here just to be safe
-        else
-        {
-            foreach (var kv in properties)
-            {
-                evt.AddOrUpdateProperty(new(kv.Key, kv.Value));
-            }
-        }
-
-        return evt;
     }
 }

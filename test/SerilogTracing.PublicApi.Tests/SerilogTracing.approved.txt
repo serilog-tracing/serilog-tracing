@@ -98,7 +98,9 @@ namespace SerilogTracing.Instrumentation
     public static class ActivityInstrumentation
     {
         public static void SetLogEventProperties(System.Diagnostics.Activity activity, params Serilog.Events.LogEventProperty[] properties) { }
+        public static void SetLogEventProperties(System.Diagnostics.Activity activity, System.Collections.Generic.IEnumerable<Serilog.Events.LogEventProperty> properties) { }
         public static void SetLogEventProperty(System.Diagnostics.Activity activity, Serilog.Events.LogEventProperty property) { }
+        public static void SetLogEventProperty(System.Diagnostics.Activity activity, string propertyName, Serilog.Events.LogEventPropertyValue propertyValue) { }
         public static void SetMessageTemplateOverride(System.Diagnostics.Activity activity, Serilog.Events.MessageTemplate messageTemplate) { }
         public static bool TrySetException(System.Diagnostics.Activity activity, System.Exception exception) { }
     }

@@ -61,10 +61,19 @@ public sealed class LoggerActivity : IDisposable
     }
 
     ILogger Logger { get; }
-    LogEventLevel DefaultCompletionLevel { get; set; }
+    LogEventLevel DefaultCompletionLevel { get; }
     bool IsComplete { get; set; }
 
     internal MessageTemplate MessageTemplate { get; }
+    
+    /// <summary>
+    /// Serilog only places very limited (not-null-or-whitespace) restrictions on property names; we carefully assert
+    /// or check this constraint whenever adding a property value here, using either `LogEventProperty.IsValidName()` or
+    /// relying on property names coming pre-validated via `LogEventProperty.Name`. Because the library uses strict
+    /// null checking, the null case is low risk. The potential to allow whitespace names through here is higher, but
+    /// no known safety issues exist for these in practise so the the risk is deemed acceptable compared with the higher
+    /// cost of enumerating and checking each property name before constructing the final `LogEvent`.
+    /// </summary>
     internal Dictionary<string, LogEventPropertyValue> Properties { get; }
 
     bool IsSuppressed => ActivityInstrumentation.IsSuppressed(Activity) || IsComplete;
@@ -97,7 +106,7 @@ public sealed class LoggerActivity : IDisposable
 
         if (Logger.BindProperty(propertyName, value, destructureObjects, out var property))
         {
-            ActivityInstrumentation.SetLogEventProperty(Activity!, property, Properties);
+            ActivityInstrumentation.SetPreValidatedLogEventProperty(Activity!, property.Name, property.Value, Properties);
         }
     }
 

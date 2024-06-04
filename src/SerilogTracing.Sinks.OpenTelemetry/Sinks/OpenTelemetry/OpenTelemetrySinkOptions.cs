@@ -30,11 +30,12 @@ public class OpenTelemetrySinkOptions
     internal const IncludedData DefaultIncludedData = IncludedData.MessageTemplateTextAttribute |
                                              IncludedData.TraceIdField | IncludedData.SpanIdField |
                                              IncludedData.SpecRequiredResourceAttributes;
-
+    
     /// <summary>
     /// The URL of the OTLP exporter logs endpoint.
     /// </summary>
     public string? LogsEndpoint { get; set; } = DefaultEndpoint;
+    
     /// <summary>
     /// The URL of the OTLP exporter traces endpoint.
     /// </summary>
