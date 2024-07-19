@@ -218,16 +218,26 @@ public static class ActivityInstrumentation
         return exception != null;
     }
 
+    internal static bool IsException(ActivityEvent activityEvent)
+    {
+        return activityEvent.Name == Constants.ExceptionEventName;
+    }
+
     static Exception? ExceptionFromEvents(Activity activity)
     {
-        var first = activity.Events.FirstOrDefault(e => e.Name == "exception");
-        if (first.Name != "exception")
+        var first = activity.Events.FirstOrDefault(IsException);
+        if (first.Name == default(ActivityEvent).Name)
             return null;
 
+        return ExceptionFromEvent(first);
+    }
+
+    internal static Exception ExceptionFromEvent(ActivityEvent activityEvent)
+    {
         return new TextException(
-            first.Tags.FirstOrDefault(t => t.Key == "exception.message").Value as string,
-            first.Tags.FirstOrDefault(t => t.Key == "exception.type").Value as string,
-            first.Tags.FirstOrDefault(t => t.Key == "exception.stacktrace").Value as string);
+            activityEvent.Tags.FirstOrDefault(t => t.Key == Constants.ExceptionMessageTagName).Value as string,
+            activityEvent.Tags.FirstOrDefault(t => t.Key == Constants.ExceptionTypeTagName).Value as string,
+            activityEvent.Tags.FirstOrDefault(t => t.Key == Constants.ExceptionStackTraceTagName).Value as string);
     }
 
     class TextException(

@@ -3,6 +3,7 @@ namespace SerilogTracing
     public class ActivityListenerConfiguration
     {
         public ActivityListenerConfiguration() { }
+        public SerilogTracing.Configuration.ActivityListenerActivityEventsConfiguration ActivityEvents { get; }
         public SerilogTracing.Configuration.ActivityListenerInitialLevelConfiguration InitialLevel { get; }
         public SerilogTracing.Configuration.ActivityListenerInstrumentationConfiguration Instrument { get; }
         public SerilogTracing.Configuration.ActivityListenerSamplingConfiguration Sample { get; }
@@ -65,11 +66,21 @@ namespace SerilogTracing
 }
 namespace SerilogTracing.Configuration
 {
+    public class ActivityListenerActivityEventsConfiguration
+    {
+        public SerilogTracing.ActivityListenerConfiguration AsLogEvents() { }
+    }
     public class ActivityListenerInitialLevelConfiguration
     {
+        public SerilogTracing.ActivityListenerConfiguration Debug() { }
+        public SerilogTracing.ActivityListenerConfiguration Error() { }
+        public SerilogTracing.ActivityListenerConfiguration Fatal() { }
+        public SerilogTracing.ActivityListenerConfiguration Information() { }
         public SerilogTracing.ActivityListenerConfiguration Is(Serilog.Events.LogEventLevel level) { }
         public SerilogTracing.ActivityListenerConfiguration Override(string activitySourceName, Serilog.Core.LoggingLevelSwitch levelSwitch) { }
         public SerilogTracing.ActivityListenerConfiguration Override(string activitySourceName, Serilog.Events.LogEventLevel level) { }
+        public SerilogTracing.ActivityListenerConfiguration Verbose() { }
+        public SerilogTracing.ActivityListenerConfiguration Warning() { }
     }
     public sealed class ActivityListenerInstrumentationConfiguration
     {

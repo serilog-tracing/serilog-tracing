@@ -243,7 +243,7 @@ and [this article introducing _Serilog.Expressions_ JSON support](https://nblumh
 ![SerilogTracing pipeline](https://raw.githubusercontent.com/serilog-tracing/serilog-tracing/dev/assets/pipeline-architecture.png)
 
 Applications using SerilogTracing add tracing using `ILogger.StartActivity()`. These activities are always converted into `LogEvent`s and emitted through the original `ILogger` that created them.
-.NET libraries and frameworks add tracing using `System.Diagnostics.ActivitySource`s. These activities can also be emitted as `LogEvent`s using `SerilogTracing.ActivityListenerConfiguration`.
+.NET libraries and frameworks add tracing using `System.Diagnostics.ActivitySource`s. These activities are also be emitted as `LogEvent`s when using `SerilogTracing.ActivityListenerConfiguration`.
 
 ### Mapping trace concepts to event properties
 
@@ -277,6 +277,13 @@ In this example, when activities from the [Npgsql](https://github.com/npgsql/npg
 #### Why is this an _initial_ level?
 
 The initial level assigned to a source determines whether activities are created by the source. When the activity is completed, it may be recorded at a higher level; for example, a span created at an initial `Information` level may complete as an `Error` (but not at a lower level such as `Debug`, because doing so may suppress the span cause the trace hierarchy to become incoherent).
+
+### Recording `Activity.Events`
+
+Activities produced by external .NET libraries may include one or more embedded `ActivityEvent`s. By default, SerilogTracing
+ignores these, except in the case of `exception` events, which map to the `LogEvent.Exception` property.
+
+To emit additional `LogEvent`s for each embedded `ActivityEvent`, call `ActivityEvents.AsLogEvents()` on `ActivityListenerConfiguration`.
 
 ## What's the relationship between SerilogTracing and OpenTelemetry?
 

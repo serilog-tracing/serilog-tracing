@@ -54,6 +54,8 @@ public class ActivityListenerConfiguration
         Instrument = new ActivityListenerInstrumentationConfiguration(this);
         Sample = new ActivityListenerSamplingConfiguration(this);
         InitialLevel = new ActivityListenerInitialLevelConfiguration(this);
+        ActivityEvents = new ActivityListenerActivityEventsConfiguration(this);
+        
         // In .NET 5 and later versions, the default format is ActivityIdFormat.W3C. In previous versions, the default format is ActivityIdFormat.Hierarchical.
         // This is to ensure that the ActivityIdFormat is set to W3C in all versions.
         // Read more: https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/5.0/default-activityidformat-changed
@@ -75,6 +77,11 @@ public class ActivityListenerConfiguration
     /// Configures the initial level assigned to externally-created activities.
     /// </summary>
     public ActivityListenerInitialLevelConfiguration InitialLevel { get; }
+    
+    /// <summary>
+    /// Configures handling of events embedded in the <see cref="Activity.Events"/> collection.
+    /// </summary>
+    public ActivityListenerActivityEventsConfiguration ActivityEvents { get; }
 
     /// <summary>
     /// Completes configuration and returns a handle that can be used to shut tracing down when no longer required.

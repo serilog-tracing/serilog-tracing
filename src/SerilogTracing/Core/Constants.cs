@@ -52,4 +52,7 @@ public static class Constants
     internal const string MessageTemplateOverridePropertyName = "SerilogTracing.LoggerActivity.MessageTemplate";
 
     internal const string ExceptionEventName = "exception";
+    internal const string ExceptionMessageTagName = "exception.message";
+    internal const string ExceptionStackTraceTagName = "exception.stacktrace";
+    internal const string ExceptionTypeTagName = "exception.type";
 }
