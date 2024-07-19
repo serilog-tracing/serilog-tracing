@@ -179,7 +179,7 @@ static class ActivityConvert
         properties["ActivityEvent"] = new ScalarValue(activityEvent.Name);
 
         return LogEvent.UnstableAssembleFromParts(
-            activityEvent.Timestamp,
+            activityEvent.Timestamp.ToLocalTime(),
             level,
             exception,
             ActivityEventMessageTemplate,
