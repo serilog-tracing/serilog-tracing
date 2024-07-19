@@ -98,6 +98,7 @@ namespace SerilogTracing.Core
 {
     public static class Constants
     {
+        public const string ActivityEventPropertyName = "ActivityEvent";
         public const string ParentSpanIdPropertyName = "ParentSpanId";
         public const string SerilogTracingActivitySourceName = "SerilogTracing";
         public const string SpanKindPropertyName = "SpanKind";

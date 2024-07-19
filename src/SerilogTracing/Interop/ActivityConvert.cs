@@ -176,7 +176,7 @@ static class ActivityConvert
             properties.Remove(ExceptionMessageTagName);
         }
         
-        properties["ActivityEvent"] = new ScalarValue(activityEvent.Name);
+        properties[Constants.ActivityEventPropertyName] = new ScalarValue(activityEvent.Name);
 
         return LogEvent.UnstableAssembleFromParts(
             activityEvent.Timestamp.ToLocalTime(),
