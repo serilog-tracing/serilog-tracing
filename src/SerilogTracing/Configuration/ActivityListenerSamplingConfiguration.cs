@@ -37,7 +37,7 @@ public class ActivityListenerSamplingConfiguration
     /// a non-default span id identifying the parent.
     /// </summary>
     /// <param name="sample">A callback providing the sampling level for a particular activity.</param>
-    /// <returns>The current instance, to enable method chaining.</returns>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
     /// <remarks>
     /// If the method is called multiple times, the last sampling callback to be specified will be used.
     /// This sampler will only run on activities that pass the <see cref="Serilog.ILogger.IsEnabled"/> filter

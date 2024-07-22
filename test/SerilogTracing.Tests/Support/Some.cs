@@ -70,4 +70,9 @@ public static class Some
         System.Diagnostics.ActivitySource.AddActivityListener(listener);
         return listener;
     }
+
+    public static DateTimeOffset Timestamp()
+    {
+        return DateTimeOffset.Now;
+    }
 }

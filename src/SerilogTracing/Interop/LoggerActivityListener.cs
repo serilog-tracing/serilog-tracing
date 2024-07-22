@@ -32,7 +32,9 @@ sealed class LoggerActivityListener: IDisposable
         _diagnosticListenerSubscription = subscription;
     }
     
-    internal static LoggerActivityListener Configure(ActivityListenerConfiguration configuration, Func<ILogger> logger, bool ignoreLevelChanges)
+    internal static LoggerActivityListener Configure(
+        ActivityListenerConfiguration configuration, Func<ILogger> logger,
+        bool ignoreLevelChanges)
     {
         ILogger GetLogger(string name)
         {
@@ -49,6 +51,7 @@ sealed class LoggerActivityListener: IDisposable
         {
             var levelMap = configuration.InitialLevel.GetOverrideMap();
             var sample = configuration.Sample.ActivityContext;
+            var activityEventRecording = configuration.ActivityEvents.Options;
 
             if (ignoreLevelChanges)
             {
@@ -91,6 +94,27 @@ sealed class LoggerActivityListener: IDisposable
 
                 if (!activityLogger.IsEnabled(level))
                     return;
+
+                if ((activityEventRecording & ActivityEventRecording.AsLogEvents) == ActivityEventRecording.AsLogEvents)
+                {
+                    var initialLevel = GetInitialLevel(levelMap, activity.Source.Name);
+                    var exceptionSkipped = false;
+                    
+#if FEATURE_ACTIVITY_STRUCTENUMERATORS
+                    foreach (var activityEvent in activity.EnumerateEvents())
+#else
+                    foreach (var activityEvent in activity.Events)
+#endif
+                    {
+                        if (!exceptionSkipped && ActivityInstrumentation.IsException(activityEvent))
+                        {
+                            exceptionSkipped = true;
+                            continue;
+                        }
+                        
+                        activityLogger.Write(ActivityConvert.ActivityEventToLogEvent(activityLogger, activity, activityEvent, initialLevel));
+                    }
+                }
 
                 activityLogger.Write(ActivityConvert.ActivityToLogEvent(activityLogger, activity, level));
             };

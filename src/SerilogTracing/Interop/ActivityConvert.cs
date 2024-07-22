@@ -16,6 +16,7 @@ using System.Diagnostics;
 using Serilog;
 using Serilog.Events;
 using Serilog.Parsing;
+using SerilogTracing.Core;
 using SerilogTracing.Instrumentation;
 using static SerilogTracing.Core.Constants;
 
@@ -31,6 +32,8 @@ static class ActivityConvert
         new ScalarValue((ActivityKind)3),
         new ScalarValue((ActivityKind)4)
     ];
+
+    static readonly MessageTemplate ActivityEventMessageTemplate = new([new PropertyToken("ActivityEvent", "{ActivityEvent}")]);
     
     internal static LogEvent ActivityToLogEvent(ILogger logger, Activity activity, LogEventLevel level)
     {
@@ -143,5 +146,45 @@ static class ActivityConvert
             properties,
             traceId,
             spanId);
+    }
+
+    internal static LogEvent ActivityEventToLogEvent(ILogger logger, Activity activity, ActivityEvent activityEvent, LogEventLevel level)
+    {
+        var properties = new Dictionary<string, LogEventPropertyValue>();
+        
+#if FEATURE_ACTIVITY_STRUCTENUMERATORS
+        foreach (var tag in activityEvent.EnumerateTagObjects())
+#else
+        foreach (var tag in activityEvent.Tags)
+#endif
+        {
+            if (properties.ContainsKey(tag.Key))
+                continue;
+
+            if (!logger.BindProperty(tag.Key, tag.Value, destructureObjects: false, out var property))
+                continue;
+
+            properties.Add(tag.Key, property.Value);
+        }
+
+        Exception? exception = null;
+        if (ActivityInstrumentation.IsException(activityEvent))
+        {
+            exception = ActivityInstrumentation.ExceptionFromEvent(activityEvent);
+            properties.Remove(ExceptionTypeTagName);
+            properties.Remove(ExceptionStackTraceTagName);
+            properties.Remove(ExceptionMessageTagName);
+        }
+        
+        properties[Constants.ActivityEventPropertyName] = new ScalarValue(activityEvent.Name);
+
+        return LogEvent.UnstableAssembleFromParts(
+            activityEvent.Timestamp.ToLocalTime(),
+            level,
+            exception,
+            ActivityEventMessageTemplate,
+            properties,
+            activity.TraceId,
+            activity.SpanId);
     }
 }

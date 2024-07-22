@@ -15,6 +15,8 @@
 using Serilog.Core;
 using Serilog.Events;
 using SerilogTracing.Core;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 namespace SerilogTracing.Configuration;
 
@@ -38,10 +40,65 @@ public class ActivityListenerInitialLevelConfiguration
     /// Sets the initial level that will be assigned to externally created activities.
     /// </summary>
     /// <param name="level">The initial level to set.</param>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
     public ActivityListenerConfiguration Is(LogEventLevel level)
     {
         _initialLevel = level;
         return _activityListenerConfiguration;
+    }
+    
+    /// <summary>
+    /// Sets the initial level that will be assigned to externally created activities to <see cref="LogEventLevel.Verbose"/>.
+    /// </summary>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
+    public ActivityListenerConfiguration Verbose()
+    {
+        return Is(LogEventLevel.Verbose);
+    }
+    
+    /// <summary>
+    /// Sets the initial level that will be assigned to externally created activities to <see cref="LogEventLevel.Debug"/>.
+    /// </summary>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
+    public ActivityListenerConfiguration Debug()
+    {
+        return Is(LogEventLevel.Debug);
+    }
+    
+    /// <summary>
+    /// Sets the initial level that will be assigned to externally created activities to <see cref="LogEventLevel.Information"/>.
+    /// </summary>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
+    public ActivityListenerConfiguration Information()
+    {
+        return Is(LogEventLevel.Information);
+    }
+    
+    /// <summary>
+    /// Sets the initial level that will be assigned to externally created activities to <see cref="LogEventLevel.Warning"/>.
+    /// </summary>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
+    public ActivityListenerConfiguration Warning()
+    {
+        return Is(LogEventLevel.Warning);
+    }
+    
+    /// <summary>
+    /// Sets the initial level that will be assigned to externally created activities to <see cref="LogEventLevel.Error"/>.
+    /// </summary>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
+    public ActivityListenerConfiguration Error()
+    {
+        return Is(LogEventLevel.Error);
+    }
+    
+    /// <summary>
+    /// Sets the initial level that will be assigned to externally created activities to <see cref="LogEventLevel.Fatal"/>.
+    /// </summary>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
+    public ActivityListenerConfiguration Fatal()
+    {
+        return Is(LogEventLevel.Fatal);
     }
 
     /// <summary>
@@ -52,6 +109,7 @@ public class ActivityListenerInitialLevelConfiguration
     /// to be namespace sub-paths, such as <code>Microsoft</code> in <code>Microsoft.AspNetCore</code>.
     /// </param>
     /// <param name="levelSwitch">The initial level to set.</param>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
     public ActivityListenerConfiguration Override(string activitySourceName, LoggingLevelSwitch levelSwitch)
     {
         _overrides[activitySourceName] = levelSwitch;
@@ -66,6 +124,7 @@ public class ActivityListenerInitialLevelConfiguration
     /// to be namespace sub-paths, such as <code>Microsoft</code> in <code>Microsoft.AspNetCore</code>.
     /// </param>
     /// <param name="level">The initial level to set.</param>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
     public ActivityListenerConfiguration Override(string activitySourceName, LogEventLevel level)
     {
         return Override(activitySourceName, new LoggingLevelSwitch(level));

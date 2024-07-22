@@ -26,11 +26,75 @@ public class ExternalActivityTests
 
         using var activity = source.StartActivity(ActivityKind.Client)!;
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
+        activity.AddEvent(new("exception", tags: new ActivityTagsCollection([
+            new("exception.message", "M"), 
+            new("exception.stacktrace", "S"),
+            new("property", "P")
+        ])));
+        activity.AddEvent(new("ignored"));
         activity.Stop();
 
-        Assert.Equal(LogEventLevel.Information, sink.SingleEvent.Level);
-        Assert.Equal(activity.DisplayName, sink.SingleEvent.RenderMessage());
-        Assert.Equal(ActivityKind.Client, ((ScalarValue)sink.SingleEvent.Properties[Constants.SpanKindPropertyName]).Value);
+        var span = sink.SingleEvent;
+        Assert.Equal(LogEventLevel.Information, span.Level);
+        Assert.Equal(activity.DisplayName, span.RenderMessage());
+        Assert.Equal(ActivityKind.Client, ((ScalarValue)span.Properties[Constants.SpanKindPropertyName]).Value);
+        Assert.Equal(activity.TraceId, span.TraceId);
+        Assert.Equal(activity.SpanId, span.SpanId);
+        Assert.NotNull(span.Exception);
+        Assert.Equal("M", span.Exception.Message);
+        Assert.Equal("S", span.Exception.ToString());
+        Assert.False(span.Properties.ContainsKey("property"));
+    }
+
+    [Fact]
+    public void EmbeddedEventsAreRecordedWhenConfigured()
+    {
+        using var source = Some.ActivitySource();
+
+        var sink = new CollectingSink();
+
+        var logger = new LoggerConfiguration()
+            .MinimumLevel.Is(LevelAlias.Minimum)
+            .WriteTo.Sink(sink)
+            .CreateLogger();
+
+        using var _ = new ActivityListenerConfiguration()
+            .ActivityEvents.AsLogEvents()
+            .TraceTo(logger);
+
+        using var activity = source.StartActivity(ActivityKind.Client)!;
+        activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
+        
+        // Mapped to LogEvent.Exception; tested previously
+        activity.AddEvent(new("exception"));
+
+        // First recorded event
+        var timestamp = Some.Timestamp();
+        activity.AddEvent(new("recorded", timestamp, new([new("property", "P")])));
+
+        // Second recorded event
+        activity.AddEvent(new("exception", tags: new([new("property", "Q")])));
+        
+        activity.Stop();
+        
+        Assert.Equal(3, sink.Events.Count);
+
+        var recorded = sink.Events.First();
+        Assert.Equal(timestamp, recorded.Timestamp);
+        Assert.Equal("{ActivityEvent}", recorded.MessageTemplate.Text);
+        Assert.Equal("recorded", ((ScalarValue)recorded.Properties["ActivityEvent"]).Value);
+        Assert.Equal("P", ((ScalarValue)recorded.Properties["property"]).Value);
+        Assert.Null(recorded.Exception);
+        Assert.Equal(LogEventLevel.Information, recorded.Level);
+        Assert.Equal(activity.TraceId, recorded.TraceId);
+        Assert.Equal(activity.SpanId, recorded.SpanId);
+
+        var exception = sink.Events.ElementAt(1);
+        Assert.Equal("{ActivityEvent}", exception.MessageTemplate.Text);
+        Assert.Equal("exception", ((ScalarValue)exception.Properties["ActivityEvent"]).Value);
+        Assert.Equal("Q", ((ScalarValue)exception.Properties["property"]).Value);
+        Assert.NotNull(exception.Exception);
+        Assert.Equal(LogEventLevel.Information, exception.Level);
     }
 
     [Fact]

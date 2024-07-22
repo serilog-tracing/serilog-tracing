@@ -14,6 +14,7 @@
 
 using System.Diagnostics;
 using Serilog.Events;
+using SerilogTracing.Configuration;
 
 namespace SerilogTracing.Core;
 
@@ -47,9 +48,19 @@ public static class Constants
     /// </summary>
     public const string SpanKindPropertyName = "SpanKind";
 
+    /// <summary>
+    /// For log events derived from <see cref="ActivityEvent"/>, the name of the entry
+    /// in <see cref="LogEvent.Properties"/> that carries the activity event's name.
+    /// </summary>
+    /// <seealso cref="ActivityListenerActivityEventsConfiguration.AsLogEvents"/>
+    public const string ActivityEventPropertyName = "ActivityEvent";
+
     internal const string LogEventPropertyCollectionName = "SerilogTracing.LogEventPropertyCollection";
     internal const string SelfPropertyName = "SerilogTracing.LoggerActivity.Self";
     internal const string MessageTemplateOverridePropertyName = "SerilogTracing.LoggerActivity.MessageTemplate";
 
     internal const string ExceptionEventName = "exception";
+    internal const string ExceptionMessageTagName = "exception.message";
+    internal const string ExceptionStackTraceTagName = "exception.stacktrace";
+    internal const string ExceptionTypeTagName = "exception.type";
 }
