@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Description>Sends log events and traces to OTLP (gRPC or HTTP) endpoints.</Description>
+		<Description>Sends log events and traces to OTLP (gRPC or HTTP) endpoints. This package is obsolete; use
+		Serilog.Sinks.OpenTelemetry v4.x or later instead.</Description>
 		<Authors>Serilog Contributors</Authors>
 		<LangVersion>10</LangVersion>
 		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
