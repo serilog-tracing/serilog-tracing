@@ -146,7 +146,7 @@ On the failure path, we call the overload of `Complete()` that accepts a level a
 These sinks have been built or modified to work well with tracing back-ends:
 
 * [`Serilog.Sinks.Seq`](https://www.nuget.org/packages/Serilog.Sinks.Seq/) - call `WriteTo.Seq()` to send logs and traces to Seq; use `Enrich.WithProperty("Application", "your app")` to show service names in traces.
-* [`SerilogTracing.Sinks.OpenTelemetry`](https://www.nuget.org/packages/SerilogTracing.Sinks.OpenTelemetry/) &mdash; call `WriteTo.OpenTelemetry()` and pass `tracingEndpoint` along with `logsEndpoint` to send traces and logs using OTLP.
+* [`Serilog.Sinks.OpenTelemetry`](https://www.nuget.org/packages/Serilog.Sinks.OpenTelemetry/) &mdash; call `WriteTo.OpenTelemetry()` to send traces and logs using OTLP.
 * [`SerilogTracing.Sinks.Zipkin`](https://www.nuget.org/packages/SerilogTracing.Sinks.Zipkin/) - call `WriteTo.Zipkin()` to send traces to Zipkin; logs are ignored by this sink.
 
 ## Adding instrumentation for ASP.NET Core requests
@@ -290,10 +290,6 @@ To emit additional `LogEvent`s for each embedded `ActivityEvent`, call `Activity
 OpenTelemetry is a project that combines a variety of telemetry data models, schemas, APIs, and SDKs. SerilogTracing, like Serilog itself, has no dependency on the OpenTelemetry SDK, but can output traces using the OpenTelemetry Protocol (OTLP). From the point of view of SerilogTracing, this is considered to be just one of many protocols and systems that exist in the wider Serilog ecosystem.
 
 If you're working in an environment with deep investment in OpenTelemetry, you might consider using the [OpenTelemetry .NET SDK](https://opentelemetry.io/docs/languages/net/) instead of SerilogTracing. If you're seeking lightweight, deliberate instrumentation that has the same crafted feel and tight control offered by Serilog, you're in the right place.
-
-### `SerilogTracing.Sinks.OpenTelemetry`
-
-SerilogTracing includes a fork of [_Serilog.Sinks.OpenTelemetry_](https://github.com/serilog/serilog-sinks-opentelemetry). This is necessary (for now) because _Serilog.Sinks.OpenTelemetry_ only supports the OTLP logs protocol: _SerilogTracing.Sinks.OpenTelemetry_ extends this with support for OTLP traces.
 
 ## Who is developing SerilogTracing?
 

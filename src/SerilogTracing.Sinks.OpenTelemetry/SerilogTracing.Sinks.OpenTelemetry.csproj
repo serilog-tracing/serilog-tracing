@@ -23,7 +23,7 @@
 	<ItemGroup>
 		<None Include="../../assets/serilog-sink-nuget.png" Pack="true" Visible="false" PackagePath="/" />
 		<None Include="../../README.md" Pack="true" Visible="false" PackagePath="/" />
-		<PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.0.0-dev-00322" />
+		<PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.0.0" />
 	</ItemGroup>
 	
 	<ItemGroup>
