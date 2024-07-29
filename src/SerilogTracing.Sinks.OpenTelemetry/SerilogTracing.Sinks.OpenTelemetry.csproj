@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Description>Sends log events and traces to OTLP (gRPC or HTTP) endpoints.</Description>
+		<Description>Sends log events and traces to OTLP (gRPC or HTTP) endpoints. This package is obsolete; use
+		Serilog.Sinks.OpenTelemetry v4.x or later instead.</Description>
 		<Authors>Serilog Contributors</Authors>
 		<LangVersion>10</LangVersion>
 		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
@@ -19,15 +20,10 @@
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 	</PropertyGroup>
 	
-	<PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-		<DefineConstants>$(DefineConstants);FEATURE_CWT_ADDORUPDATE;FEATURE_ACTIVITY;FEATURE_HALF;FEATURE_DATE_AND_TIME_ONLY;FEATURE_SYNC_HTTP_SEND;FEATURE_SOCKETS_HTTP_HANDLER</DefineConstants>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<None Include="../../assets/serilog-sink-nuget.png" Pack="true" Visible="false" PackagePath="/" />
 		<None Include="../../README.md" Pack="true" Visible="false" PackagePath="/" />
-		<PackageReference Include="Google.Protobuf" Version="3.25.1" />
-		<PackageReference Include="Grpc.Net.Client" Version="2.60.0" />
+		<PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.0.0" />
 	</ItemGroup>
 	
 	<ItemGroup>

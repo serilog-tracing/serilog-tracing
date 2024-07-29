@@ -14,11 +14,12 @@
 
 using Serilog;
 using Serilog.Configuration;
-using Serilog.Core;
-using SerilogTracing.Collections;
 using SerilogTracing.Sinks.OpenTelemetry;
-using SerilogTracing.Sinks.OpenTelemetry.Exporters;
+using OpenTelemetrySinkOptions = SerilogTracing.Sinks.OpenTelemetry.OpenTelemetrySinkOptions;
+using BatchedOpenTelemetrySinkOptions = SerilogTracing.Sinks.OpenTelemetry.BatchedOpenTelemetrySinkOptions;
+
 // ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable InvokeAsExtensionMethod
 
 namespace SerilogTracing;
 
@@ -27,12 +28,29 @@ namespace SerilogTracing;
 /// </summary>
 public static class OpenTelemetryLoggerConfigurationExtensions
 {
-    static HttpMessageHandler? CreateDefaultHttpMessageHandler() =>
-#if FEATURE_SOCKETS_HTTP_HANDLER
-        new SocketsHttpHandler { ActivityHeadersPropagator = null };
-#else
-        null;
-#endif
+    static void ApplyOptions(BatchedOpenTelemetrySinkOptions options, Serilog.Sinks.OpenTelemetry.BatchedOpenTelemetrySinkOptions adaptedOptions)
+    {
+        adaptedOptions.BatchingOptions.BatchSizeLimit = options.BatchingOptions.BatchSizeLimit;
+        adaptedOptions.BatchingOptions.QueueLimit = options.BatchingOptions.QueueLimit;
+        adaptedOptions.BatchingOptions.BufferingTimeLimit = options.BatchingOptions.BufferingTimeLimit;
+        adaptedOptions.BatchingOptions.EagerlyEmitFirstEvent = options.BatchingOptions.EagerlyEmitFirstEvent;
+        ApplyOptions((OpenTelemetrySinkOptions)options, adaptedOptions);
+    }
+
+    static void ApplyOptions(OpenTelemetrySinkOptions options, Serilog.Sinks.OpenTelemetry.OpenTelemetrySinkOptions adaptedOptions)
+    {
+        adaptedOptions.Endpoint = null;
+        adaptedOptions.LogsEndpoint = options.LogsEndpoint;
+        adaptedOptions.TracesEndpoint = options.TracesEndpoint;
+        adaptedOptions.Protocol = (Serilog.Sinks.OpenTelemetry.OtlpProtocol)(int)options.Protocol;
+        adaptedOptions.LevelSwitch = options.LevelSwitch;
+        adaptedOptions.FormatProvider = options.FormatProvider;
+        adaptedOptions.IncludedData = (Serilog.Sinks.OpenTelemetry.IncludedData)(int)options.IncludedData;
+        adaptedOptions.HttpMessageHandler = options.HttpMessageHandler;
+        adaptedOptions.RestrictedToMinimumLevel = options.RestrictedToMinimumLevel;
+        adaptedOptions.ResourceAttributes = options.ResourceAttributes;
+        adaptedOptions.Headers = options.Headers;
+    }
 
     /// <summary>
     /// Send log events to an OTLP exporter.
@@ -41,48 +59,22 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// The `WriteTo` configuration object.
     /// </param>
     /// <param name="configure">The configuration callback.</param>
+    [Obsolete("The functionality of this sink is now directly supported in Serilog.Sinks.OpenTelemetry; use that package instead.")]
     public static LoggerConfiguration OpenTelemetry(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         Action<BatchedOpenTelemetrySinkOptions> configure)
     {
         if (configure == null) throw new ArgumentNullException(nameof(configure));
 
-        var options = new BatchedOpenTelemetrySinkOptions();
-        configure(options);
-
-        var exporter = Exporter.Create(
-            logsEndpoint: options.LogsEndpoint,
-            tracesEndpoint: options.TracesEndpoint,
-            protocol: options.Protocol,
-            headers: new Dictionary<string, string>(options.Headers),
-            httpMessageHandler: options.HttpMessageHandler ?? CreateDefaultHttpMessageHandler());
-
-        ILogEventSink? logsSink = null, tracesSink = null;
-
-        if (options.LogsEndpoint != null)
-        {
-            var openTelemetryLogsSink = new OpenTelemetryLogsSink(
-                exporter: exporter,
-                formatProvider: options.FormatProvider,
-                resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
-                includedData: options.IncludedData);
-
-            logsSink = LoggerSinkConfiguration.CreateSink(wt => wt.Sink(openTelemetryLogsSink, options.BatchingOptions));
-        }
-
-        if (options.TracesEndpoint != null)
-        {
-            var openTelemetryTracesSink = new OpenTelemetryTracesSink(
-                exporter: exporter,
-                resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
-                includedData: options.IncludedData);
-
-            tracesSink = LoggerSinkConfiguration.CreateSink(wt => wt.Sink(openTelemetryTracesSink, options.BatchingOptions));
-        }
-
-        var sink = new OpenTelemetrySink(exporter, logsSink, tracesSink);
-
-        return loggerSinkConfiguration.Sink(sink, options.RestrictedToMinimumLevel, options.LevelSwitch);
+        return Serilog.OpenTelemetryLoggerConfigurationExtensions.OpenTelemetry(
+            loggerSinkConfiguration,
+            adaptedOptions =>
+            {
+                var options = new BatchedOpenTelemetrySinkOptions();
+                configure(options);
+                ApplyOptions(options, adaptedOptions);
+            },
+            ignoreEnvironment: true);
     }
 
     /// <summary>
@@ -110,6 +102,7 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// values: integers, doubles, strings, or booleans. Other values will be silently ignored.
     /// </param>
     /// <returns>Logger configuration, allowing configuration to continue.</returns>
+    [Obsolete("The functionality of this sink is now directly supported in Serilog.Sinks.OpenTelemetry; use that package instead.")]
     public static LoggerConfiguration OpenTelemetry(
         this LoggerSinkConfiguration loggerSinkConfiguration,
         string? logsEndpoint,
@@ -120,14 +113,21 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     {
         if (loggerSinkConfiguration == null) throw new ArgumentNullException(nameof(loggerSinkConfiguration));
 
-        return loggerSinkConfiguration.OpenTelemetry(options =>
-        {
-            options.LogsEndpoint = logsEndpoint;
-            options.TracesEndpoint = tracesEndpoint;
-            options.Protocol = protocol;
-            headers?.AddTo(options.Headers);
-            resourceAttributes?.AddTo(options.ResourceAttributes);
-        });
+        return Serilog.OpenTelemetryLoggerConfigurationExtensions.OpenTelemetry(
+            loggerSinkConfiguration,
+            adaptedOptions =>
+            {
+                var options = new BatchedOpenTelemetrySinkOptions
+                {
+                    LogsEndpoint = logsEndpoint,
+                    TracesEndpoint = tracesEndpoint,
+                    Protocol = protocol,
+                    Headers = headers ?? new Dictionary<string, string>(),
+                    ResourceAttributes = resourceAttributes ?? new Dictionary<string, object>()
+                };
+                ApplyOptions(options, adaptedOptions);
+            },
+            ignoreEnvironment: true);
     }
 
     /// <summary>
@@ -137,45 +137,21 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// The `AuditTo` configuration object.
     /// </param>
     /// <param name="configure">The configuration callback.</param>
+    [Obsolete("The functionality of this sink is now directly supported in Serilog.Sinks.OpenTelemetry; use that package instead.")]
     public static LoggerConfiguration OpenTelemetry(
         this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
         Action<OpenTelemetrySinkOptions> configure)
     {
         if (configure == null) throw new ArgumentNullException(nameof(configure));
 
-        var options = new OpenTelemetrySinkOptions();
-
-        configure(options);
-
-        var exporter = Exporter.Create(
-            logsEndpoint: options.LogsEndpoint,
-            tracesEndpoint: options.TracesEndpoint,
-            protocol: options.Protocol,
-            headers: new Dictionary<string, string>(options.Headers),
-            httpMessageHandler: options.HttpMessageHandler ?? CreateDefaultHttpMessageHandler());
-
-        ILogEventSink? logsSink = null, tracesSink = null;
-
-        if (options.LogsEndpoint != null)
-        {
-            logsSink = new OpenTelemetryLogsSink(
-                exporter: exporter,
-                formatProvider: options.FormatProvider,
-                resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
-                includedData: options.IncludedData);
-        }
-
-        if (options.TracesEndpoint != null)
-        {
-            tracesSink = new OpenTelemetryTracesSink(
-                exporter: exporter,
-                resourceAttributes: new Dictionary<string, object>(options.ResourceAttributes),
-                includedData: options.IncludedData);
-        }
-
-        var sink = new OpenTelemetrySink(exporter, logsSink, tracesSink);
-
-        return loggerAuditSinkConfiguration.Sink(sink, options.RestrictedToMinimumLevel, options.LevelSwitch);
+        return Serilog.OpenTelemetryLoggerConfigurationExtensions.OpenTelemetry(
+            loggerAuditSinkConfiguration,
+            adaptedOptions =>
+            {
+                var options = new BatchedOpenTelemetrySinkOptions();
+                configure(options);
+                ApplyOptions(options, adaptedOptions);
+            });
     }
 
     /// <summary>
@@ -203,6 +179,7 @@ public static class OpenTelemetryLoggerConfigurationExtensions
     /// values: integers, doubles, strings, or booleans. Other values will be silently ignored.
     /// </param>
     /// <returns>Logger configuration, allowing configuration to continue.</returns>
+    [Obsolete("The functionality of this sink is now directly supported in Serilog.Sinks.OpenTelemetry; use that package instead.")]
     public static LoggerConfiguration OpenTelemetry(
         this LoggerAuditSinkConfiguration loggerAuditSinkConfiguration,
         string? logsEndpoint,
@@ -212,14 +189,20 @@ public static class OpenTelemetryLoggerConfigurationExtensions
         IDictionary<string, object>? resourceAttributes = null)
     {
         if (loggerAuditSinkConfiguration == null) throw new ArgumentNullException(nameof(loggerAuditSinkConfiguration));
-
-        return loggerAuditSinkConfiguration.OpenTelemetry(options =>
-        {
-            options.LogsEndpoint = logsEndpoint;
-            options.TracesEndpoint = tracesEndpoint;
-            options.Protocol = protocol;
-            headers?.AddTo(options.Headers);
-            resourceAttributes?.AddTo(options.ResourceAttributes);
-        });
+        
+        return Serilog.OpenTelemetryLoggerConfigurationExtensions.OpenTelemetry(
+            loggerAuditSinkConfiguration,
+            adaptedOptions =>
+            {
+                var options = new BatchedOpenTelemetrySinkOptions
+                {
+                    LogsEndpoint = logsEndpoint,
+                    TracesEndpoint = tracesEndpoint,
+                    Protocol = protocol,
+                    Headers = headers ?? new Dictionary<string, string>(),
+                    ResourceAttributes = resourceAttributes ?? new Dictionary<string, object>()
+                };
+                ApplyOptions(options, adaptedOptions);
+            });
     }
 }

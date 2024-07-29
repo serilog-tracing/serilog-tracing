@@ -2,9 +2,17 @@ namespace SerilogTracing
 {
     public static class OpenTelemetryLoggerConfigurationExtensions
     {
+        [System.Obsolete("The functionality of this sink is now directly supported in Serilog.Sinks.OpenTel" +
+            "emetry; use that package instead.")]
         public static Serilog.LoggerConfiguration OpenTelemetry(this Serilog.Configuration.LoggerAuditSinkConfiguration loggerAuditSinkConfiguration, System.Action<SerilogTracing.Sinks.OpenTelemetry.OpenTelemetrySinkOptions> configure) { }
+        [System.Obsolete("The functionality of this sink is now directly supported in Serilog.Sinks.OpenTel" +
+            "emetry; use that package instead.")]
         public static Serilog.LoggerConfiguration OpenTelemetry(this Serilog.Configuration.LoggerSinkConfiguration loggerSinkConfiguration, System.Action<SerilogTracing.Sinks.OpenTelemetry.BatchedOpenTelemetrySinkOptions> configure) { }
+        [System.Obsolete("The functionality of this sink is now directly supported in Serilog.Sinks.OpenTel" +
+            "emetry; use that package instead.")]
         public static Serilog.LoggerConfiguration OpenTelemetry(this Serilog.Configuration.LoggerAuditSinkConfiguration loggerAuditSinkConfiguration, string? logsEndpoint, string? tracesEndpoint, SerilogTracing.Sinks.OpenTelemetry.OtlpProtocol protocol = 0, System.Collections.Generic.IDictionary<string, string>? headers = null, System.Collections.Generic.IDictionary<string, object>? resourceAttributes = null) { }
+        [System.Obsolete("The functionality of this sink is now directly supported in Serilog.Sinks.OpenTel" +
+            "emetry; use that package instead.")]
         public static Serilog.LoggerConfiguration OpenTelemetry(this Serilog.Configuration.LoggerSinkConfiguration loggerSinkConfiguration, string? logsEndpoint, string? tracesEndpoint, SerilogTracing.Sinks.OpenTelemetry.OtlpProtocol protocol = 0, System.Collections.Generic.IDictionary<string, string>? headers = null, System.Collections.Generic.IDictionary<string, object>? resourceAttributes = null) { }
     }
 }

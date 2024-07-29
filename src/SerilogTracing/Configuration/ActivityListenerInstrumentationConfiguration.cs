@@ -41,7 +41,7 @@ public sealed class ActivityListenerInstrumentationConfiguration
     /// Whether to use default built-in activity instrumentors.
     /// </summary>
     /// <param name="withDefaults">If true, default activity instrumentors will be used.</param>
-    /// <returns>Configuration object allowing method chaining.</returns>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
     public ActivityListenerConfiguration WithDefaultInstrumentation(bool withDefaults)
     {
         _withDefaultInstrumentors = withDefaults;
@@ -54,7 +54,7 @@ public sealed class ActivityListenerInstrumentationConfiguration
     /// </summary>
     /// <param name="instrumentors">Instrumentors to apply to all events passing through
     /// the logger.</param>
-    /// <returns>Configuration object allowing method chaining.</returns>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
     /// <exception cref="ArgumentNullException">When <paramref name="instrumentors"/> is <code>null</code></exception>
     /// <exception cref="ArgumentException">When any element of <paramref name="instrumentors"/> is <code>null</code></exception>
     public ActivityListenerConfiguration With(params IActivityInstrumentor[] instrumentors)
@@ -83,7 +83,7 @@ public sealed class ActivityListenerInstrumentationConfiguration
     /// </summary>
     /// <typeparam name="TInstrumentor">Instrumentor type to apply to all events passing through
     /// the logger.</typeparam>
-    /// <returns>Configuration object allowing method chaining.</returns>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
     public ActivityListenerConfiguration With<TInstrumentor>()
         where TInstrumentor : IActivityInstrumentor, new()
     {
