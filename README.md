@@ -243,7 +243,7 @@ and [this article introducing _Serilog.Expressions_ JSON support](https://nblumh
 ![SerilogTracing pipeline](https://raw.githubusercontent.com/serilog-tracing/serilog-tracing/dev/assets/pipeline-architecture.png)
 
 Applications using SerilogTracing add tracing using `ILogger.StartActivity()`. These activities are always converted into `LogEvent`s and emitted through the original `ILogger` that created them.
-.NET libraries and frameworks add tracing using `System.Diagnostics.ActivitySource`s. These activities are also be emitted as `LogEvent`s when using `SerilogTracing.ActivityListenerConfiguration`.
+.NET libraries and frameworks add tracing using `System.Diagnostics.ActivitySource`s. These activities are also emitted as `LogEvent`s when using `SerilogTracing.ActivityListenerConfiguration`.
 
 ### Mapping trace concepts to event properties
 
