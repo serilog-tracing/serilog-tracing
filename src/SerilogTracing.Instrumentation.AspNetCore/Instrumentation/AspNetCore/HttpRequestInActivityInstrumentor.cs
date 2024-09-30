@@ -171,7 +171,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
 
             if (inheritTags)
             {
-                foreach (var (name, value) in incoming.EnumerateTagObjects())
+                foreach (var (name, value) in incoming.TagObjects)
                 {
                     replacement.SetTag(name, value);
                 }
