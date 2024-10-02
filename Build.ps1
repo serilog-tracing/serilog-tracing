@@ -14,7 +14,7 @@ if(Test-Path .\artifacts) {
 
 & dotnet restore --no-cache
 
-$dbp = [Xml] (Get-Content .\Directory.Build.propsj)
+$dbp = [Xml] (Get-Content .\Directory.Build.props)
 $versionPrefix = $dbp.Project.PropertyGroup.VersionPrefix
 
 Write-Output "build: Package version prefix is $versionPrefix"
