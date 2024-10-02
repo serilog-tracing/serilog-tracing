@@ -71,12 +71,10 @@ public sealed class LoggerActivity : IDisposable
     /// or check this constraint whenever adding a property value here, using either `LogEventProperty.IsValidName()` or
     /// relying on property names coming pre-validated via `LogEventProperty.Name`. Because the library uses strict
     /// null checking, the null case is low risk. The potential to allow whitespace names through here is higher, but
-    /// no known safety issues exist for these in practise so the the risk is deemed acceptable compared with the higher
+    /// no known safety issues exist for these in practise so the risk is deemed acceptable compared with the higher
     /// cost of enumerating and checking each property name before constructing the final `LogEvent`.
     /// </summary>
     internal Dictionary<string, LogEventPropertyValue> Properties { get; }
-
-    bool IsSuppressed => ActivityInstrumentation.IsSuppressed(Activity) || IsComplete;
 
     bool IsDataSuppressed => ActivityInstrumentation.IsDataSuppressed(Activity) || IsComplete;
 
@@ -135,23 +133,22 @@ public sealed class LoggerActivity : IDisposable
         LogEventLevel? level = null,
         Exception? exception = null)
     {
-        if (IsSuppressed
+        if (Activity == null
+            || IsComplete
 #if FEATURE_ACTIVITY_ISSTOPPED
             // Though it could be considered misuse, avoid failures when the underlying activity
             // has been manually stopped/disposed outside of SerilogTracing.
-            || Activity!.IsStopped
+            || Activity.IsStopped
 #endif
-           )
+            )
         {
             return;
         }
 
-        // `Activity` is guaranteed to be non-null here thanks to `!IsSuppressed`
-
         // This property can be removed once we can rely on the existence of Activity.IsStopped.
         IsComplete = true;
 
-        if (!Activity!.Recorded)
+        if (!Activity.Recorded)
         {
             Activity.Stop();
             return;
@@ -169,20 +166,20 @@ public sealed class LoggerActivity : IDisposable
 
         if (exception != null)
         {
-            ActivityInstrumentation.TrySetException(Activity!, exception);
+            ActivityInstrumentation.TrySetException(Activity, exception);
         }
 
         // Only set the activity status if completion was done explicitly by the caller
         // If the activity was disposed without completing then leave the status unset
         if (isExplicit)
         {
-            Activity!.SetStatus(completionLevel <= LogEventLevel.Warning
+            Activity.SetStatus(completionLevel <= LogEventLevel.Warning
                 ? ActivityStatusCode.Ok
                 : ActivityStatusCode.Error);
         }
 
-        Activity!.SetEndTime(end.UtcDateTime);
-        Activity!.Stop();
+        Activity.SetEndTime(end.UtcDateTime);
+        Activity.Stop();
 
         // We assume here that `level` is still enabled as it was in the call to `StartActivity()`. If this is not
         // the case, traces may end up with missing spans. Writing a `SelfLog` event would be reasonable but this
