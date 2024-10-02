@@ -62,6 +62,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".workflows", ".workflows", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Benchmarks", "test\SerilogTracing.Benchmarks\SerilogTracing.Benchmarks.csproj", "{9052EA54-5BEE-4203-8966-DEC013DE62CB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sampling", "example\Sampling\Sampling.csproj", "{C89D0546-587D-4504-8BC2-4E08D30ACE4F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +88,7 @@ Global
 		{0128EB76-9B60-4553-B089-2D1707CD0D65} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
 		{ECE478F5-0719-4E59-8AEF-6AB12BE33B62} = {6BB7BDF8-8AEE-4D76-9E81-EA9984A66BF6}
 		{9052EA54-5BEE-4203-8966-DEC013DE62CB} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
+		{C89D0546-587D-4504-8BC2-4E08D30ACE4F} = {E35D98E8-5F3C-4ABD-8A65-63B6E357DC2F}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -144,5 +147,9 @@ Global
 		{9052EA54-5BEE-4203-8966-DEC013DE62CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9052EA54-5BEE-4203-8966-DEC013DE62CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9052EA54-5BEE-4203-8966-DEC013DE62CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C89D0546-587D-4504-8BC2-4E08D30ACE4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C89D0546-587D-4504-8BC2-4E08D30ACE4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C89D0546-587D-4504-8BC2-4E08D30ACE4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C89D0546-587D-4504-8BC2-4E08D30ACE4F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

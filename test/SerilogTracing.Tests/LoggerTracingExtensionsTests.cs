@@ -19,10 +19,10 @@ public class LoggerTracingExtensionsTests
 
     [Theory]
     [InlineData(true, true, true, true)]
-    [InlineData(true, true, false, false)]
+    [InlineData(true, true, false, true)]
     [InlineData(true, false, null, true)]
     [InlineData(false, true, true, false)]
-    [InlineData(false, true, false, false)]
+    [InlineData(false, true, null, false)]
     [InlineData(false, false, null, false)]
     public void ActivityIsGeneratedWhen(bool levelEnabled, bool tracingEnabled, bool? includedInSample, bool activityExpected)
     {
@@ -50,7 +50,8 @@ public class LoggerTracingExtensionsTests
         var configuration = new ActivityListenerConfiguration();
         if (includedInSample is { } always)
         {
-            var result = always ? ActivitySamplingResult.AllData : ActivitySamplingResult.None;
+            var result = always ? ActivitySamplingResult.AllDataAndRecorded :
+                 ActivitySamplingResult.PropagationData;
             configuration.Sample.Using((ref ActivityCreationOptions<ActivityContext> _) => result);
         }
 
