@@ -19,10 +19,13 @@ for (var i = 0; i < 10000; ++i)
     await Task.Delay(100);
 }
 
+/// <summary>
+/// Record one trace in every <c>N</c>.
+/// </summary>
 static class IntervalSampler
 {
     /// <summary>
-    /// Record one trace in every <paramref name="interval"/> possible traces.
+    /// Create a sampling delegate that records one trace in every <paramref name="interval"/> possible traces.
     /// </summary>
     /// <param name="interval">The sampling interval. Note that this is per root activity, not per individual activity.</param>
     /// <returns>A sampling function that can be provided to <see cref="ActivityListenerSamplingConfiguration.Using"/>.</returns>
@@ -33,9 +36,7 @@ static class IntervalSampler
         
         return (ref ActivityCreationOptions<ActivityContext> options) =>
         {
-            // The string comparison is required here because of some inconsistencies in how empty/default span ids
-            // are constructed.
-            if (options.Parent.SpanId.ToHexString() != default(ActivitySpanId).ToHexString())
+            if (options.Parent != default)
             {
                 // The activity is a child of another; if the parent is recorded, the child is recorded. Otherwise,
                 // there's no need to generate an activity at all.
