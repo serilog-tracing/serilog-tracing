@@ -32,7 +32,7 @@ static class IntervalSampler
     public static SampleActivity<ActivityContext> Create(ulong interval)
     {
         ArgumentOutOfRangeException.ThrowIfZero(interval);
-        var next = 0ul;
+        var next = interval - 1;
         
         return (ref ActivityCreationOptions<ActivityContext> options) =>
         {
@@ -47,7 +47,7 @@ static class IntervalSampler
 
             // We're at the root; if the trace is not included in the sample, return `PropagationData` so that
             // we apply the same decision to child activities via the path above.
-            var n = Interlocked.Increment(ref next) % interval - 1;
+            var n = Interlocked.Increment(ref next) % interval;
             return n == 0
                 ? ActivitySamplingResult.AllDataAndRecorded
                 : ActivitySamplingResult.PropagationData;
