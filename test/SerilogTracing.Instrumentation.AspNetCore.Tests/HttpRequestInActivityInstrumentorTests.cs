@@ -61,13 +61,22 @@ public class HttpRequestInActivityInstrumentorTests
     public void AllDetailsAreInheritedInTrustMode()
     {
         using var listener = Some.AlwaysOnListenerFor(HttpRequestInActivityInstrumentor.ReplacementActivitySourceName);
-        var incoming = CreateIncoming();
-        var replacement = HttpRequestInActivityInstrumentor.CreateReplacementActivity(incoming, IncomingTraceParent.Trust);
-        Assert.NotNull(replacement);
-        Assert.Equal(incoming.TraceId, replacement.TraceId);
-        Assert.Equal(incoming.ParentSpanId, replacement.ParentSpanId);
-        Assert.Equal(incoming.ActivityTraceFlags, replacement.ActivityTraceFlags);
-        Assert.NotEmpty(replacement.Baggage);
-        Assert.NotEmpty(replacement.TagObjects);
+        
+        var incomingNone = CreateIncoming();
+        incomingNone.ActivityTraceFlags = ActivityTraceFlags.None;
+        var incomingRecorded = CreateIncoming();
+        incomingRecorded.ActivityTraceFlags = ActivityTraceFlags.Recorded;
+
+        foreach (var incoming in new[] {incomingNone, incomingRecorded})
+        {
+            var replacement =
+                HttpRequestInActivityInstrumentor.CreateReplacementActivity(incoming, IncomingTraceParent.Trust);
+            Assert.NotNull(replacement);
+            Assert.Equal(incoming.TraceId, replacement.TraceId);
+            Assert.Equal(incoming.ParentSpanId, replacement.ParentSpanId);
+            Assert.Equal(incoming.ActivityTraceFlags, replacement.ActivityTraceFlags);
+            Assert.NotEmpty(replacement.Baggage);
+            Assert.NotEmpty(replacement.TagObjects);
+        }
     }
 }
