@@ -24,7 +24,7 @@ public class ActivityListenerSamplingConfiguration
     readonly ActivityListenerConfiguration _activityListenerConfiguration;
     SampleActivity<ActivityContext>? _sample;
 
-    internal SampleActivity<ActivityContext>? ActivityContext => _sample;
+    internal SampleActivity<ActivityContext>? SamplingDelegate => _sample;
 
     internal ActivityListenerSamplingConfiguration(ActivityListenerConfiguration activityListenerConfiguration)
     {
