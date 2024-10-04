@@ -39,10 +39,12 @@ static class IntervalSampler
             if (options.Parent != default)
             {
                 // The activity is a child of another; if the parent is recorded, the child is recorded. Otherwise,
-                // there's no need to generate an activity at all.
+                // as long as a local activity is present, there's no need to generate an activity at all.
                 return (options.Parent.TraceFlags & ActivityTraceFlags.Recorded) == ActivityTraceFlags.Recorded ?
                     ActivitySamplingResult.AllDataAndRecorded :
-                    ActivitySamplingResult.None;
+                    options.Parent.IsRemote ?
+                        ActivitySamplingResult.PropagationData :
+                        ActivitySamplingResult.None;
             }
 
             // We're at the root; if the trace is not included in the sample, return `PropagationData` so that
