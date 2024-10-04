@@ -6,13 +6,17 @@ namespace SerilogTracing.Instrumentation.AspNetCore.Tests;
 
 public class HttpRequestInActivityInstrumentorTests
 {
-    static Activity CreateIncoming()
+    static Activity CreateIncoming(ActivityTraceFlags parentFlags = ActivityTraceFlags.None)
     {
+        var parent = new Activity(Some.String());
+        parent.ActivityTraceFlags = parentFlags;
+        parent.Start();
         var incoming = new Activity(Some.String());
         // ReSharper disable once RedundantArgumentDefaultValue
-        incoming.SetParentId(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.None);
+        incoming.SetParentId(parent.TraceId, parent.SpanId, ActivityTraceFlags.None);
         incoming.SetBaggage(Some.String(), Some.String());
         incoming.SetTag(Some.String(), Some.String());
+        parent.Stop();
         return incoming;
     }
 
@@ -63,9 +67,7 @@ public class HttpRequestInActivityInstrumentorTests
         using var listener = Some.AlwaysOnListenerFor(HttpRequestInActivityInstrumentor.ReplacementActivitySourceName);
         
         var incomingNone = CreateIncoming();
-        incomingNone.ActivityTraceFlags = ActivityTraceFlags.None;
-        var incomingRecorded = CreateIncoming();
-        incomingRecorded.ActivityTraceFlags = ActivityTraceFlags.Recorded;
+        var incomingRecorded = CreateIncoming(ActivityTraceFlags.Recorded);
 
         foreach (var incoming in new[] {incomingNone, incomingRecorded})
         {
