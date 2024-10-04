@@ -32,33 +32,47 @@ public class HttpRequestInActivityInstrumentorTests
         Assert.Equal(default, replacement.ParentSpanId);
         Assert.Equal(ActivityTraceFlags.Recorded, replacement.ActivityTraceFlags);
     }
-    
+
     [Fact]
     public void NoDetailsAreInheritedInIgnoreMode()
     {
         using var listener = Some.AlwaysOnListenerFor(HttpRequestInActivityInstrumentor.ReplacementActivitySourceName);
-        var incoming = CreateIncoming();
-        var replacement = HttpRequestInActivityInstrumentor.CreateReplacementActivity(incoming, IncomingTraceParent.Ignore);
-        Assert.NotNull(replacement);
-        Assert.NotEqual(incoming.TraceId, replacement.TraceId);
-        Assert.Equal(default, replacement.ParentSpanId);
-        Assert.NotEqual(incoming.ActivityTraceFlags, replacement.ActivityTraceFlags);
-        Assert.Empty(replacement.Baggage);
-        Assert.Empty(replacement.TagObjects);
+
+        var incomingNone = CreateIncoming();
+        var incomingRecorded = CreateIncoming(ActivityTraceFlags.Recorded);
+
+        foreach (var incoming in new[] { incomingNone, incomingRecorded })
+        {
+            var replacement =
+                HttpRequestInActivityInstrumentor.CreateReplacementActivity(incoming, IncomingTraceParent.Ignore);
+            Assert.NotNull(replacement);
+            Assert.NotEqual(incoming.TraceId, replacement.TraceId);
+            Assert.Equal(default, replacement.ParentSpanId);
+            Assert.NotEqual(incoming.ActivityTraceFlags, replacement.ActivityTraceFlags);
+            Assert.Empty(replacement.Baggage);
+            Assert.Empty(replacement.TagObjects);
+        }
     }
-    
+
     [Fact]
     public void LimitedDetailsAreInheritedInAcceptMode()
     {
         using var listener = Some.AlwaysOnListenerFor(HttpRequestInActivityInstrumentor.ReplacementActivitySourceName);
-        var incoming = CreateIncoming();
-        var replacement = HttpRequestInActivityInstrumentor.CreateReplacementActivity(incoming, IncomingTraceParent.Accept);
-        Assert.NotNull(replacement);
-        Assert.Equal(incoming.TraceId, replacement.TraceId);
-        Assert.Equal(incoming.ParentSpanId, replacement.ParentSpanId);
-        Assert.NotEqual(incoming.ActivityTraceFlags, replacement.ActivityTraceFlags);
-        Assert.Empty(replacement.Baggage);
-        Assert.NotEmpty(replacement.TagObjects);
+        
+        var incomingNone = CreateIncoming();
+        var incomingRecorded = CreateIncoming(ActivityTraceFlags.Recorded);
+
+        foreach (var incoming in new[] { incomingNone, incomingRecorded })
+        {
+            var replacement =
+                HttpRequestInActivityInstrumentor.CreateReplacementActivity(incoming, IncomingTraceParent.Accept);
+            Assert.NotNull(replacement);
+            Assert.Equal(incoming.TraceId, replacement.TraceId);
+            Assert.Equal(incoming.ParentSpanId, replacement.ParentSpanId);
+            Assert.NotEqual(incoming.ActivityTraceFlags, replacement.ActivityTraceFlags);
+            Assert.Empty(replacement.Baggage);
+            Assert.NotEmpty(replacement.TagObjects);
+        }
     }
     
     [Fact]
