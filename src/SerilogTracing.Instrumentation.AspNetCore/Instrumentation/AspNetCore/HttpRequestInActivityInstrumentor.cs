@@ -165,13 +165,11 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
         inheritParent = inheritParent && incoming != null &&
                         incoming.ParentSpanId.ToHexString() != default(ActivitySpanId).ToHexString();
 
-        // Unfortunately there's no way to access the parent's trace flag apart from parsing the header ourselves,
-        // which we'll eventually need to implement. This gets us there for now.
         var flags = ActivityTraceFlags.None;
-        if (inheritParent && inheritFlags)
+        if (inheritParent && inheritFlags &&
+            incoming!.ParentId != null && TraceParentHeader.TryParse(incoming.ParentId, out var parsed))
         {
-            if (incoming?.ParentId?.EndsWith("-01") == true)
-                flags |= ActivityTraceFlags.Recorded;
+            flags = parsed.Value;
         }
 
         var context = inheritParent ?
