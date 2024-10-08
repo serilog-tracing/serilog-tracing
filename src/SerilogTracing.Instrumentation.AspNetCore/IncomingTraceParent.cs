@@ -30,7 +30,8 @@ public enum IncomingTraceParent
     Accept,
     
     /// <summary>
-    /// Accept the trace id, parent span id, trace flags and baggage.
+    /// Accept the trace id, parent span id, trace flags and baggage. The remote `recorded` flag will override the sampling
+    /// decision of any local samplers.
     /// </summary>
     /// <remarks>
     /// A new sibling <see cref="System.Diagnostics.Activity"/> with the trace context of the original will be
