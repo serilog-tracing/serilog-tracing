@@ -50,22 +50,31 @@ sealed class LoggerActivityListener: IDisposable
         try
         {
             var levelMap = configuration.InitialLevel.GetOverrideMap();
-            var sample = configuration.Sample.ActivityContext;
+            var samplingDelegate = configuration.Sample.SamplingDelegate;
             var activityEventRecording = configuration.ActivityEvents.Options;
+
+            samplingDelegate ??= (ref ActivityCreationOptions<ActivityContext> options) =>
+            {
+                if (options.Parent != default)
+                {
+                    // The activity is a child of another; if the parent is recorded, the child is recorded. Otherwise,
+                    // as long as a local activity is present, there's no need to generate an activity at all.
+                    return (options.Parent.TraceFlags & ActivityTraceFlags.Recorded) == ActivityTraceFlags.Recorded ?
+                        ActivitySamplingResult.AllDataAndRecorded :
+                        options.Parent.IsRemote ?
+                            ActivitySamplingResult.PropagationData :
+                            ActivitySamplingResult.None;
+                }
+
+                return ActivitySamplingResult.AllDataAndRecorded;
+            };
 
             if (ignoreLevelChanges)
             {
                 activityListener.ShouldListenTo = source => GetLogger(source.Name)
                     .IsEnabled(GetInitialLevel(levelMap, source.Name));
 
-                if (sample != null)
-                {
-                    activityListener.Sample = (ref ActivityCreationOptions<ActivityContext> activity) => sample.Invoke(ref activity);
-                }
-                else
-                {
-                    activityListener.Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded;
-                }
+                activityListener.Sample = samplingDelegate;
             }
             else
             {
@@ -77,7 +86,7 @@ sealed class LoggerActivityListener: IDisposable
                             .IsEnabled(GetInitialLevel(levelMap, activity.Source.Name)))
                         return ActivitySamplingResult.None;
 
-                    return sample?.Invoke(ref activity) ?? ActivitySamplingResult.AllDataAndRecorded;
+                    return samplingDelegate(ref activity);
                 };
             }
 
