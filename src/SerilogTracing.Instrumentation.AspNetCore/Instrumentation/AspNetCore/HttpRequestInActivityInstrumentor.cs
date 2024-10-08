@@ -172,7 +172,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
             flags = parsed.Value;
         }
 
-        var context = inheritParent ?
+        var context = inheritParent && inheritFlags ?
             new ActivityContext(
                 incoming!.TraceId,
                 incoming.ParentSpanId,
@@ -203,10 +203,19 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
                 }
             }
 
-            if (inheritParent && inheritFlags)
+            if (inheritParent)
             {
-                // In `Trust` mode we override the local sampling decision with the remote one.
-                replacement.ActivityTraceFlags = flags;
+                if (inheritFlags)
+                {
+                    // In `Trust` mode we override the local sampling decision with the remote one. We
+                    // already used the incoming trace and parent span ids through the `context` passed
+                    // to `CreateActivity`.
+                    replacement.ActivityTraceFlags = flags;
+                }
+                else
+                {
+                    replacement.SetParentId(incoming.TraceId, incoming.ParentSpanId, replacement.ActivityTraceFlags);
+                }
             }
 
             if (inheritBaggage)
