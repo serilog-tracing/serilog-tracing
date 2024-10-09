@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Diagnostics;
+using SerilogTracing.Samplers;
 
 namespace SerilogTracing.Configuration;
 
@@ -22,17 +23,18 @@ namespace SerilogTracing.Configuration;
 public class ActivityListenerSamplingConfiguration
 {
     readonly ActivityListenerConfiguration _activityListenerConfiguration;
-    SampleActivity<ActivityContext>? _sample;
+    SampleActivity<ActivityContext> _sample;
 
-    internal SampleActivity<ActivityContext>? SamplingDelegate => _sample;
+    internal SampleActivity<ActivityContext> SamplingDelegate => _sample;
 
     internal ActivityListenerSamplingConfiguration(ActivityListenerConfiguration activityListenerConfiguration)
     {
         _activityListenerConfiguration = activityListenerConfiguration;
+        _sample = ParentPrecedenceSampler.Create(AlwaysRecordedSampler.Create());
     }
 
     /// <summary>
-    /// Set the sampling level for the listener. The <see cref="System.Diagnostics.ActivityContext"/> supplied to
+    /// Set the sampling policy for the listener. The <see cref="System.Diagnostics.ActivityContext"/> supplied to
     /// the callback will contain the current trace id, and if the activity has a known parent
     /// a non-default span id identifying the parent.
     /// </summary>
@@ -47,6 +49,35 @@ public class ActivityListenerSamplingConfiguration
     public ActivityListenerConfiguration Using(SampleActivity<ActivityContext> sample)
     {
         _sample = sample;
+        return _activityListenerConfiguration;
+    }
+
+    /// <summary>
+    /// Record all traces. This is the SerilogTracing default policy.
+    /// </summary>
+    /// <remarks>This policy will respect any sampling decisions already made for parent activities. This will only
+    /// occur when incoming requests or messages contain propagated tracing information; to control whether
+    /// external tracing decisions are trusted, see for example <c>IncomingTraceParent</c> in the ASP.NET Core
+    /// instrumentation.</remarks>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
+    public ActivityListenerConfiguration AllTraces()
+    {
+        _sample = ParentPrecedenceSampler.Create(AlwaysRecordedSampler.Create());
+        return _activityListenerConfiguration;
+    }
+
+    /// <summary>
+    /// Record one trace in every <paramref name="interval"/> possible traces.
+    /// </summary>
+    /// <param name="interval">The sampling interval. Note that this is per root activity, not per individual activity.</param>
+    /// <remarks>This policy will respect any sampling decisions already made for parent activities. This will only
+    /// occur when incoming requests or messages contain propagated tracing information; to control whether
+    /// external tracing decisions are trusted, see for example <c>IncomingTraceParent</c> in the ASP.NET Core
+    /// instrumentation.</remarks>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
+    public ActivityListenerConfiguration OneTraceIn(ulong interval)
+    {
+        _sample = ParentPrecedenceSampler.Create(IntervalSampler.Create(interval));
         return _activityListenerConfiguration;
     }
 }
