@@ -10,5 +10,7 @@
         <!-- The condition is required to support BenchmarkDotNet -->
         <SignAssembly Condition="Exists('../../assets/SerilogTracing.snk')">true</SignAssembly>
         <AssemblyOriginatorKeyFile>../../assets/SerilogTracing.snk</AssemblyOriginatorKeyFile>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 </Project>
