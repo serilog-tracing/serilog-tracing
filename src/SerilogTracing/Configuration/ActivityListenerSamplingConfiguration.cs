@@ -67,7 +67,8 @@ public class ActivityListenerSamplingConfiguration
     }
 
     /// <summary>
-    /// Record one trace in every <paramref name="interval"/> possible traces.
+    /// Record one trace in every <paramref name="interval"/> possible traces. The sampling algorithm uses a simple local
+    /// counter, which is not preserved across application restarts.
     /// </summary>
     /// <param name="interval">The sampling interval. Note that this is per root activity, not per individual activity.</param>
     /// <remarks>This policy will respect any sampling decisions already made for parent activities. This will only

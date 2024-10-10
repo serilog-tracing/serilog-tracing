@@ -277,6 +277,8 @@ More sophisticated sampling strategies can be plugged in through `Sample.Using()
 > [!NOTE]
 > Once a sampling decision has been made for the root activity in a trace, SerilogTracing's sampling infrastructure will ensure all child activities inherit that sampling decision, regardless of the sampling policy in use. This means that when sampling decisions are communicated by a remote caller, care should be taken to either discard or trust that caller's decision. See the section [Adding instrumentation for ASP.NET Core requests](#adding-instrumentation-for-aspnet-core-requests) for information on how to do this with SerilogTracing's ASP.NET Core integration.
 
+Sampling does not affect the recording of log events: log events written during an un-sampled trace will still be recorded, and will carry trace and span ids even though the corresponding spans will be missing.
+
 ## How an `Activity` becomes a `LogEvent`
 
 ![SerilogTracing pipeline](https://raw.githubusercontent.com/serilog-tracing/serilog-tracing/dev/assets/pipeline-architecture.png)
