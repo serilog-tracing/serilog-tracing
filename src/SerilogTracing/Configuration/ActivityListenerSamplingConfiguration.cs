@@ -30,7 +30,7 @@ public class ActivityListenerSamplingConfiguration
     internal ActivityListenerSamplingConfiguration(ActivityListenerConfiguration activityListenerConfiguration)
     {
         _activityListenerConfiguration = activityListenerConfiguration;
-        _sample = ParentPrecedenceSampler.Create(AlwaysRecordedSampler.Create());
+        _sample = ParentPrecedentSampler.Create(AlwaysRecordedSampler.Create());
     }
 
     /// <summary>
@@ -62,7 +62,7 @@ public class ActivityListenerSamplingConfiguration
     /// <returns>The activity listener configuration, to enable method chaining.</returns>
     public ActivityListenerConfiguration AllTraces()
     {
-        _sample = ParentPrecedenceSampler.Create(AlwaysRecordedSampler.Create());
+        _sample = ParentPrecedentSampler.Create(AlwaysRecordedSampler.Create());
         return _activityListenerConfiguration;
     }
 
@@ -77,7 +77,7 @@ public class ActivityListenerSamplingConfiguration
     /// <returns>The activity listener configuration, to enable method chaining.</returns>
     public ActivityListenerConfiguration OneTraceIn(ulong interval)
     {
-        _sample = ParentPrecedenceSampler.Create(IntervalSampler.Create(interval));
+        _sample = ParentPrecedentSampler.Create(IntervalSampler.Create(interval));
         return _activityListenerConfiguration;
     }
 }

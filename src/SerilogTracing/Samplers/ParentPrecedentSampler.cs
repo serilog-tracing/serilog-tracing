@@ -20,7 +20,7 @@ namespace SerilogTracing.Samplers;
 /// <summary>
 /// A sampling wrapper that gives precedence to the sampling decision made for the parent activity.
 /// </summary>
-static class ParentPrecedenceSampler
+static class ParentPrecedentSampler
 {
     /// <summary>
     /// Create a sampling delegate that gives precedence to the sampling decision made for the parent activity, if present, but
