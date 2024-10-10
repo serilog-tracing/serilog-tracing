@@ -165,6 +165,27 @@ using var listener = new ActivityListenerConfiguration()
     .TraceToSharedLogger();
 ```
 
+### Incoming `traceparent` headers
+
+HTTP requests received by ASP.NET Core may contain a header with the trace id, span id, and sampling decision made for the active span in the calling application. How this header is used can be configured with `HttpRequestInActivityInstrumentationOptions.IncomingTraceParent`:
+
+```csharp
+using var listener = new ActivityListenerConfiguration()
+    .Instrument.AspNetCoreRequests(opts =>
+    {
+        opts.IncomingTraceParent = IncomingTraceParent.Trust;
+    })
+    .TraceToSharedLogger();
+```
+
+The supported options are:
+
+ * **`IncomingTraceParent.Accept`** (default) &mdash; the parent's trace and span ids will be used, but the sampling decision will be ignored; this reveals the presence of incoming tracing information while preventing callers from controlling whether data is recorded
+ * **`IncomingTraceParent.Ignore`** &mdash; no information about the parent span will be preserved; this is the appropriate option for most public or Internet-facing sites and services
+ * **`IncomingTraceParent.Trust`** &mdash; use the parent's trace and span ids, and respect the parent's sampling decision; this is the appropriate option for many internal services, since it allows system-wide sampling and consistent, detailed traces
+
+See the section [Sampling](#sampling) below for more information on how sampling works in SerilogTracing.
+
 ## Adding instrumentation for `HttpClient` requests
 
 `HttpClient` requests are instrumented by default. To configure the way `HttpClient` requests are recorded as spans, remove the default instrumentation and add `HttpClient` instrumentation explicitly:
@@ -237,6 +258,26 @@ Log.Logger = new LoggerConfiguration()
 
 For an example showing how to produce JSON with `ExpressionTemplate`, see the implementation of `ZipkinSink` in this repository,
 and [this article introducing _Serilog.Expressions_ JSON support](https://nblumhardt.com/2021/06/customize-serilog-json-output/).
+
+## Sampling
+
+Sampling is a method of reducing stored data volumes by selectively recording traces. This is similar to levelling, but instead of turning individual span types on and off, sampling causes either _all_ of the spans in a trace to be recorded, or _none_ of them.
+
+SerilogTracing implements two simple strategies via `ActivityListenerConfiguration`: `Sample.AllTraces()`, which records all traces (the default), and `Sample.OneTraceIn()`, which records a fixed proportion of possible traces:
+
+```csharp
+// Record only every 1000th trace
+using var listener = new ActivityListenerConfiguration()
+    .Sample.OneTraceIn(1000)
+    .TraceToSharedLogger();
+```
+
+More sophisticated sampling strategies can be plugged in through `Sample.Using()`, which provides access to the raw `System.Diagnostics.ActivityListener` sampling API.
+
+> [!NOTE]
+> Once a sampling decision has been made for the root activity in a trace, SerilogTracing's sampling infrastructure will ensure all child activities inherit that sampling decision, regardless of the sampling policy in use. This means that when sampling decisions are communicated by a remote caller, care should be taken to either discard or trust that caller's decision. See the section [Adding instrumentation for ASP.NET Core requests](#adding-instrumentation-for-aspnet-core-requests) for information on how to do this with SerilogTracing's ASP.NET Core integration.
+
+Sampling does not affect the recording of log events: log events written during an un-sampled trace will still be recorded, and will carry trace and span ids even though the corresponding spans will be missing.
 
 ## How an `Activity` becomes a `LogEvent`
 
