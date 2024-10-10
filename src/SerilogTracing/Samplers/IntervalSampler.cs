@@ -32,14 +32,14 @@ static class IntervalSampler
         if (interval == 0) throw new ArgumentOutOfRangeException(nameof(interval));
         var next = (long)interval - 1;
         
-        return (ref ActivityCreationOptions<ActivityContext> _) =>
+        return (ref ActivityCreationOptions<ActivityContext> options) =>
         {
-            // Tf the trace is not included in the sample, return `PropagationData` so that
+            // If the trace is not included in the sample, return `PropagationData` so that
             // we apply the same decision to child activities via the path above.
             var n = Interlocked.Increment(ref next) % (long)interval;
-            return n == 0
-                ? ActivitySamplingResult.AllDataAndRecorded
-                : ActivitySamplingResult.PropagationData;
+            return n == 0 ?
+                ActivitySamplingResult.AllDataAndRecorded :
+                ActivitySamplingResult.PropagationData;
         };
     }
 }
