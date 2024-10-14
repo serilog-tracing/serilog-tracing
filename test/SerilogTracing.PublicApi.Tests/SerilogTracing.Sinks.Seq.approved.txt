@@ -1,8 +1,0 @@
-﻿namespace SerilogTracing
-{
-    public static class SeqTracingLoggerSinkConfigurationExtensions
-    {
-        [System.Obsolete("Use Serilog.Sinks.Seq version 7.0.0 or later, and WriteTo.Seq() instead.")]
-        public static Serilog.LoggerConfiguration SeqTracing(this Serilog.Configuration.LoggerSinkConfiguration loggerSinkConfiguration, string serverUrl, Serilog.Events.LogEventLevel restrictedToMinimumLevel = 0, int batchPostingLimit = 1000, System.TimeSpan? period = default, string? apiKey = null, string? bufferBaseFilename = null, long? bufferSizeLimitBytes = default, long? eventBodyLimitBytes = 262144, Serilog.Core.LoggingLevelSwitch? controlLevelSwitch = null, System.Net.Http.HttpMessageHandler? messageHandler = null, long? retainedInvalidPayloadsLimitBytes = default, int queueSizeLimit = 100000) { }
-    }
-}
