@@ -13,7 +13,6 @@ public class PublicApiTests
     [InlineData(typeof(TracingNameResolver))]
     [InlineData(typeof(ActivityListenerInstrumentationConfigurationSqlClientExtensions))]
     [InlineData(typeof(ActivityListenerInstrumentationConfigurationAspNetCoreExtensions))]
-    [InlineData(typeof(OpenTelemetryLoggerConfigurationExtensions))]
     [InlineData(typeof(ZipkinLoggerSinkConfigurationExtensions))]
     public void PublicApiSurfaceIsStable(Type representativeType)
     {
