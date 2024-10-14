@@ -65,13 +65,13 @@ if ($env:NUGET_API_KEY) {
     Write-Output "build: Publishing NuGet packages"
     
     foreach ($nupkg in Get-ChildItem artifacts/*.nupkg) {
-        & dotnet nuget push -k $env:NUGET_API_KEY -s https://api.nuget.org/v3/index.json "$nupkg" --no-symbols
+        & dotnet nuget push -k $env:NUGET_API_KEY -s https://api.nuget.org/v3/index.json "$nupkg"
         if($LASTEXITCODE -ne 0) { throw "Publishing failed" }
     }
 
     if (!($suffix)) {
         Write-Output "build: Creating release for version $versionPrefix"
 
-        gh release create "v$versionPrefix" --title "v$versionPrefix" --generate-notes
+        gh release create "v$versionPrefix" --title "v$versionPrefix" --generate-notes @$"$(get-item ./artifacts/*.nupkg) $(get-item ./artifacts/*.snupkg)"
     }
 }

@@ -53,22 +53,6 @@ sealed class LoggerActivityListener: IDisposable
             var samplingDelegate = configuration.Sample.SamplingDelegate;
             var activityEventRecording = configuration.ActivityEvents.Options;
 
-            samplingDelegate ??= (ref ActivityCreationOptions<ActivityContext> options) =>
-            {
-                if (options.Parent != default)
-                {
-                    // The activity is a child of another; if the parent is recorded, the child is recorded. Otherwise,
-                    // as long as a local activity is present, there's no need to generate an activity at all.
-                    return (options.Parent.TraceFlags & ActivityTraceFlags.Recorded) == ActivityTraceFlags.Recorded ?
-                        ActivitySamplingResult.AllDataAndRecorded :
-                        options.Parent.IsRemote ?
-                            ActivitySamplingResult.PropagationData :
-                            ActivitySamplingResult.None;
-                }
-
-                return ActivitySamplingResult.AllDataAndRecorded;
-            };
-
             if (ignoreLevelChanges)
             {
                 activityListener.ShouldListenTo = source => GetLogger(source.Name)

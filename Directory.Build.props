@@ -4,11 +4,13 @@
         <Nullable>enable</Nullable>
         <LangVersion>12</LangVersion>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <VersionPrefix>2.1.2</VersionPrefix>
+        <VersionPrefix>2.2.0</VersionPrefix>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <!-- The condition is required to support BenchmarkDotNet -->
         <SignAssembly Condition="Exists('../../assets/SerilogTracing.snk')">true</SignAssembly>
         <AssemblyOriginatorKeyFile>../../assets/SerilogTracing.snk</AssemblyOriginatorKeyFile>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 </Project>

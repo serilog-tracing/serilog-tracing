@@ -91,6 +91,8 @@ namespace SerilogTracing.Configuration
     }
     public class ActivityListenerSamplingConfiguration
     {
+        public SerilogTracing.ActivityListenerConfiguration AllTraces() { }
+        public SerilogTracing.ActivityListenerConfiguration OneTraceIn(ulong interval) { }
         public SerilogTracing.ActivityListenerConfiguration Using(System.Diagnostics.SampleActivity<System.Diagnostics.ActivityContext> sample) { }
     }
 }
