@@ -75,6 +75,7 @@ namespace SerilogTracing.Configuration
         public SerilogTracing.ActivityListenerConfiguration Debug() { }
         public SerilogTracing.ActivityListenerConfiguration Error() { }
         public SerilogTracing.ActivityListenerConfiguration Fatal() { }
+        public SerilogTracing.ActivityListenerConfiguration IgnoreChanges() { }
         public SerilogTracing.ActivityListenerConfiguration Information() { }
         public SerilogTracing.ActivityListenerConfiguration Is(Serilog.Events.LogEventLevel level) { }
         public SerilogTracing.ActivityListenerConfiguration Override(string activitySourceName, Serilog.Core.LoggingLevelSwitch levelSwitch) { }

@@ -33,8 +33,7 @@ sealed class LoggerActivityListener: IDisposable
     }
     
     internal static LoggerActivityListener Configure(
-        ActivityListenerConfiguration configuration, Func<ILogger> logger,
-        bool ignoreLevelChanges)
+        ActivityListenerConfiguration configuration, Func<ILogger> logger)
     {
         ILogger GetLogger(string name)
         {
@@ -53,7 +52,7 @@ sealed class LoggerActivityListener: IDisposable
             var samplingDelegate = configuration.Sample.SamplingDelegate;
             var activityEventRecording = configuration.ActivityEvents.Options;
 
-            if (ignoreLevelChanges)
+            if (configuration.InitialLevel.IgnoreLevelChanges)
             {
                 activityListener.ShouldListenTo = source => GetLogger(source.Name)
                     .IsEnabled(GetInitialLevel(levelMap, source.Name));
