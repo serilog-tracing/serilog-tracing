@@ -24,6 +24,23 @@ namespace SerilogTracing.Instrumentation.AspNetCore;
 /// </summary>
 sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrumentationEventObserver
 {
+    readonly Func<HttpRequest, IEnumerable<LogEventProperty>> _getRequestProperties;
+    readonly Func<HttpResponse, IEnumerable<LogEventProperty>> _getResponseProperties;
+    readonly MessageTemplate _messageTemplateOverride;
+    readonly Func<HttpResponse,bool> _isErrorResponse;
+    readonly IncomingTraceParent _incomingTraceParent;
+    readonly Func<HttpContext,bool>? _postSamplingFilter;
+
+    readonly PropertyAccessor<Exception> _exceptionAccessor = new("exception");
+    readonly PropertyAccessor<HttpContext> _httpContextAccessor = new("httpContext");
+
+    const string ReplacedActivityPropertyName = "SerilogTracing.Instrumentation.AspNetCore.Replaced";
+    internal const string ReplacementActivitySourceName = "SerilogTracing.Instrumentation.AspNetCore";
+    const string TargetDiagnosticListenerName = "Microsoft.AspNetCore";
+    const string DefaultActivityName = "SerilogTracing.Instrumentation.AspNetCore.HttpRequestIn";
+
+    static readonly ActivitySource ReplacementActivitySource = new(ReplacementActivitySourceName);
+
     /// <summary>
     /// Create an instance of the instrumentor.
     /// </summary>
@@ -34,23 +51,8 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
         _messageTemplateOverride = new MessageTemplateParser().Parse(options.MessageTemplate);
         _incomingTraceParent = options.IncomingTraceParent;
         _isErrorResponse = options.IsErrorResponse;
+        _postSamplingFilter = options.PostSamplingFilter;
     }
-
-    readonly Func<HttpRequest, IEnumerable<LogEventProperty>> _getRequestProperties;
-    readonly Func<HttpResponse, IEnumerable<LogEventProperty>> _getResponseProperties;
-    readonly MessageTemplate _messageTemplateOverride;
-    readonly Func<HttpResponse,bool> _isErrorResponse;
-    readonly IncomingTraceParent _incomingTraceParent;
-    
-    readonly PropertyAccessor<Exception> _exceptionAccessor = new("exception");
-    readonly PropertyAccessor<HttpContext> _httpContextAccessor = new("httpContext");
-
-    const string ReplacedActivityPropertyName = "SerilogTracing.Instrumentation.AspNetCore.Replaced";
-    internal const string ReplacementActivitySourceName = "SerilogTracing.Instrumentation.AspNetCore";
-    const string TargetDiagnosticListenerName = "Microsoft.AspNetCore";
-    const string DefaultActivityName = "SerilogTracing.Instrumentation.AspNetCore.HttpRequestIn";
-
-    static readonly ActivitySource ReplacementActivitySource = new(ReplacementActivitySourceName);
 
     /// <inheritdoc />
     public bool ShouldSubscribeTo(string diagnosticListenerName)
@@ -86,11 +88,20 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
 
         if (replacement != null)
         {
-            ActivityInstrumentation.SetMessageTemplateOverride(replacement, _messageTemplateOverride);
-            replacement.DisplayName = _messageTemplateOverride.Text;
+            if (_postSamplingFilter != null && !_postSamplingFilter(start))
+            {
+                // The post-sampling filter can unilaterally suppress activities.
+                replacement.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+            }
+            else if (replacement.Recorded)
+            {
+                ActivityInstrumentation.SetMessageTemplateOverride(replacement, _messageTemplateOverride);
+                replacement.DisplayName = _messageTemplateOverride.Text;
 
-            var props = _getRequestProperties(start.Request);
-            ActivityInstrumentation.SetLogEventProperties(replacement, props as LogEventProperty[] ?? props.ToArray());
+                var props = _getRequestProperties(start.Request);
+                ActivityInstrumentation.SetLogEventProperties(replacement,
+                    props as LogEventProperty[] ?? props.ToArray());
+            }
 
             replacement.Start();
         }
