@@ -22,5 +22,6 @@ namespace SerilogTracing.Instrumentation.AspNetCore
         public SerilogTracing.IncomingTraceParent IncomingTraceParent { get; set; }
         public System.Func<Microsoft.AspNetCore.Http.HttpResponse, bool> IsErrorResponse { get; set; }
         public string MessageTemplate { get; set; }
+        public System.Func<Microsoft.AspNetCore.Http.HttpContext, bool>? PostSamplingFilter { get; set; }
     }
 }

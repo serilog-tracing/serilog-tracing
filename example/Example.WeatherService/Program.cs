@@ -18,7 +18,11 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 using var _ = new ActivityListenerConfiguration()
-    .Instrument.AspNetCoreRequests(opts => opts.IncomingTraceParent = IncomingTraceParent.Trust)
+    .Instrument.AspNetCoreRequests(opts =>
+    {
+        opts.IncomingTraceParent = IncomingTraceParent.Trust;
+        opts.PostSamplingFilter = httpContext => !httpContext.Request.Path.StartsWithSegments("/health");
+    })
     .TraceToSharedLogger();
 
 Log.Information("Weather service starting up");
@@ -41,6 +45,8 @@ try
 
         return forecast;
     });
+
+    app.MapGet("/health", () => "Ok!");
 
     app.Run();
 
