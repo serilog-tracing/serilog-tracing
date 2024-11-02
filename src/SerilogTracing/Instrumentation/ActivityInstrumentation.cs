@@ -29,6 +29,12 @@ namespace SerilogTracing.Instrumentation;
 /// </summary>
 public static class ActivityInstrumentation
 {
+    internal const string ReplacementActivitySourceName = "SerilogTracing.Instrumentation.ActivityInstrumentation";
+    const string DefaultActivityName = "SerilogTracing.Instrumentation.ActivityInstrumentation.Activity";
+    const string ReplacedActivityPropertyName = "SerilogTracing.Instrumentation.ActivityInstrumentation.ReplacedActivity";
+
+    static readonly ActivitySource ReplacementActivitySource = new(ReplacementActivitySourceName);
+    
     /// <summary>
     /// Associate a <see cref="MessageTemplate"/> with the given <see cref="Activity"/>, without changing the
     /// <see cref="Activity.DisplayName"/>.
@@ -246,6 +252,173 @@ public static class ActivityInstrumentation
         string? toString) : Exception(message ?? type)
     {
         public override string ToString() => toString ?? "No information available.";
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="configureReplacement"></param>
+    /// <param name="postSamplingFilter"></param>
+    /// <param name="inheritTags"></param>
+    /// <param name="inheritParent"></param>
+    /// <param name="inheritFlags"></param>
+    /// <param name="inheritBaggage"></param>
+    /// <returns></returns>
+    public static void StartReplacementActivity(
+        Func<Activity?, bool> postSamplingFilter,
+        Action<Activity> configureReplacement,
+        bool inheritTags = true,
+        bool inheritParent = true,
+        bool inheritFlags = true,
+        bool inheritBaggage = true
+    ) {
+        var incoming = Activity.Current;
+        
+        // Important to do this first, otherwise our activity source will consult the inherited
+        // activity when making sampling decisions.
+        Activity.Current = incoming?.Parent;
+
+        var replacement = CreateReplacementActivity(incoming, inheritTags, inheritParent, inheritFlags, inheritBaggage);
+
+        if (incoming != null)
+        {
+            // Suppress the original activity
+            incoming.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+            incoming.IsAllDataRequested = false;
+        }
+
+        if (replacement != null)
+        {
+            if (!postSamplingFilter(replacement))
+            {
+                // The post-sampling filter can unilaterally suppress activities.
+                replacement.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+            }
+            else if (replacement.Recorded)
+            {
+                configureReplacement(replacement);
+            }
+
+            replacement.Start();
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="activity"></param>
+    public static void StopReplacementActivity(Activity activity)
+    {
+        if (activity.GetCustomProperty(ReplacedActivityPropertyName) is Activity original)
+        {
+            activity.Stop();
+            Activity.Current = original;
+        }
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="incoming"></param>
+    /// <param name="inheritTags"></param>
+    /// <param name="inheritParent"></param>
+    /// <param name="inheritFlags"></param>
+    /// <param name="inheritBaggage"></param>
+    /// <returns></returns>
+    internal static Activity? CreateReplacementActivity(
+        Activity? incoming,
+        bool inheritTags,
+        bool inheritParent,
+        bool inheritFlags,
+        bool inheritBaggage
+    ) {
+        // We're only interested in the incoming parent if there is one. Switching off `inheritParent` when there isn't,
+        // prevents us from trying to override a nonexistent sampling decision a little further down. Checking
+        // `HasRemoteParent` would be useful here, but it creates problems for unit testing.
+        inheritParent = inheritParent && incoming != null &&
+                        incoming.ParentSpanId.ToHexString() != default(ActivitySpanId).ToHexString();
+
+        var flags = ActivityTraceFlags.None;
+        if (inheritParent && inheritFlags &&
+            incoming!.ParentId != null && TryParseTraceParentHeader(incoming.ParentId, out var parsed))
+        {
+            flags = parsed.Value;
+        }
+
+        var context = inheritParent && inheritFlags ?
+            new ActivityContext(
+                incoming!.TraceId,
+                incoming.ParentSpanId,
+                flags,
+                isRemote: true) :
+            default;
+        
+        var replacement = ReplacementActivitySource.CreateActivity(DefaultActivityName, incoming?.Kind ?? ActivityKind.Internal, context);
+
+        if (incoming == null)
+        {
+            return replacement;
+        }
+
+        if (replacement != null)
+        {
+            replacement.SetCustomProperty(ReplacedActivityPropertyName, incoming);
+
+            if (inheritTags)
+            {
+#if FEATURE_ACTIVITY_ENUMERATETAGOBJECTS
+                foreach (var (name, value) in incoming.EnumerateTagObjects())
+#else
+                foreach (var (name, value) in incoming.TagObjects)
+#endif
+                {
+                    replacement.SetTag(name, value);
+                }
+            }
+
+            if (inheritParent)
+            {
+                if (inheritFlags)
+                {
+                    // In `Trust` mode we override the local sampling decision with the remote one. We
+                    // already used the incoming trace and parent span ids through the `context` passed
+                    // to `CreateActivity`.
+                    replacement.ActivityTraceFlags = flags;
+                }
+                else
+                {
+                    replacement.SetParentId(incoming.TraceId, incoming.ParentSpanId, replacement.ActivityTraceFlags);
+                }
+            }
+
+            if (inheritBaggage)
+            {
+                foreach (var (k, v) in incoming.Baggage)
+                {
+                    replacement.SetBaggage(k, v);
+                }
+            }
+        }
+        
+        return replacement;
+    }
+    
+    internal static bool TryParseTraceParentHeader(string traceParentHeaderValue, [NotNullWhen(true)] out ActivityTraceFlags? flags)
+    {
+        if (traceParentHeaderValue.EndsWith("-00"))
+        {
+            flags = ActivityTraceFlags.None;
+            return true;
+        }
+        
+        if (traceParentHeaderValue.EndsWith("-01"))
+        {
+            flags = ActivityTraceFlags.Recorded;
+            return true;
+        }
+
+        flags = null;
+        return false;
     }
 
     internal static void AttachLoggerActivity(Activity activity, LoggerActivity loggerActivity)

@@ -23,6 +23,7 @@ namespace SerilogTracing.Interop;
 
 sealed class LoggerActivityListener: IDisposable
 {
+    // TODO: Plug in our `ActivitySource`-based listeners here
     readonly ActivityListener? _listener;
     readonly IDisposable? _diagnosticListenerSubscription;
 
