@@ -272,19 +272,19 @@ public static class ActivityInstrumentation
         bool inheritFlags = true,
         bool inheritBaggage = true
     ) {
-        var incoming = Activity.Current;
+        var replace = Activity.Current;
         
         // Important to do this first, otherwise our activity source will consult the inherited
         // activity when making sampling decisions.
-        Activity.Current = incoming?.Parent;
+        Activity.Current = replace?.Parent;
 
-        var replacement = CreateReplacementActivity(incoming, inheritTags, inheritParent, inheritFlags, inheritBaggage);
+        var replacement = CreateReplacementActivity(replace, inheritTags, inheritParent, inheritFlags, inheritBaggage);
 
-        if (incoming != null)
+        if (replace != null)
         {
             // Suppress the original activity
-            incoming.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
-            incoming.IsAllDataRequested = false;
+            replace.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+            replace.IsAllDataRequested = false;
         }
 
         if (replacement != null)
@@ -299,6 +299,9 @@ public static class ActivityInstrumentation
                 configureReplacement(replacement);
             }
 
+            // This method should be called in an `ActivityStarted` callback
+            // so the replaced activity should already be started. We need
+            // to start the replacement activity here
             replacement.Start();
         }
     }
@@ -306,27 +309,50 @@ public static class ActivityInstrumentation
     /// <summary>
     /// 
     /// </summary>
+    public static void StopReplacementActivity()
+    {
+        var replacement = Activity.Current;
+        
+        if (replacement?.GetCustomProperty(ReplacedActivityPropertyName) is Activity replaced)
+        {
+            // This method should be called in an `ActivityStopped` callback
+            // so the replacement activity should already be stopped. We
+            // need to stop the replaced activity here
+            replaced.Stop();
+
+            Activity.Current = replaced;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="activity"></param>
-    public static void StopReplacementActivity(Activity activity)
+    /// <param name="replacedActivity"></param>
+    /// <returns></returns>
+    public static bool TryGetReplacedActivity(Activity activity, [NotNullWhen(true)] out Activity? replacedActivity)
     {
         if (activity.GetCustomProperty(ReplacedActivityPropertyName) is Activity original)
         {
-            activity.Stop();
-            Activity.Current = original;
+            replacedActivity = original;
+            return true;
         }
+
+        replacedActivity = null;
+        return false;
     }
     
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="incoming"></param>
+    /// <param name="replace"></param>
     /// <param name="inheritTags"></param>
     /// <param name="inheritParent"></param>
     /// <param name="inheritFlags"></param>
     /// <param name="inheritBaggage"></param>
     /// <returns></returns>
     internal static Activity? CreateReplacementActivity(
-        Activity? incoming,
+        Activity? replace,
         bool inheritTags,
         bool inheritParent,
         bool inheritFlags,
@@ -335,41 +361,41 @@ public static class ActivityInstrumentation
         // We're only interested in the incoming parent if there is one. Switching off `inheritParent` when there isn't,
         // prevents us from trying to override a nonexistent sampling decision a little further down. Checking
         // `HasRemoteParent` would be useful here, but it creates problems for unit testing.
-        inheritParent = inheritParent && incoming != null &&
-                        incoming.ParentSpanId.ToHexString() != default(ActivitySpanId).ToHexString();
+        inheritParent = inheritParent && replace != null &&
+                        replace.ParentSpanId.ToHexString() != default(ActivitySpanId).ToHexString();
 
         var flags = ActivityTraceFlags.None;
         if (inheritParent && inheritFlags &&
-            incoming!.ParentId != null && TryParseTraceParentHeader(incoming.ParentId, out var parsed))
+            replace!.ParentId != null && TryParseTraceParentHeader(replace.ParentId, out var parsed))
         {
             flags = parsed.Value;
         }
 
         var context = inheritParent && inheritFlags ?
             new ActivityContext(
-                incoming!.TraceId,
-                incoming.ParentSpanId,
+                replace!.TraceId,
+                replace.ParentSpanId,
                 flags,
                 isRemote: true) :
             default;
         
-        var replacement = ReplacementActivitySource.CreateActivity(DefaultActivityName, incoming?.Kind ?? ActivityKind.Internal, context);
+        var replacement = ReplacementActivitySource.CreateActivity(DefaultActivityName, replace?.Kind ?? ActivityKind.Internal, context);
 
-        if (incoming == null)
+        if (replace == null)
         {
             return replacement;
         }
 
         if (replacement != null)
         {
-            replacement.SetCustomProperty(ReplacedActivityPropertyName, incoming);
+            replacement.SetCustomProperty(ReplacedActivityPropertyName, replace);
 
             if (inheritTags)
             {
 #if FEATURE_ACTIVITY_ENUMERATETAGOBJECTS
                 foreach (var (name, value) in incoming.EnumerateTagObjects())
 #else
-                foreach (var (name, value) in incoming.TagObjects)
+                foreach (var (name, value) in replace.TagObjects)
 #endif
                 {
                     replacement.SetTag(name, value);
@@ -387,13 +413,13 @@ public static class ActivityInstrumentation
                 }
                 else
                 {
-                    replacement.SetParentId(incoming.TraceId, incoming.ParentSpanId, replacement.ActivityTraceFlags);
+                    replacement.SetParentId(replace.TraceId, replace.ParentSpanId, replacement.ActivityTraceFlags);
                 }
             }
 
             if (inheritBaggage)
             {
-                foreach (var (k, v) in incoming.Baggage)
+                foreach (var (k, v) in replace.Baggage)
                 {
                     replacement.SetBaggage(k, v);
                 }

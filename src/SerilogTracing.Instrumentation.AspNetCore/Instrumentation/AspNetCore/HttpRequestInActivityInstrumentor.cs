@@ -107,7 +107,13 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
                     activity.SetStatus(ActivityStatusCode.Error);
                 }
 
-                ActivityInstrumentation.StopReplacementActivity(activity);
+                // This event is triggered before the activity itself is stopped
+                // We stop our replacement activity and restore the original for ASP.NET to complete
+                if (ActivityInstrumentation.TryGetReplacedActivity(activity, out var original))
+                {
+                    activity.Stop();
+                    Activity.Current = original;
+                }
 
                 break;
         }
