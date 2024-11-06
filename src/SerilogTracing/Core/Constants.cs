@@ -63,4 +63,7 @@ public static class Constants
     internal const string ExceptionMessageTagName = "exception.message";
     internal const string ExceptionStackTraceTagName = "exception.stacktrace";
     internal const string ExceptionTypeTagName = "exception.type";
+
+    internal const string SerilogTracingActivityStartedEventName = "ActivityStarted";
+    internal const string SerilogTracingActivityStoppedEventName = "ActivityStopped";
 }

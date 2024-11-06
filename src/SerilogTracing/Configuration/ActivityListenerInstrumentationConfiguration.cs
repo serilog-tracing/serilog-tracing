@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics;
 using SerilogTracing.Instrumentation;
 using SerilogTracing.Instrumentation.HttpClient;
 
@@ -88,5 +89,13 @@ public sealed class ActivityListenerInstrumentationConfiguration
         where TInstrumentor : IActivityInstrumentor, new()
     {
         return With(new TInstrumentor());
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public ActivityListenerConfiguration ActivitySource(Action<Activity> onStarted)
+    {
+        return With(new ActivitySourceInstrumentor(onStarted, null));
     }
 }
