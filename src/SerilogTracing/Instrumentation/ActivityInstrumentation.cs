@@ -29,8 +29,6 @@ namespace SerilogTracing.Instrumentation;
 /// </summary>
 public static class ActivityInstrumentation
 {
-    const string ReplacedActivityPropertyName = "SerilogTracing.Instrumentation.ActivityInstrumentation.ReplacedActivity";
-
     /// <summary>
     /// Associate a <see cref="MessageTemplate"/> with the given <see cref="Activity"/>, without changing the
     /// <see cref="Activity.DisplayName"/>.
@@ -295,28 +293,19 @@ public static class ActivityInstrumentation
                 configureReplacement(replacement);
             }
 
-            // This method should be called in an `ActivityStarted` callback
-            // so the replaced activity should already be started. We need
-            // to start the replacement activity here
             replacement.Start();
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="activity"></param>
-    /// <param name="replacedActivity"></param>
-    /// <returns></returns>
-    public static bool TryGetReplacedActivity(Activity activity, [NotNullWhen(true)] out Activity? replacedActivity)
+    internal static bool TryGetReplacementActivity(Activity activity, [NotNullWhen(true)] out Activity? replacementActivity)
     {
-        if (activity.GetCustomProperty(ReplacedActivityPropertyName) is Activity original)
+        if (activity.GetCustomProperty(Constants.ReplacementActivityPropertyName) is Activity original)
         {
-            replacedActivity = original;
+            replacementActivity = original;
             return true;
         }
 
-        replacedActivity = null;
+        replacementActivity = null;
         return false;
     }
     
@@ -344,7 +333,7 @@ public static class ActivityInstrumentation
 
         var flags = ActivityTraceFlags.None;
         if (inheritParent && inheritFlags &&
-            replace!.ParentId != null && TryParseTraceParentHeader(replace.ParentId, out var parsed))
+            replace!.ParentId != null && TraceParentHeader.TryParse(replace.ParentId, out var parsed))
         {
             flags = parsed.Value;
         }
@@ -366,8 +355,8 @@ public static class ActivityInstrumentation
 
         if (replacement != null)
         {
-            // TODO: We need to set the replacement on the original; so the original source will complete it
-            replacement.SetCustomProperty(ReplacedActivityPropertyName, replace);
+            replacement.SetCustomProperty(Constants.ReplacedActivityPropertyName, replace);
+            replace.SetCustomProperty(Constants.ReplacementActivityPropertyName, replacement);
 
             if (inheritTags)
             {
@@ -406,24 +395,6 @@ public static class ActivityInstrumentation
         }
         
         return replacement;
-    }
-    
-    internal static bool TryParseTraceParentHeader(string traceParentHeaderValue, [NotNullWhen(true)] out ActivityTraceFlags? flags)
-    {
-        if (traceParentHeaderValue.EndsWith("-00"))
-        {
-            flags = ActivityTraceFlags.None;
-            return true;
-        }
-        
-        if (traceParentHeaderValue.EndsWith("-01"))
-        {
-            flags = ActivityTraceFlags.Recorded;
-            return true;
-        }
-
-        flags = null;
-        return false;
     }
 
     internal static void AttachLoggerActivity(Activity activity, LoggerActivity loggerActivity)

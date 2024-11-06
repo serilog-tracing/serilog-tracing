@@ -13,10 +13,10 @@ class ReplacementActivitySource
 
     public Activity? CreateActivity(ActivityKind kind, ActivityContext context)
     {
-        var activity = _source.CreateActivity(DefaultActivityName, kind, context);
-        var listener = new ReplacementActivityListener();
+        // Force initialization of the replacement listener instance
+        _ = ReplacementActivityListener.Instance;
         
-        activity?.SetCustomProperty("SerilogTracing.Listener", listener);
+        var activity = _source.CreateActivity(DefaultActivityName, kind, context);
 
         return activity;
     }

@@ -10,14 +10,16 @@ class ReplacementActivityListener
     internal ReplacementActivityListener()
     {
         _listener = new ActivityListener();
-        _listener.ShouldListenTo = source => source.Name == Constants.ReplacementActivitySourceName;
+        _listener.ShouldListenTo = _ => true;
         _listener.ActivityStopped += activity =>
         {
-            if (!ActivityInstrumentation.TryGetReplacedActivity(activity, out var replaced)) return;
-            
-            Activity.Current = replaced;
-            replaced.Stop();
+            if (ActivityInstrumentation.TryGetReplacementActivity(activity, out var replacement))
+            {
+                replacement.Stop();
+            }
         };
+        
+        ActivitySource.AddActivityListener(_listener);
     }
 
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable

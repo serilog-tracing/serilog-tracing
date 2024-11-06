@@ -68,4 +68,6 @@ public static class Constants
     internal const string SerilogTracingActivityStoppedEventName = "ActivityStopped";
     
     internal const string ReplacementActivitySourceName = "SerilogTracing.Instrumentation.ActivityInstrumentation";
+    internal const string ReplacedActivityPropertyName = "SerilogTracing.Instrumentation.ActivityInstrumentation.ReplacedActivity";
+    internal const string ReplacementActivityPropertyName = "SerilogTracing.Instrumentation.ActivityInstrumentation.ReplacementActivity";
 }
