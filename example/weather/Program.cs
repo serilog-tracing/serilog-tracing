@@ -17,11 +17,6 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 using var _ = new ActivityListenerConfiguration()
-    .Instrument
-    .ActivitySource(activity =>
-    {
-        Console.WriteLine("Observed activity from: {0}", activity.Source.Name);
-    })
     .TraceToSharedLogger();
 
 if (args.Length != 1)

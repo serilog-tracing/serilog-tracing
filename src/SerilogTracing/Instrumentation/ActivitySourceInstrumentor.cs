@@ -9,14 +9,17 @@ namespace SerilogTracing.Instrumentation;
 class ActivitySourceInstrumentor : IActivityInstrumentor
 {
     public ActivitySourceInstrumentor(
+        Func<ActivitySource, bool> shouldInstrumentActivitySource,
         Action<Activity>? onActivityStarted,
         Action<Activity>? onActivityStopped
     )
     {
+        _shouldInstrumentActivitySource = shouldInstrumentActivitySource;
         _onActivityStarted = onActivityStarted;
         _onActivityStopped = onActivityStopped;
     }
 
+    readonly Func<ActivitySource, bool> _shouldInstrumentActivitySource;
     readonly Action<Activity>? _onActivityStarted;
     readonly Action<Activity>? _onActivityStopped;
 
@@ -25,9 +28,11 @@ class ActivitySourceInstrumentor : IActivityInstrumentor
         return diagnosticListenerName == Constants.SerilogTracingActivitySourceName;
     }
 
-
     public void InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
+        if (!_shouldInstrumentActivitySource(activity.Source))
+            return;
+        
         switch (eventName)
         {
             case Constants.SerilogTracingActivityStartedEventName:

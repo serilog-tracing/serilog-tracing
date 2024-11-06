@@ -29,12 +29,8 @@ namespace SerilogTracing.Instrumentation;
 /// </summary>
 public static class ActivityInstrumentation
 {
-    internal const string ReplacementActivitySourceName = "SerilogTracing.Instrumentation.ActivityInstrumentation";
-    const string DefaultActivityName = "SerilogTracing.Instrumentation.ActivityInstrumentation.Activity";
     const string ReplacedActivityPropertyName = "SerilogTracing.Instrumentation.ActivityInstrumentation.ReplacedActivity";
 
-    static readonly ActivitySource ReplacementActivitySource = new(ReplacementActivitySourceName);
-    
     /// <summary>
     /// Associate a <see cref="MessageTemplate"/> with the given <see cref="Activity"/>, without changing the
     /// <see cref="Activity.DisplayName"/>.
@@ -309,24 +305,6 @@ public static class ActivityInstrumentation
     /// <summary>
     /// 
     /// </summary>
-    public static void StopReplacementActivity()
-    {
-        var replacement = Activity.Current;
-        
-        if (replacement?.GetCustomProperty(ReplacedActivityPropertyName) is Activity replaced)
-        {
-            // This method should be called in an `ActivityStopped` callback
-            // so the replacement activity should already be stopped. We
-            // need to stop the replaced activity here
-            replaced.Stop();
-
-            Activity.Current = replaced;
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
     /// <param name="activity"></param>
     /// <param name="replacedActivity"></param>
     /// <returns></returns>
@@ -379,7 +357,7 @@ public static class ActivityInstrumentation
                 isRemote: true) :
             default;
         
-        var replacement = ReplacementActivitySource.CreateActivity(DefaultActivityName, replace?.Kind ?? ActivityKind.Internal, context);
+        var replacement = ReplacementActivitySource.Instance.CreateActivity(replace?.Kind ?? ActivityKind.Internal, context);
 
         if (replace == null)
         {
@@ -388,6 +366,7 @@ public static class ActivityInstrumentation
 
         if (replacement != null)
         {
+            // TODO: We need to set the replacement on the original; so the original source will complete it
             replacement.SetCustomProperty(ReplacedActivityPropertyName, replace);
 
             if (inheritTags)

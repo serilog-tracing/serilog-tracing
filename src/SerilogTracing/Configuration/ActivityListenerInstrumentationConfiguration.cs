@@ -94,8 +94,8 @@ public sealed class ActivityListenerInstrumentationConfiguration
     /// <summary>
     /// 
     /// </summary>
-    public ActivityListenerConfiguration ActivitySource(Action<Activity> onStarted)
+    public ActivityListenerConfiguration ActivitySource(string activitySourceName, Action<Activity> instrument)
     {
-        return With(new ActivitySourceInstrumentor(onStarted, null));
+        return With(new ActivitySourceInstrumentor(source => source.Name == activitySourceName, instrument, null));
     }
 }

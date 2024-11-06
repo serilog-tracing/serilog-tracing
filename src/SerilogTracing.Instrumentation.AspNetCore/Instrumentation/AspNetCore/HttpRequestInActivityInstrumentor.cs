@@ -34,7 +34,6 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
     readonly PropertyAccessor<Exception> _exceptionAccessor = new("exception");
     readonly PropertyAccessor<HttpContext> _httpContextAccessor = new("httpContext");
 
-    internal const string ReplacementActivitySourceName = "SerilogTracing.Instrumentation.AspNetCore";
     const string TargetDiagnosticListenerName = "Microsoft.AspNetCore";
 
     /// <summary>
@@ -105,14 +104,6 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
                 if (_isErrorResponse(stop.Response))
                 {
                     activity.SetStatus(ActivityStatusCode.Error);
-                }
-
-                // This event is triggered before the activity itself is stopped
-                // We stop our replacement activity and restore the original for ASP.NET to complete
-                if (ActivityInstrumentation.TryGetReplacedActivity(activity, out var original))
-                {
-                    activity.Stop();
-                    Activity.Current = original;
                 }
 
                 break;
