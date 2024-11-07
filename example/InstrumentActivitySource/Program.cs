@@ -92,12 +92,13 @@ class RabbitProducerInstrumentor : ReplacementActivitySourceInstrumentor
     {
     }
 
-    protected override void InstrumentActivity(Activity activity)
+    protected override void InstrumentReplacementActivity(Activity activity)
     {
-        // TODO
+        ActivityInstrumentation.SetMessageTemplateOverride(activity, new MessageTemplateParser().Parse("RabbitMQ {Role}"));
+        ActivityInstrumentation.SetLogEventProperty(activity, "Role", new ScalarValue("Publisher"));
     }
 
-    protected override bool ShouldInstrument(ActivitySource source)
+    protected override bool ShouldReplace(ActivitySource source)
     {
         return source.Name == "RabbitMQ.Client.Publisher";
     }

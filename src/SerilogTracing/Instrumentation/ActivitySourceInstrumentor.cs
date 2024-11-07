@@ -8,12 +8,6 @@ namespace SerilogTracing.Instrumentation;
 /// </summary>
 public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
 {
-    /// <inheritdoc />
-    public bool ShouldSubscribeTo(string diagnosticListenerName)
-    {
-        return diagnosticListenerName == Constants.SerilogTracingActivitySourceName;
-    }
-
     /// <summary>
     /// 
     /// </summary>
@@ -28,14 +22,20 @@ public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
     protected abstract bool ShouldInstrument(ActivitySource source);
     
     /// <inheritdoc />
+    bool IActivityInstrumentor.ShouldSubscribeTo(string diagnosticListenerName)
+    {
+        return diagnosticListenerName == Constants.SerilogTracingActivitySourceName;
+    }
+    
+    /// <inheritdoc />
     void IActivityInstrumentor.InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
-        if (!ShouldInstrument(activity.Source))
-            return;
-        
         switch (eventName)
         {
             case Constants.SerilogTracingActivityStartedEventName:
+                if (!ShouldInstrument(activity.Source))
+                    return;
+                
                 InstrumentActivity(activity);
                 return;
         }

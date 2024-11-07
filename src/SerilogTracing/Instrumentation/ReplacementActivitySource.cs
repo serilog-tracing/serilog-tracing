@@ -57,20 +57,13 @@ public class ReplacementActivitySource : IDisposable
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="configureReplacement"></param>
     /// <param name="postSamplingFilter"></param>
-    /// <param name="inheritTags"></param>
-    /// <param name="inheritParent"></param>
-    /// <param name="inheritFlags"></param>
-    /// <param name="inheritBaggage"></param>
-    /// <returns></returns>
+    /// <param name="configureReplacement"></param>
+    /// <param name="options"></param>
     public void StartReplacementActivity(
         Func<Activity?, bool> postSamplingFilter,
         Action<Activity> configureReplacement,
-        bool inheritTags = true,
-        bool inheritParent = true,
-        bool inheritFlags = true,
-        bool inheritBaggage = true
+        ReplacementActivityOptions options
     ) {
         var replace = Activity.Current;
         
@@ -78,7 +71,7 @@ public class ReplacementActivitySource : IDisposable
         // activity when making sampling decisions.
         Activity.Current = replace?.Parent;
 
-        var replacement = CreateReplacementActivity(replace, inheritTags, inheritParent, inheritFlags, inheritBaggage);
+        var replacement = CreateReplacementActivity(replace, options);
 
         if (replace != null)
         {
@@ -103,36 +96,24 @@ public class ReplacementActivitySource : IDisposable
         }
     }
     
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="replace"></param>
-    /// <param name="inheritTags"></param>
-    /// <param name="inheritParent"></param>
-    /// <param name="inheritFlags"></param>
-    /// <param name="inheritBaggage"></param>
-    /// <returns></returns>
-    internal Activity? CreateReplacementActivity(
+     internal Activity? CreateReplacementActivity(
         Activity? replace,
-        bool inheritTags,
-        bool inheritParent,
-        bool inheritFlags,
-        bool inheritBaggage
+        ReplacementActivityOptions options
     ) {
         // We're only interested in the incoming parent if there is one. Switching off `inheritParent` when there isn't,
         // prevents us from trying to override a nonexistent sampling decision a little further down. Checking
         // `HasRemoteParent` would be useful here, but it creates problems for unit testing.
-        inheritParent = inheritParent && replace != null &&
-                        replace.ParentSpanId.ToHexString() != default(ActivitySpanId).ToHexString();
+        options.InheritParent = options.InheritParent && replace != null &&
+                                replace.ParentSpanId.ToHexString() != default(ActivitySpanId).ToHexString();
 
         var flags = ActivityTraceFlags.None;
-        if (inheritParent && inheritFlags &&
+        if (options.InheritParent && options.InheritFlags &&
             replace!.ParentId != null && TraceParentHeader.TryParse(replace.ParentId, out var parsed))
         {
             flags = parsed.Value;
         }
 
-        var context = inheritParent && inheritFlags ?
+        var context = options.InheritParent && options.InheritFlags ?
             new ActivityContext(
                 replace!.TraceId,
                 replace.ParentSpanId,
@@ -152,7 +133,7 @@ public class ReplacementActivitySource : IDisposable
             replacement.SetCustomProperty(Constants.ReplacedActivityPropertyName, replace);
             replace.SetCustomProperty(Constants.ReplacementActivityPropertyName, replacement);
 
-            if (inheritTags)
+            if (options.InheritTags)
             {
 #if FEATURE_ACTIVITY_ENUMERATETAGOBJECTS
                 foreach (var (name, value) in incoming.EnumerateTagObjects())
@@ -164,9 +145,9 @@ public class ReplacementActivitySource : IDisposable
                 }
             }
 
-            if (inheritParent)
+            if (options.InheritParent)
             {
-                if (inheritFlags)
+                if (options.InheritFlags)
                 {
                     // In `Trust` mode we override the local sampling decision with the remote one. We
                     // already used the incoming trace and parent span ids through the `context` passed
@@ -179,7 +160,7 @@ public class ReplacementActivitySource : IDisposable
                 }
             }
 
-            if (inheritBaggage)
+            if (options.InheritBaggage)
             {
                 foreach (var (k, v) in replace.Baggage)
                 {

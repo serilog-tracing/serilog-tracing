@@ -34,7 +34,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
     readonly PropertyAccessor<Exception> _exceptionAccessor = new("exception");
     readonly PropertyAccessor<HttpContext> _httpContextAccessor = new("httpContext");
 
-    private readonly ReplacementActivitySource _replacementSource = new("Microsoft.AspNetCore");
+    readonly ReplacementActivitySource _replacementSource = new("Microsoft.AspNetCore");
 
     const string TargetDiagnosticListenerName = "Microsoft.AspNetCore";
 
@@ -63,7 +63,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
         if (eventName !=  "Microsoft.AspNetCore.Hosting.HttpRequestIn.Start" || 
             eventArgs is not HttpContext start) return;
 
-        var (inheritTags, inheritParent, inheritFlags, inheritBaggage) = InheritFlags(_incomingTraceParent);
+        var replacementOptions = InheritFlags(_incomingTraceParent);
         
         _replacementSource.StartReplacementActivity(
             _ => _postSamplingFilter?.Invoke(start) ?? true,
@@ -76,10 +76,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
                 ActivityInstrumentation.SetLogEventProperties(replacement,
                     props as LogEventProperty[] ?? props.ToArray());
             },
-            inheritTags,
-            inheritParent,
-            inheritFlags,
-            inheritBaggage
+            replacementOptions
         );
     }
     
@@ -112,26 +109,44 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
         }
     }
 
-    static (bool, bool, bool, bool) InheritFlags(IncomingTraceParent incomingTraceParent)
+    static ReplacementActivityOptions InheritFlags(IncomingTraceParent incomingTraceParent)
     {
         return incomingTraceParent switch
         {
             // Don't trust the incoming traceparent
             IncomingTraceParent.Ignore =>
                 // Generate a new root activity, using no information from the traceparent
-                (false, false, false, false),
+                new ReplacementActivityOptions
+                {
+                    InheritTags = false,
+                    InheritParent = false,
+                    InheritFlags = false,
+                    InheritBaggage = false
+                },
 
             // Partially trust the incoming traceparent
             IncomingTraceParent.Accept =>
                 // Use the propagated trace and parent ids, but ignore any flags or baggage
-                (true, true, false, false),
+                new ReplacementActivityOptions
+                    {
+                        InheritTags = true,
+                        InheritParent = true,
+                        InheritFlags = false,
+                        InheritBaggage = false
+                    },
 
             // Fully trust the incoming traceparent
             IncomingTraceParent.Trust =>
                 // The incoming activity is still replaced, so that:
                 // 1. Sampling is properly applied, even if the activity was manually created by ASP.NET Core
                 // 2. Clients that don't send any traceparent header may still produce a recorded activity
-                (true, true, true, true),
+                new ReplacementActivityOptions
+                {
+                    InheritTags = true,
+                    InheritParent = true,
+                    InheritFlags = true,
+                    InheritBaggage = true
+                },
 
             _ => throw new ArgumentOutOfRangeException(nameof(incomingTraceParent))
         };

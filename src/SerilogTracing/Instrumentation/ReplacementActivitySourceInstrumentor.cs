@@ -19,45 +19,60 @@ public abstract class ReplacementActivitySourceInstrumentor : IActivityInstrumen
 
     readonly ReplacementActivitySource _replacementSource;
     
-    /// <inheritdoc />
-    public bool ShouldSubscribeTo(string diagnosticListenerName)
-    {
-        return diagnosticListenerName == Constants.SerilogTracingActivitySourceName;
-    }
-    
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="activity"></param>
-    protected abstract void InstrumentActivity(Activity activity);
-
     /// <summary>
     /// 
     /// </summary>
     /// <param name="source"></param>
     /// <returns></returns>
-    protected abstract bool ShouldInstrument(ActivitySource source);
+    protected abstract bool ShouldReplace(ActivitySource source);
     
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="activity"></param>
+    /// <param name="replacementActivity"></param>
+    protected abstract void InstrumentReplacementActivity(Activity replacementActivity);
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="replacementActivity"></param>
     /// <returns></returns>
-    protected virtual bool PostSamplingFilter(Activity? activity)
+    protected virtual bool PostSamplingReplacementFilter(Activity? replacementActivity)
     {
         return true;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="activityToReplace"></param>
+    /// <returns></returns>
+    protected virtual ReplacementActivityOptions ReplacementOptions(Activity activityToReplace)
+    {
+        return new ReplacementActivityOptions();
+    }
+    
+    /// <inheritdoc />
+    bool IActivityInstrumentor.ShouldSubscribeTo(string diagnosticListenerName)
+    {
+        return diagnosticListenerName == Constants.SerilogTracingActivitySourceName;
     }
     
     /// <inheritdoc />
     void IActivityInstrumentor.InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
-        if (!ShouldInstrument(activity.Source) || !_replacementSource.CanReplace(activity.Source))
-            return;
-        
         switch (eventName)
         {
             case Constants.SerilogTracingActivityStartedEventName:
-                _replacementSource.StartReplacementActivity(PostSamplingFilter, InstrumentActivity);
+                if (!ShouldReplace(activity.Source) || !_replacementSource.CanReplace(activity.Source))
+                    return;
+                
+                _replacementSource.StartReplacementActivity(
+                    PostSamplingReplacementFilter,
+                    InstrumentReplacementActivity,
+                    ReplacementOptions(activity)
+                );
+                
                 return;
         }
     }
