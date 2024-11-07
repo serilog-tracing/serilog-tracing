@@ -34,6 +34,8 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
     readonly PropertyAccessor<Exception> _exceptionAccessor = new("exception");
     readonly PropertyAccessor<HttpContext> _httpContextAccessor = new("httpContext");
 
+    private readonly ReplacementActivitySource _replacementSource = new("Microsoft.AspNetCore");
+
     const string TargetDiagnosticListenerName = "Microsoft.AspNetCore";
 
     /// <summary>
@@ -63,7 +65,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
 
         var (inheritTags, inheritParent, inheritFlags, inheritBaggage) = InheritFlags(_incomingTraceParent);
         
-        ActivityInstrumentation.StartReplacementActivity(
+        _replacementSource.StartReplacementActivity(
             _ => _postSamplingFilter?.Invoke(start) ?? true,
             replacement =>
             {

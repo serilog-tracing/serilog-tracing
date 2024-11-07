@@ -60,6 +60,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Benchmarks",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sampling", "example\Sampling\Sampling.csproj", "{C89D0546-587D-4504-8BC2-4E08D30ACE4F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstrumentActivitySource", "example\InstrumentActivitySource\InstrumentActivitySource.csproj", "{F2D9F7CF-6F2F-424A-B4FC-5E8C78F6BA9C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,7 @@ Global
 		{ECE478F5-0719-4E59-8AEF-6AB12BE33B62} = {6BB7BDF8-8AEE-4D76-9E81-EA9984A66BF6}
 		{9052EA54-5BEE-4203-8966-DEC013DE62CB} = {92FDF45D-CCCD-4BEA-A5E3-CC8ECEF34472}
 		{C89D0546-587D-4504-8BC2-4E08D30ACE4F} = {E35D98E8-5F3C-4ABD-8A65-63B6E357DC2F}
+		{F2D9F7CF-6F2F-424A-B4FC-5E8C78F6BA9C} = {E35D98E8-5F3C-4ABD-8A65-63B6E357DC2F}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2D5CE076-4A88-41C1-961B-A26ABA88E6F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -137,5 +140,9 @@ Global
 		{C89D0546-587D-4504-8BC2-4E08D30ACE4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C89D0546-587D-4504-8BC2-4E08D30ACE4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C89D0546-587D-4504-8BC2-4E08D30ACE4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2D9F7CF-6F2F-424A-B4FC-5E8C78F6BA9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2D9F7CF-6F2F-424A-B4FC-5E8C78F6BA9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2D9F7CF-6F2F-424A-B4FC-5E8C78F6BA9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2D9F7CF-6F2F-424A-B4FC-5E8C78F6BA9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
