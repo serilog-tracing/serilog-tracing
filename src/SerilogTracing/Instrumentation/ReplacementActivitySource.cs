@@ -51,7 +51,7 @@ public class ReplacementActivitySource : IDisposable
     /// <returns></returns>
     public bool CanReplace(ActivitySource source)
     {
-        return source != _source && source.Name == _source.Name;
+        return source != _source;
     }
     
     /// <summary>

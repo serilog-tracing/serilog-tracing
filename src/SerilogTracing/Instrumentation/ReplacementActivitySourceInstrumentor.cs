@@ -1,19 +1,30 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using SerilogTracing.Core;
 
 namespace SerilogTracing.Instrumentation;
 
 /// <summary>
-/// An instrumentor that observes events when activities are started or stopped.
+/// 
 /// </summary>
-public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
+public abstract class ReplacementActivitySourceInstrumentor : IActivityInstrumentor
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="replacementActivitySourceName"></param>
+    protected ReplacementActivitySourceInstrumentor(string replacementActivitySourceName)
+    {
+        _replacementSource = new ReplacementActivitySource(replacementActivitySourceName);
+    }
+
+    readonly ReplacementActivitySource _replacementSource;
+    
     /// <inheritdoc />
     public bool ShouldSubscribeTo(string diagnosticListenerName)
     {
         return diagnosticListenerName == Constants.SerilogTracingActivitySourceName;
     }
-
+    
     /// <summary>
     /// 
     /// </summary>
@@ -27,16 +38,26 @@ public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
     /// <returns></returns>
     protected abstract bool ShouldInstrument(ActivitySource source);
     
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="activity"></param>
+    /// <returns></returns>
+    protected virtual bool PostSamplingFilter(Activity? activity)
+    {
+        return true;
+    }
+    
     /// <inheritdoc />
     void IActivityInstrumentor.InstrumentActivity(Activity activity, string eventName, object eventArgs)
     {
-        if (!ShouldInstrument(activity.Source))
+        if (!ShouldInstrument(activity.Source) || !_replacementSource.CanReplace(activity.Source))
             return;
         
         switch (eventName)
         {
             case Constants.SerilogTracingActivityStartedEventName:
-                InstrumentActivity(activity);
+                _replacementSource.StartReplacementActivity(PostSamplingFilter, InstrumentActivity);
                 return;
         }
     }

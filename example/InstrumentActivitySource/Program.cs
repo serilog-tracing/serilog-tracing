@@ -27,14 +27,7 @@ Log.Logger = new LoggerConfiguration()
 var replacementSource = new ReplacementActivitySource("RabbitMQ.Client.Publisher");
 
 using var _ = new ActivityListenerConfiguration()
-    .Instrument.ActivitySource(source => replacementSource.CanReplace(source), og =>
-    {
-        replacementSource.StartReplacementActivity(_ => true, activity =>
-        {
-            ActivityInstrumentation.SetMessageTemplateOverride(activity, new MessageTemplateParser().Parse("RabbitMQ {Role}"));
-            ActivityInstrumentation.SetLogEventProperty(activity, "Role", new ScalarValue("Publisher"));
-        });
-    })
+    .Instrument.With(new RabbitProducerInstrumentor())
     .TraceToSharedLogger();
 
 var receiver = Task.Run(async () =>
@@ -92,3 +85,20 @@ await channel.BasicPublishAsync(
 await receiver;
 
 await Log.CloseAndFlushAsync();
+
+class RabbitProducerInstrumentor : ReplacementActivitySourceInstrumentor
+{
+    public RabbitProducerInstrumentor() : base("RabbitMQ.Client.Publisher")
+    {
+    }
+
+    protected override void InstrumentActivity(Activity activity)
+    {
+        // TODO
+    }
+
+    protected override bool ShouldInstrument(ActivitySource source)
+    {
+        return source.Name == "RabbitMQ.Client.Publisher";
+    }
+}

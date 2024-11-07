@@ -90,12 +90,4 @@ public sealed class ActivityListenerInstrumentationConfiguration
     {
         return With(new TInstrumentor());
     }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public ActivityListenerConfiguration ActivitySource(Func<ActivitySource, bool> shouldInstrument, Action<Activity> instrument)
-    {
-        return With(new ActivitySourceInstrumentor(shouldInstrument, instrument, null));
-    }
 }
