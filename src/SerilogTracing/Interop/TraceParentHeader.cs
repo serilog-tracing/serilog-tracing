@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace SerilogTracing.Instrumentation;
+namespace SerilogTracing.Interop;
 
 static class TraceParentHeader
 {

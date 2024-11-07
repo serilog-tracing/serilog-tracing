@@ -109,25 +109,19 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
         }
     }
 
-    static ReplacementActivityOptions InheritFlags(IncomingTraceParent incomingTraceParent)
+    static ReplacementActivityParentOptions InheritFlags(IncomingTraceParent incomingTraceParent)
     {
         return incomingTraceParent switch
         {
             // Don't trust the incoming traceparent
             IncomingTraceParent.Ignore =>
                 // Generate a new root activity, using no information from the traceparent
-                new ReplacementActivityOptions
-                {
-                    InheritTags = false,
-                    InheritParent = false,
-                    InheritFlags = false,
-                    InheritBaggage = false
-                },
+                ReplacementActivityParentOptions.InheritNone,
 
             // Partially trust the incoming traceparent
             IncomingTraceParent.Accept =>
                 // Use the propagated trace and parent ids, but ignore any flags or baggage
-                new ReplacementActivityOptions
+                new ReplacementActivityParentOptions
                     {
                         InheritTags = true,
                         InheritParent = true,
@@ -140,13 +134,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
                 // The incoming activity is still replaced, so that:
                 // 1. Sampling is properly applied, even if the activity was manually created by ASP.NET Core
                 // 2. Clients that don't send any traceparent header may still produce a recorded activity
-                new ReplacementActivityOptions
-                {
-                    InheritTags = true,
-                    InheritParent = true,
-                    InheritFlags = true,
-                    InheritBaggage = true
-                },
+                ReplacementActivityParentOptions.InheritAll,
 
             _ => throw new ArgumentOutOfRangeException(nameof(incomingTraceParent))
         };

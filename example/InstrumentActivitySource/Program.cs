@@ -86,19 +86,25 @@ await receiver;
 
 await Log.CloseAndFlushAsync();
 
-class RabbitProducerInstrumentor : ReplacementActivitySourceInstrumentor
+class RabbitProducerInstrumentor : ActivitySourceInstrumentor
 {
     public RabbitProducerInstrumentor() : base("RabbitMQ.Client.Publisher")
     {
     }
 
-    protected override void InstrumentReplacementActivity(Activity activity)
+    protected override void InstrumentActivity(Activity activity)
     {
-        ActivityInstrumentation.SetMessageTemplateOverride(activity, new MessageTemplateParser().Parse("RabbitMQ {Role}"));
-        ActivityInstrumentation.SetLogEventProperty(activity, "Role", new ScalarValue("Publisher"));
+        ReplacementSource.StartReplacementActivity(
+            _ => true,
+            replacement =>
+            {
+                ActivityInstrumentation.SetMessageTemplateOverride(replacement, new MessageTemplateParser().Parse("RabbitMQ {Role}"));
+                ActivityInstrumentation.SetLogEventProperty(replacement, "Role", new ScalarValue("Publisher"));
+            }
+        );
     }
 
-    protected override bool ShouldReplace(ActivitySource source)
+    protected override bool ShouldInstrument(ActivitySource source)
     {
         return source.Name == "RabbitMQ.Client.Publisher";
     }

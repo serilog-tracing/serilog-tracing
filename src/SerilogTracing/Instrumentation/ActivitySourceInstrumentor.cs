@@ -1,13 +1,27 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using SerilogTracing.Core;
 
 namespace SerilogTracing.Instrumentation;
 
 /// <summary>
-/// An instrumentor that observes events when activities are started or stopped.
+/// 
 /// </summary>
 public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="replacementActivitySourceName"></param>
+    protected ActivitySourceInstrumentor(string replacementActivitySourceName)
+    {
+        ReplacementSource = new ReplacementActivitySource(replacementActivitySourceName);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    protected readonly ReplacementActivitySource ReplacementSource;
+
     /// <summary>
     /// 
     /// </summary>
@@ -33,7 +47,7 @@ public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
         switch (eventName)
         {
             case Constants.SerilogTracingActivityStartedEventName:
-                if (!ShouldInstrument(activity.Source))
+                if (!ShouldInstrument(activity.Source) || !ReplacementSource.CanReplace(activity.Source))
                     return;
                 
                 InstrumentActivity(activity);

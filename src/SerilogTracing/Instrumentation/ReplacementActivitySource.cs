@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using SerilogTracing.Core;
+using SerilogTracing.Interop;
 
 #if NETSTANDARD2_0
 using SerilogTracing.Pollyfill;
@@ -26,6 +27,9 @@ public class ReplacementActivitySource : IDisposable
         _listener = new ActivityListener();
         _listener.ShouldListenTo = source => source.Name == name;
         
+        // The listener always wants activities from its own internal source
+        // For any other source (including the one it's potentially replacing activities from)
+        // it doesn't contribute any sampling decision
         _listener.Sample = (ref ActivityCreationOptions<ActivityContext> options) => options.Source == _source
             ? ActivitySamplingResult.AllDataAndRecorded
             : ActivitySamplingResult.None;
@@ -63,7 +67,7 @@ public class ReplacementActivitySource : IDisposable
     public void StartReplacementActivity(
         Func<Activity?, bool> postSamplingFilter,
         Action<Activity> configureReplacement,
-        ReplacementActivityOptions options
+        ReplacementActivityParentOptions? options = null
     ) {
         var replace = Activity.Current;
         
@@ -71,7 +75,7 @@ public class ReplacementActivitySource : IDisposable
         // activity when making sampling decisions.
         Activity.Current = replace?.Parent;
 
-        var replacement = CreateReplacementActivity(replace, options);
+        var replacement = CreateReplacementActivity(replace, options ?? ReplacementActivityParentOptions.InheritAll);
 
         if (replace != null)
         {
@@ -98,7 +102,7 @@ public class ReplacementActivitySource : IDisposable
     
      internal Activity? CreateReplacementActivity(
         Activity? replace,
-        ReplacementActivityOptions options
+        ReplacementActivityParentOptions options
     ) {
         // We're only interested in the incoming parent if there is one. Switching off `inheritParent` when there isn't,
         // prevents us from trying to override a nonexistent sampling decision a little further down. Checking
