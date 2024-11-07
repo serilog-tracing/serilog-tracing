@@ -63,11 +63,11 @@ public class ReplacementActivitySource : IDisposable
     /// </summary>
     /// <param name="postSamplingFilter"></param>
     /// <param name="configureReplacement"></param>
-    /// <param name="options"></param>
+    /// <param name="parentOptions"></param>
     public void StartReplacementActivity(
         Func<Activity?, bool> postSamplingFilter,
         Action<Activity> configureReplacement,
-        ReplacementActivityParentOptions? options = null
+        ReplacementActivityParentOptions? parentOptions = null
     ) {
         var replace = Activity.Current;
         
@@ -75,7 +75,7 @@ public class ReplacementActivitySource : IDisposable
         // activity when making sampling decisions.
         Activity.Current = replace?.Parent;
 
-        var replacement = CreateReplacementActivity(replace, options ?? ReplacementActivityParentOptions.InheritAll);
+        var replacement = CreateReplacementActivity(replace, parentOptions ?? ReplacementActivityParentOptions.InheritAll);
 
         if (replace != null)
         {
@@ -102,22 +102,22 @@ public class ReplacementActivitySource : IDisposable
     
      internal Activity? CreateReplacementActivity(
         Activity? replace,
-        ReplacementActivityParentOptions options
+        ReplacementActivityParentOptions parentOptions
     ) {
         // We're only interested in the incoming parent if there is one. Switching off `inheritParent` when there isn't,
         // prevents us from trying to override a nonexistent sampling decision a little further down. Checking
         // `HasRemoteParent` would be useful here, but it creates problems for unit testing.
-        options.InheritParent = options.InheritParent && replace != null &&
+        parentOptions.InheritParent = parentOptions.InheritParent && replace != null &&
                                 replace.ParentSpanId.ToHexString() != default(ActivitySpanId).ToHexString();
 
         var flags = ActivityTraceFlags.None;
-        if (options.InheritParent && options.InheritFlags &&
+        if (parentOptions.InheritParent && parentOptions.InheritFlags &&
             replace!.ParentId != null && TraceParentHeader.TryParse(replace.ParentId, out var parsed))
         {
             flags = parsed.Value;
         }
 
-        var context = options.InheritParent && options.InheritFlags ?
+        var context = parentOptions.InheritParent && parentOptions.InheritFlags ?
             new ActivityContext(
                 replace!.TraceId,
                 replace.ParentSpanId,
@@ -137,7 +137,7 @@ public class ReplacementActivitySource : IDisposable
             replacement.SetCustomProperty(Constants.ReplacedActivityPropertyName, replace);
             replace.SetCustomProperty(Constants.ReplacementActivityPropertyName, replacement);
 
-            if (options.InheritTags)
+            if (parentOptions.InheritTags)
             {
 #if FEATURE_ACTIVITY_ENUMERATETAGOBJECTS
                 foreach (var (name, value) in incoming.EnumerateTagObjects())
@@ -149,9 +149,9 @@ public class ReplacementActivitySource : IDisposable
                 }
             }
 
-            if (options.InheritParent)
+            if (parentOptions.InheritParent)
             {
-                if (options.InheritFlags)
+                if (parentOptions.InheritFlags)
                 {
                     // In `Trust` mode we override the local sampling decision with the remote one. We
                     // already used the incoming trace and parent span ids through the `context` passed
@@ -164,7 +164,7 @@ public class ReplacementActivitySource : IDisposable
                 }
             }
 
-            if (options.InheritBaggage)
+            if (parentOptions.InheritBaggage)
             {
                 foreach (var (k, v) in replace.Baggage)
                 {
