@@ -18,11 +18,15 @@ using Serilog.Events;
 using SerilogTracing.Core;
 using SerilogTracing.Instrumentation;
 using Constants = Serilog.Core.Constants;
+using TracingConstants = SerilogTracing.Core.Constants;
 
 namespace SerilogTracing.Interop;
 
 sealed class LoggerActivityListener: IDisposable
 {
+    // A bridge between `DiagnosticListener` and `ActivityListener` for `IActivityInstrumentor`s
+    static readonly DiagnosticSource ActivitySourceDiagnosticListener = new DiagnosticListener(TracingConstants.SerilogTracingDiagnosticSourceName);
+    
     readonly ActivityListener? _listener;
     readonly IDisposable? _diagnosticListenerSubscription;
 
@@ -73,8 +77,23 @@ sealed class LoggerActivityListener: IDisposable
                 };
             }
 
+            activityListener.ActivityStarted += activity =>
+            {
+                // Bridge the `ActivityStarted` event for diagnostic listener observers
+                if (ActivitySourceDiagnosticListener.IsEnabled(TracingConstants.SerilogTracingActivityStartedEventName))
+                {
+                    ActivitySourceDiagnosticListener.Write(TracingConstants.SerilogTracingActivityStartedEventName, activity);                    
+                }
+            };
+
             activityListener.ActivityStopped += activity =>
             {
+                // Bridge the `ActivityStopped` event for diagnostic listener observers
+                if (ActivitySourceDiagnosticListener.IsEnabled(TracingConstants.SerilogTracingActivityStoppedEventName))
+                {
+                    ActivitySourceDiagnosticListener.Write(TracingConstants.SerilogTracingActivityStoppedEventName, activity);
+                }
+
                 if (ActivityInstrumentation.IsDataSuppressed(activity)) return;
 
                 if (ActivityInstrumentation.HasAttachedLoggerActivity(activity))
