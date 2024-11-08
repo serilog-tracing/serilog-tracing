@@ -11,20 +11,6 @@ public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="replacementActivitySourceName"></param>
-    protected ActivitySourceInstrumentor(string replacementActivitySourceName)
-    {
-        ReplacementSource = new ReplacementActivitySource(replacementActivitySourceName);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    protected readonly ReplacementActivitySource ReplacementSource;
-
-    /// <summary>
-    /// 
-    /// </summary>
     /// <param name="activity"></param>
     protected abstract void InstrumentActivity(Activity activity);
 
@@ -47,7 +33,7 @@ public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
         switch (eventName)
         {
             case Constants.SerilogTracingActivityStartedEventName:
-                if (!ShouldInstrument(activity.Source) || !ReplacementSource.CanReplace(activity.Source))
+                if (!ShouldInstrument(activity.Source))
                     return;
                 
                 InstrumentActivity(activity);

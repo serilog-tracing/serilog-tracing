@@ -25,18 +25,10 @@ public class ReplacementActivitySource : IDisposable
         _source = new ActivitySource(name);
 
         _listener = new ActivityListener();
-        _listener.ShouldListenTo = source => source.Name == name;
-        
-        // The listener always wants activities from its own internal source
-        // For any other source (including the one it's potentially replacing activities from)
-        // it doesn't contribute any sampling decision
-        _listener.Sample = (ref ActivityCreationOptions<ActivityContext> options) => options.Source == _source
-            ? ActivitySamplingResult.AllDataAndRecorded
-            : ActivitySamplingResult.None;
-        
+        _listener.ShouldListenTo = _ => true;
         _listener.ActivityStopped += activity =>
         {
-            if (TryGetReplacementActivity(activity, out var replacement))
+            if (TryGetReplacementActivity(activity, out var replacement) && replacement.Source == _source)
             {
                 replacement.Stop();
             }
@@ -51,16 +43,6 @@ public class ReplacementActivitySource : IDisposable
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="source"></param>
-    /// <returns></returns>
-    public bool CanReplace(ActivitySource source)
-    {
-        return source != _source;
-    }
-    
-    /// <summary>
-    /// 
-    /// </summary>
     /// <param name="postSamplingFilter"></param>
     /// <param name="configureReplacement"></param>
     /// <param name="parentOptions"></param>
@@ -70,6 +52,14 @@ public class ReplacementActivitySource : IDisposable
         ReplacementActivityParentOptions? parentOptions = null
     ) {
         var replace = Activity.Current;
+
+        // If the activity we're looking at is from our own replacement source then return
+        // This means we've ended up with a replacement source shadowing the name of the
+        // source it's replacing
+        if (replace?.Source == _source)
+        {
+            return;
+        }
         
         // Important to do this first, otherwise our activity source will consult the inherited
         // activity when making sampling decisions.
