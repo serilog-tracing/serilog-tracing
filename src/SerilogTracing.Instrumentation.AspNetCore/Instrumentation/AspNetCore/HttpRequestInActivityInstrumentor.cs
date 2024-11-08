@@ -66,6 +66,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
         var replacementOptions = InheritFlags(_incomingTraceParent);
         
         _replacementSource.StartReplacementActivity(
+            replacementOptions,
             _ => _postSamplingFilter?.Invoke(start) ?? true,
             replacement =>
             {
@@ -75,8 +76,7 @@ sealed class HttpRequestInActivityInstrumentor : IActivityInstrumentor, IInstrum
                 var props = _getRequestProperties(start.Request);
                 ActivityInstrumentation.SetLogEventProperties(replacement,
                     props as LogEventProperty[] ?? props.ToArray());
-            },
-            replacementOptions
+            }
         );
     }
     

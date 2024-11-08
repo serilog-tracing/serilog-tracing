@@ -43,13 +43,23 @@ public class ReplacementActivitySource : IDisposable
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="configureReplacement"></param>
+    public void StartReplacementActivity(
+        Action<Activity> configureReplacement
+    ) {
+        StartReplacementActivity(ReplacementActivityParentOptions.InheritAll, _ => true, configureReplacement);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="postSamplingFilter"></param>
     /// <param name="configureReplacement"></param>
     /// <param name="parentOptions"></param>
     public void StartReplacementActivity(
+        ReplacementActivityParentOptions parentOptions,
         Func<Activity?, bool> postSamplingFilter,
-        Action<Activity> configureReplacement,
-        ReplacementActivityParentOptions? parentOptions = null
+        Action<Activity> configureReplacement
     ) {
         var replace = Activity.Current;
 

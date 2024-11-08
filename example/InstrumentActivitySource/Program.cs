@@ -47,8 +47,6 @@ var receiver = Task.Run(async () =>
         var body = ea.Body.ToArray();
         var message = Encoding.UTF8.GetString(body);
         
-        using var activity = Log.Logger.StartActivity("Receive {Message}", message);
-        
         received.SetResult();
         return Task.CompletedTask;
     };
@@ -90,14 +88,21 @@ class RabbitProducerInstrumentor : ActivitySourceInstrumentor
     {
     }
 
-    protected override void InstrumentActivity(Activity activity)
+    readonly ReplacementActivitySource _source = new("Rabbit");
+
+    protected override void InstrumentActivity(Activity incoming)
     {
-        ActivityInstrumentation.SetMessageTemplateOverride(activity, new MessageTemplateParser().Parse("RabbitMQ {Role}"));
-        ActivityInstrumentation.SetLogEventProperty(activity, "Role", new ScalarValue("Publisher"));
+        _source.StartReplacementActivity(
+            activity =>
+            {
+                ActivityInstrumentation.SetMessageTemplateOverride(activity, new MessageTemplateParser().Parse("RabbitMQ {Role}"));
+                ActivityInstrumentation.SetLogEventProperty(activity, "Role", new ScalarValue(incoming.Source.Name.Split('.').Last()));
+            }
+        );
     }
 
     protected override bool ShouldInstrument(ActivitySource source)
     {
-        return source.Name == "RabbitMQ.Client.Publisher";
+        return source.Name.StartsWith("RabbitMQ");
     }
 }
