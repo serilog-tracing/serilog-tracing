@@ -40,7 +40,7 @@ public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
     /// <inheritdoc />
     bool IActivityInstrumentor.ShouldSubscribeTo(string diagnosticListenerName)
     {
-        return diagnosticListenerName == Constants.SerilogTracingActivitySourceName;
+        return diagnosticListenerName == Constants.SerilogTracingDiagnosticSourceName;
     }
     
     /// <inheritdoc />
