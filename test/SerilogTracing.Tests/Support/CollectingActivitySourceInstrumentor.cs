@@ -7,12 +7,12 @@ class CollectingActivitySourceInstrumentor : ActivitySourceInstrumentor
 {
     public Activity? Activity { get; set; }
 
-    protected override bool ShouldSubscribeTo(string activitySourceName)
+    public override bool ShouldSubscribeTo(string activitySourceName)
     {
         return true;
     }
 
-    protected override void InstrumentActivity(Activity activity)
+    public override void InstrumentActivity(Activity activity)
     {
         Activity = activity;
     }

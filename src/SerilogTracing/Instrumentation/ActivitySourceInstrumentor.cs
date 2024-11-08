@@ -27,7 +27,7 @@ public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
     /// </summary>
     /// <param name="activitySourceName">The <see cref="ActivitySource.Name"/> of the candidate <see cref="ActivitySource"/>.</param>
     /// <returns>Whether the instrumentor should instrument activities from the given source.</returns>
-    protected abstract bool ShouldSubscribeTo(string activitySourceName);
+    public abstract bool ShouldSubscribeTo(string activitySourceName);
 
     /// <summary>
     /// Enrich an activity.
@@ -35,7 +35,7 @@ public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
     /// <remarks>This method will only be called by SerilogTracing for activities that are expected to be enriched with data.
     /// This is, activities where <see cref="Activity.IsAllDataRequested"/> is true.</remarks>
     /// <param name="activity">The activity to enrich with instrumentation.</param>
-    protected abstract void InstrumentActivity(Activity activity);
+    public abstract void InstrumentActivity(Activity activity);
     
     /// <inheritdoc />
     bool IActivityInstrumentor.ShouldSubscribeTo(string diagnosticListenerName)
