@@ -30,12 +30,26 @@ public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
     public abstract bool ShouldSubscribeTo(string activitySourceName);
 
     /// <summary>
-    /// Enrich an activity.
+    /// Enrich an activity when it's started.
     /// </summary>
     /// <remarks>This method will only be called by SerilogTracing for activities that are expected to be enriched with data.
     /// This is, activities where <see cref="Activity.IsAllDataRequested"/> is true.</remarks>
     /// <param name="activity">The activity to enrich with instrumentation.</param>
-    public abstract void InstrumentActivity(Activity activity);
+    public virtual void InstrumentOnActivityStarted(Activity activity)
+    {
+        
+    }
+    
+    /// <summary>
+    /// Enrich an activity when it's stopped.
+    /// </summary>
+    /// <remarks>This method will only be called by SerilogTracing for activities that are expected to be enriched with data.
+    /// This is, activities where <see cref="Activity.IsAllDataRequested"/> is true.</remarks>
+    /// <param name="activity">The activity to enrich with instrumentation.</param>
+    public virtual void InstrumentOnActivityStopped(Activity activity)
+    {
+        
+    }
     
     /// <inheritdoc />
     bool IActivityInstrumentor.ShouldSubscribeTo(string diagnosticListenerName)
@@ -52,7 +66,14 @@ public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
                 if (!ShouldSubscribeTo(activity.Source.Name))
                     return;
                 
-                InstrumentActivity(activity);
+                InstrumentOnActivityStarted(activity);
+                return;
+            
+            case Constants.SerilogTracingActivityStoppedEventName:
+                if (!ShouldSubscribeTo(activity.Source.Name))
+                    return;
+                
+                InstrumentOnActivityStopped(activity);
                 return;
         }
     }

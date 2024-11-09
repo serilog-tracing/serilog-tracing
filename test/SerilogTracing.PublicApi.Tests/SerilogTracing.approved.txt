@@ -122,7 +122,8 @@ namespace SerilogTracing.Instrumentation
     public abstract class ActivitySourceInstrumentor : SerilogTracing.Instrumentation.IActivityInstrumentor
     {
         protected ActivitySourceInstrumentor() { }
-        public abstract void InstrumentActivity(System.Diagnostics.Activity activity);
+        public virtual void InstrumentOnActivityStarted(System.Diagnostics.Activity activity) { }
+        public virtual void InstrumentOnActivityStopped(System.Diagnostics.Activity activity) { }
         public abstract bool ShouldSubscribeTo(string activitySourceName);
     }
     public interface IActivityInstrumentor

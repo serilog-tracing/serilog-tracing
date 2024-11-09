@@ -47,7 +47,8 @@ public class DiagnosticEventObserverTests
 
         new DiagnosticEventObserver(instrumentor).OnNext(activity, "ActivityStarted", activity);
 
-        Assert.Null(instrumentor.Activity);
+        Assert.Null(instrumentor.StartedActivity);
+        Assert.Null(instrumentor.StoppedActivity);
     }
 
     [Fact]
@@ -60,6 +61,11 @@ public class DiagnosticEventObserverTests
 
         new DiagnosticEventObserver(instrumentor).OnNext(activity, "ActivityStarted", activity);
 
-        Assert.Equal(activity, instrumentor.Activity);
+        Assert.Equal(activity, instrumentor.StartedActivity);
+        Assert.Null(instrumentor.StoppedActivity);
+        
+        new DiagnosticEventObserver(instrumentor).OnNext(activity, "ActivityStopped", activity);
+        
+        Assert.Equal(activity, instrumentor.StoppedActivity);
     }
 }
