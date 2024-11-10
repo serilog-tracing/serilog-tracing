@@ -35,22 +35,16 @@ public abstract class ActivitySourceInstrumentor : IActivityInstrumentor
     /// <remarks>This method will only be called by SerilogTracing for activities that are expected to be enriched with data.
     /// This is, activities where <see cref="Activity.IsAllDataRequested"/> is true.</remarks>
     /// <param name="activity">The activity to enrich with instrumentation.</param>
-    public virtual void InstrumentOnActivityStarted(Activity activity)
-    {
-        
-    }
-    
+    public virtual void InstrumentOnActivityStarted(Activity activity) { }
+
     /// <summary>
     /// Enrich an activity when it's stopped.
     /// </summary>
     /// <remarks>This method will only be called by SerilogTracing for activities that are expected to be enriched with data.
     /// This is, activities where <see cref="Activity.IsAllDataRequested"/> is true.</remarks>
     /// <param name="activity">The activity to enrich with instrumentation.</param>
-    public virtual void InstrumentOnActivityStopped(Activity activity)
-    {
-        
-    }
-    
+    public virtual void InstrumentOnActivityStopped(Activity activity) { }
+
     /// <inheritdoc />
     bool IActivityInstrumentor.ShouldSubscribeTo(string diagnosticListenerName)
     {
