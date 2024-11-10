@@ -119,6 +119,13 @@ namespace SerilogTracing.Instrumentation
         public static void SetMessageTemplateOverride(System.Diagnostics.Activity activity, Serilog.Events.MessageTemplate messageTemplate) { }
         public static bool TrySetException(System.Diagnostics.Activity activity, System.Exception exception) { }
     }
+    public abstract class ActivitySourceInstrumentor : SerilogTracing.Instrumentation.IActivityInstrumentor
+    {
+        protected ActivitySourceInstrumentor() { }
+        public virtual void InstrumentOnActivityStarted(System.Diagnostics.Activity activity) { }
+        public virtual void InstrumentOnActivityStopped(System.Diagnostics.Activity activity) { }
+        public abstract bool ShouldSubscribeTo(string activitySourceName);
+    }
     public interface IActivityInstrumentor
     {
         void InstrumentActivity(System.Diagnostics.Activity activity, string eventName, object eventArgs);

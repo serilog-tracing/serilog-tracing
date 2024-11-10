@@ -36,4 +36,36 @@ public class DiagnosticEventObserverTests
         Assert.Equal("event", instrumentor.EventName);
         Assert.Equal(true, instrumentor.EventArgs);
     }
+
+    [Fact]
+    public void ActivitySourceInstrumentorDoesNotSeeSuppressedActivities()
+    {
+        using var activity = Some.Activity();
+        activity.IsAllDataRequested = false;
+
+        var instrumentor = new CollectingActivitySourceInstrumentor();
+
+        new DiagnosticEventObserver(instrumentor).OnNext(activity, "ActivityStarted", activity);
+
+        Assert.Null(instrumentor.StartedActivity);
+        Assert.Null(instrumentor.StoppedActivity);
+    }
+
+    [Fact]
+    public void ActivitySourceInstrumentorSeesUnsuppressedActivities()
+    {
+        using var activity = Some.Activity();
+        activity.IsAllDataRequested = true;
+
+        var instrumentor = new CollectingActivitySourceInstrumentor();
+
+        new DiagnosticEventObserver(instrumentor).OnNext(activity, "ActivityStarted", activity);
+
+        Assert.Equal(activity, instrumentor.StartedActivity);
+        Assert.Null(instrumentor.StoppedActivity);
+        
+        new DiagnosticEventObserver(instrumentor).OnNext(activity, "ActivityStopped", activity);
+        
+        Assert.Equal(activity, instrumentor.StoppedActivity);
+    }
 }
