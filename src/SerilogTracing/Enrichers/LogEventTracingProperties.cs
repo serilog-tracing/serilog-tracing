@@ -16,7 +16,7 @@ using System.Diagnostics.CodeAnalysis;
 using Serilog.Events;
 using SerilogTracing.Core;
 
-namespace SerilogTracing.Instrumentation;
+namespace SerilogTracing.Enrichers;
 
 static class LogEventTracingProperties
 {
