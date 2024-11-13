@@ -96,10 +96,4 @@ public class LoggerActivityTests
         var span = sink.SingleEvent;
         Assert.DoesNotContain("Discarded", span.Properties);
     }
-
-    [Fact]
-    public void ParentContextIsUsed()
-    {
-        throw new NotImplementedException();
-    }
 }

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.Remoting;
 using Serilog;
 using Serilog.Events;
 using SerilogTracing.Tests.Support;
@@ -87,6 +88,41 @@ public class LoggerTracingExtensionsTests
         else
         {
             Assert.Same(LoggerActivity.None, activity);
+            Assert.Empty(sink.Events);
+        }
+    }
+    
+    [Theory]
+    [InlineData(ActivityTraceFlags.None, false)]
+    [InlineData(ActivityTraceFlags.Recorded, true)]
+    public void ParentContextIsUsedWhenSpecified(ActivityTraceFlags flags, bool recorded)
+    {
+        var sink = new CollectingSink();
+        var log = new LoggerConfiguration()
+            .WriteTo.Sink(sink)
+            .CreateLogger();
+
+        var parentContext = new ActivityContext(
+            ActivityTraceId.CreateRandom(),
+            ActivitySpanId.CreateRandom(),
+            flags
+        );
+        
+        var activity = log
+            .StartActivity(parentContext, Some.String());
+        
+        Assert.Equal(parentContext.SpanId, activity.Activity!.ParentSpanId);
+        Assert.Equal(parentContext.TraceId, activity.Activity!.TraceId);
+        Assert.Equal(parentContext.TraceFlags, activity.Activity!.ActivityTraceFlags);
+
+        activity.Complete();
+
+        if (recorded)
+        {
+            Assert.Single(sink.Events);
+        }
+        else
+        {
             Assert.Empty(sink.Events);
         }
     }
