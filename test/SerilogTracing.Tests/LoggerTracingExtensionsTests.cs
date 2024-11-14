@@ -109,7 +109,7 @@ public class LoggerTracingExtensionsTests
         );
         
         var activity = log
-            .StartActivity(parentContext, default, Some.String());
+            .StartActivity(ActivityKind.Internal, parentContext, Some.String());
         
         Assert.Equal(parentContext.SpanId, activity.Activity!.ParentSpanId);
         Assert.Equal(parentContext.TraceId, activity.Activity!.TraceId);

@@ -34,7 +34,7 @@ public static class LoggerTracingExtensions
     static readonly MessageTemplate FallbackTemplate = new MessageTemplateParser().Parse($"{{{FallbackTemplateOriginalTemplateName}}}");
 
     // This method checks preconditions for starting an activity, before a params array or `LoggerActivity` might need to be allocated.
-    static bool TryStartActivity(ILogger logger, ActivityContext parentContext, ActivityKind kind, LogEventLevel level, string messageTemplate, [NotNullWhen(true)] out Activity? activity)
+    static bool TryStartActivity(ILogger logger, ActivityKind kind, ActivityContext parentContext, LogEventLevel level, string messageTemplate, [NotNullWhen(true)] out Activity? activity)
     {
         if (logger == null! || messageTemplate == null!)
         {
@@ -48,7 +48,7 @@ public static class LoggerTracingExtensions
             return false;
         }
 
-        activity = LoggerActivitySource.TryStartActivity(messageTemplate, parentContext, kind);
+        activity = LoggerActivitySource.TryStartActivity(messageTemplate, kind, parentContext);
         return activity != null;
     }
 
@@ -82,9 +82,9 @@ public static class LoggerTracingExtensions
     /// These properties will also be attached to the resulting span.</param>
     /// <returns>A <see cref="LoggerActivity"/>.</returns>
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
-    public static LoggerActivity StartActivity(this ILogger logger, ActivityContext parentContext, ActivityKind kind, LogEventLevel level, string messageTemplate, params object?[]? propertyValues)
+    public static LoggerActivity StartActivity(this ILogger logger, ActivityKind kind, ActivityContext parentContext, LogEventLevel level, string messageTemplate, params object?[]? propertyValues)
     {
-        return !TryStartActivity(logger, parentContext, kind, level, messageTemplate, out var activity) ?
+        return !TryStartActivity(logger, kind, parentContext, level, messageTemplate, out var activity) ?
             LoggerActivity.None :
             BindLoggerActivity(logger, level, messageTemplate, propertyValues, activity, kind);
     }
@@ -102,8 +102,8 @@ public static class LoggerTracingExtensions
     /// These properties will also be attached to the resulting span.</param>
     /// <returns>A <see cref="LoggerActivity"/>.</returns>
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
-    public static LoggerActivity StartActivity(this ILogger logger, ActivityContext parentContext, ActivityKind kind, string messageTemplate, params object?[]? propertyValues)
-        => StartActivity(logger, parentContext, kind, LogEventLevel.Information, messageTemplate, propertyValues);
+    public static LoggerActivity StartActivity(this ILogger logger, ActivityKind kind, ActivityContext parentContext, string messageTemplate, params object?[]? propertyValues)
+        => StartActivity(logger, kind, parentContext, LogEventLevel.Information, messageTemplate, propertyValues);
 
     /// <summary>
     /// Start an activity.
@@ -119,9 +119,9 @@ public static class LoggerTracingExtensions
     /// <param name="messageTemplate">A message template that will be used to format the activity name.</param>
     /// <returns>A <see cref="LoggerActivity"/>.</returns>
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
-    public static LoggerActivity StartActivity(this ILogger logger, ActivityContext parentContext, ActivityKind kind, LogEventLevel level, string messageTemplate)
+    public static LoggerActivity StartActivity(this ILogger logger, ActivityKind kind, ActivityContext parentContext, LogEventLevel level, string messageTemplate)
     {
-        return !TryStartActivity(logger, parentContext, kind, level, messageTemplate, out var activity) ?
+        return !TryStartActivity(logger, kind, parentContext, level, messageTemplate, out var activity) ?
             LoggerActivity.None :
             BindLoggerActivity(logger, level, messageTemplate, [], activity, kind);
     }
@@ -137,8 +137,8 @@ public static class LoggerTracingExtensions
     /// <param name="messageTemplate">A message template that will be used to format the activity name.</param>
     /// <returns>A <see cref="LoggerActivity"/>.</returns>
     [MessageTemplateFormatMethod(nameof(messageTemplate))]
-    public static LoggerActivity StartActivity(this ILogger logger, ActivityContext parentContext, ActivityKind kind, string messageTemplate)
-        => StartActivity(logger, parentContext, kind, LogEventLevel.Information, messageTemplate);
+    public static LoggerActivity StartActivity(this ILogger logger, ActivityKind kind, ActivityContext parentContext, string messageTemplate)
+        => StartActivity(logger, kind, parentContext, LogEventLevel.Information, messageTemplate);
 
     /// <summary>
     /// Start an activity.

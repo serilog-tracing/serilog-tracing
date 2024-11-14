@@ -34,13 +34,13 @@ namespace SerilogTracing
         [Serilog.Core.MessageTemplateFormatMethod("messageTemplate")]
         public static SerilogTracing.LoggerActivity StartActivity(this Serilog.ILogger logger, Serilog.Events.LogEventLevel level, string messageTemplate, params object?[]? propertyValues) { }
         [Serilog.Core.MessageTemplateFormatMethod("messageTemplate")]
-        public static SerilogTracing.LoggerActivity StartActivity(this Serilog.ILogger logger, System.Diagnostics.ActivityContext parentContext, System.Diagnostics.ActivityKind kind, string messageTemplate) { }
+        public static SerilogTracing.LoggerActivity StartActivity(this Serilog.ILogger logger, System.Diagnostics.ActivityKind kind, System.Diagnostics.ActivityContext parentContext, string messageTemplate) { }
         [Serilog.Core.MessageTemplateFormatMethod("messageTemplate")]
-        public static SerilogTracing.LoggerActivity StartActivity(this Serilog.ILogger logger, System.Diagnostics.ActivityContext parentContext, System.Diagnostics.ActivityKind kind, Serilog.Events.LogEventLevel level, string messageTemplate) { }
+        public static SerilogTracing.LoggerActivity StartActivity(this Serilog.ILogger logger, System.Diagnostics.ActivityKind kind, System.Diagnostics.ActivityContext parentContext, Serilog.Events.LogEventLevel level, string messageTemplate) { }
         [Serilog.Core.MessageTemplateFormatMethod("messageTemplate")]
-        public static SerilogTracing.LoggerActivity StartActivity(this Serilog.ILogger logger, System.Diagnostics.ActivityContext parentContext, System.Diagnostics.ActivityKind kind, string messageTemplate, params object?[]? propertyValues) { }
+        public static SerilogTracing.LoggerActivity StartActivity(this Serilog.ILogger logger, System.Diagnostics.ActivityKind kind, System.Diagnostics.ActivityContext parentContext, string messageTemplate, params object?[]? propertyValues) { }
         [Serilog.Core.MessageTemplateFormatMethod("messageTemplate")]
-        public static SerilogTracing.LoggerActivity StartActivity(this Serilog.ILogger logger, System.Diagnostics.ActivityContext parentContext, System.Diagnostics.ActivityKind kind, Serilog.Events.LogEventLevel level, string messageTemplate, params object?[]? propertyValues) { }
+        public static SerilogTracing.LoggerActivity StartActivity(this Serilog.ILogger logger, System.Diagnostics.ActivityKind kind, System.Diagnostics.ActivityContext parentContext, Serilog.Events.LogEventLevel level, string messageTemplate, params object?[]? propertyValues) { }
         [Serilog.Core.MessageTemplateFormatMethod("messageTemplate")]
         public static SerilogTracing.LoggerActivity StartActivity<T>(this Serilog.ILogger logger, string messageTemplate, T propertyValue) { }
         [Serilog.Core.MessageTemplateFormatMethod("messageTemplate")]

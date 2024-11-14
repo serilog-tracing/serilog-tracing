@@ -21,7 +21,7 @@ static class LoggerActivitySource
 {
     static ActivitySource Instance { get; } = new(Constants.SerilogTracingActivitySourceName, null);
 
-    public static Activity? TryStartActivity(string name, ActivityContext parentContext, ActivityKind kind)
+    public static Activity? TryStartActivity(string name, ActivityKind kind, ActivityContext parentContext)
     {
         if (Instance.HasListeners())
         {
