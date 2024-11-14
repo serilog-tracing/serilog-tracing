@@ -21,11 +21,8 @@ static class LoggerActivitySource
 {
     static ActivitySource Instance { get; } = new(Constants.SerilogTracingActivitySourceName, null);
 
-    public static Activity? TryStartActivity(string name, ActivityKind kind, ActivityContext parentContext)
+    public static Activity? TryStartActivity(string name, ActivityContext parentContext, ActivityKind kind)
     {
-        // `ActivityKind` might be passed through here in the future. The `Activity` constructor does
-        // not accept this.
-
         if (Instance.HasListeners())
         {
             // Tracing is enabled; if this returns `null`, sampling is suppressing the activity and so therefore
@@ -40,6 +37,7 @@ static class LoggerActivitySource
         // Tracing is not enabled. Levels are everything, and the level check has already been performed by the
         // caller, so we're in business!
 
+        // `kind` needs to be set on the `LoggerActivity` directly
         var manualActivity = new Activity(name);
 
         if (parentContext != default)

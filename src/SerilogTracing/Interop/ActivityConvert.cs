@@ -71,12 +71,15 @@ static class ActivityConvert
             throw new InvalidOperationException("`LoggerActivity.Activity` is only `null` when activity is suppressed, so should never result in mapping to a `LogEvent`.");
         
         var activity = loggerActivity.Activity;
+        
         var start = activity.StartTimeUtc;
         var traceId = activity.TraceId;
         var spanId = activity.SpanId;
         var parentSpanId = activity.ParentSpanId;
-        var kind = activity.Kind;
+        
+        var kind = loggerActivity.Kind;
         var template = loggerActivity.MessageTemplate;
+        
         if (exception == null)
         {
             ActivityInstrumentation.TryGetException(activity, out exception);
