@@ -34,18 +34,20 @@ public sealed class LoggerActivity : IDisposable
     /// A <see cref="LoggerActivity"/> that represents a suppressed activity. The <see cref="Activity"/> property of
     /// this instance, and only this instance, will be <c langword="null"/>.
     /// </summary>
-    public static LoggerActivity None { get; } = new(new LoggerConfiguration().CreateLogger(), LevelAlias.Minimum, null, new(Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>());
+    public static LoggerActivity None { get; } = new(new LoggerConfiguration().CreateLogger(), LevelAlias.Minimum, null, default, new(Enumerable.Empty<MessageTemplateToken>()), Enumerable.Empty<LogEventProperty>());
 
     internal LoggerActivity(
         ILogger logger,
         LogEventLevel defaultCompletionLevel,
         Activity? activity,
+        ActivityKind kind,
         MessageTemplate messageTemplate,
         IEnumerable<LogEventProperty> captures)
     {
         Logger = logger;
         DefaultCompletionLevel = defaultCompletionLevel;
         Activity = activity;
+        Kind = kind;
         MessageTemplate = messageTemplate;
         Properties = [];
 
@@ -63,6 +65,8 @@ public sealed class LoggerActivity : IDisposable
     ILogger Logger { get; }
     LogEventLevel DefaultCompletionLevel { get; }
     bool IsComplete { get; set; }
+    
+    internal ActivityKind Kind { get; }
 
     internal MessageTemplate MessageTemplate { get; }
     

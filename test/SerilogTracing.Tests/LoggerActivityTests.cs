@@ -29,12 +29,32 @@ public class LoggerActivityTests
         activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
         activity.Start();
 
-        var loggerActivity = new LoggerActivity(logger, initialLevel, activity, MessageTemplate.Empty, []);
+        var loggerActivity = new LoggerActivity(logger, initialLevel, activity, default, MessageTemplate.Empty, []);
         loggerActivity.Complete(completionLevel);
 
         var span = sink.SingleEvent;
         Assert.Equal(expectedLevel, span.Level);
         Assert.Equal(expectedStatusCode, activity.Status);
+    }
+    
+    [Fact]
+    public void ExpectedKindIsUsed()
+    {
+        var sink = new CollectingSink();
+
+        var logger = new LoggerConfiguration()
+            .WriteTo.Sink(sink)
+            .CreateLogger();
+
+        using var activity = Some.Activity();
+        activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
+        activity.Start();
+
+        var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, activity, ActivityKind.Producer, MessageTemplate.Empty, []);
+        loggerActivity.Complete();
+
+        var span = sink.SingleEvent;
+        Assert.Equal(ActivityKind.Producer.ToString(), span.Properties["SpanKind"].ToString());
     }
 
     [Fact]
@@ -50,7 +70,7 @@ public class LoggerActivityTests
         using var activity = Some.Activity();
         activity.Start();
 
-        var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, activity, MessageTemplate.Empty, []);
+        var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, activity, default, MessageTemplate.Empty, []);
         loggerActivity.Dispose();
 
         Assert.Equal(ActivityStatusCode.Unset, activity.Status);
@@ -66,7 +86,7 @@ public class LoggerActivityTests
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, null, MessageTemplate.Empty, []);
+        var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, null, default, MessageTemplate.Empty, []);
         loggerActivity.Complete(LogEventLevel.Information);
 
         Assert.Empty(sink.Events);
@@ -87,7 +107,7 @@ public class LoggerActivityTests
         activity.IsAllDataRequested = false;
         activity.Start();
 
-        var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, activity, MessageTemplate.Empty, []);
+        var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, activity, default, MessageTemplate.Empty, []);
 
         loggerActivity.AddProperty("Discarded", true);
 
