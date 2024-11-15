@@ -153,8 +153,10 @@ public sealed class LoggerActivity : IDisposable
             Activity.Stop();
             return;
         }
-
+        
+#if FEATURE_HIRES_CLOCK
         var end = DateTimeOffset.Now;
+#endif
 
         var completionLevel = DefaultCompletionLevel;
         if (level is { } completionLevelOverride && completionLevelOverride > completionLevel)
@@ -177,10 +179,19 @@ public sealed class LoggerActivity : IDisposable
                 ? ActivityStatusCode.Ok
                 : ActivityStatusCode.Error);
         }
-
+        
+#if FEATURE_HIRES_CLOCK
         Activity.SetEndTime(end.UtcDateTime);
+#endif
+
         Activity.Stop();
 
+#if !FEATURE_HIRES_CLOCK
+        // On .NET Framework, `DateTimeOffset.Now` uses a low-resolution clock, while `Activity` implements a
+        // higher-resolution one. (On .NET Core, `DateTimeOffset.Now` is high-resolution and `Activity` uses this.)
+        var end = new DateTimeOffset(Activity.StartTimeUtc.Add(Activity.Duration), TimeSpan.Zero).ToLocalTime();
+#endif
+        
         // We assume here that `level` is still enabled as it was in the call to `StartActivity()`. If this is not
         // the case, traces may end up with missing spans. Writing a `SelfLog` event would be reasonable but this
         // will end up being a hot path so avoiding it at this time.
