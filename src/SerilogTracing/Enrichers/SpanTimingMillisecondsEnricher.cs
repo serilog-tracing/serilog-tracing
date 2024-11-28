@@ -14,7 +14,6 @@
 
 using Serilog.Core;
 using Serilog.Events;
-using SerilogTracing.Instrumentation;
 
 namespace SerilogTracing.Enrichers;
 

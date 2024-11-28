@@ -17,8 +17,12 @@ using System.Diagnostics;
 namespace SerilogTracing.Instrumentation;
 
 /// <summary>
-/// Instrument <see cref="Activity">activities</see>.
+/// Instrument <see cref="Activity">activities</see> from a <see cref="DiagnosticSource" />.
 /// </summary>
+/// <remarks>
+/// Implementors are plugged in via <see cref="Configuration.ActivityListenerInstrumentationConfiguration.With">instrumentation configuration</see> to the SerilogTracing pipeline.
+/// To instrument activities from sources that use an <see cref="ActivitySource" /> instead of a diagnostic source, see <see cref="ActivitySourceInstrumentor" />.
+/// </remarks>
 public interface IActivityInstrumentor
 {
     /// <summary>
@@ -29,7 +33,7 @@ public interface IActivityInstrumentor
     bool ShouldSubscribeTo(string diagnosticListenerName);
 
     /// <summary>
-    /// Enrich the an activity with context from a diagnostic event.
+    /// Enrich an activity with context from a diagnostic event.
     /// </summary>
     /// <remarks>This method will only be called by SerilogTracing for activities that are expected to be enriched with data.
     /// This is, activities where <see cref="Activity.IsAllDataRequested"/> is true.</remarks>

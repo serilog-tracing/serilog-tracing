@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
-using SerilogTracing.Core;
 using SerilogTracing.Tests.Support;
 using Xunit;
+using Constants = SerilogTracing.Core.Constants;
 
 namespace SerilogTracing.Tests;
 
@@ -123,9 +124,9 @@ public class ExternalActivityTests
     [Theory]
     [InlineData(LogEventLevel.Debug, LogEventLevel.Error)]
     [InlineData(LogEventLevel.Fatal, LogEventLevel.Fatal)]
-    public void ErroredExternalActivitiesUseErrorLevel(LogEventLevel initialLevel, LogEventLevel completionLevel)
+    public void FailedExternalActivitiesUseErrorLevel(LogEventLevel initialLevel, LogEventLevel completionLevel)
     {
-        var source = new ActivitySource($"{typeof(ExternalActivityTests).FullName}.${nameof(ErroredExternalActivitiesUseErrorLevel)}.${initialLevel}.${completionLevel}");
+        var source = new ActivitySource($"{typeof(ExternalActivityTests).FullName}.${nameof(FailedExternalActivitiesUseErrorLevel)}.${initialLevel}.${completionLevel}");
 
         var sink = new CollectingSink();
 
@@ -169,23 +170,41 @@ public class ExternalActivityTests
         Assert.Equal(LogEventLevel.Debug, sink.SingleEvent.Level);
     }
 
-    [Fact]
-    public void ExternalActivitiesSampleInitialLevel()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ExternalActivitiesRespondToLevelChanges(bool ignoreChanges)
     {
         using var source = Some.ActivitySource();
 
         var sink = new CollectingSink();
 
+        var levelSwitch = new LoggingLevelSwitch(LogEventLevel.Warning);
+        
         var logger = new LoggerConfiguration()
-            .MinimumLevel.Is(LogEventLevel.Warning)
+            .MinimumLevel.ControlledBy(levelSwitch)
             .WriteTo.Sink(sink)
             .CreateLogger();
 
-        using var _ = new ActivityListenerConfiguration()
+        using var _ = (ignoreChanges ? 
+                new ActivityListenerConfiguration().InitialLevel.IgnoreChanges() : 
+                new ActivityListenerConfiguration())
             .InitialLevel.Is(LogEventLevel.Debug)
             .TraceTo(logger);
 
+        Assert.Null(source.StartActivity());
+
+        levelSwitch.MinimumLevel = LogEventLevel.Debug;
+
         using var activity = source.StartActivity();
-        Assert.Null(activity);
+        if (ignoreChanges)
+        {
+            Assert.Null(activity);
+        }
+        else
+        {
+            Assert.NotNull(activity);
+        }
     }
+    
 }

@@ -11,21 +11,6 @@ class ZipkinSink : IBatchedLogEventSink
 {
     readonly Encoding _encoding = new UTF8Encoding(false);
     readonly HttpClient _client;
-    readonly ExpressionTemplate _formatter = new("""
-    {
-        {
-            id: @sp,
-            traceId: @tr,
-            parentId: ParentSpanId,
-            name: @m,
-            timestamp: Microseconds(FromUnixEpoch(SpanStartTimestamp)),
-            duration: Microseconds(Elapsed()),
-            kind: ToUpperInvariant(SpanKind),
-            localEndpoint: {serviceName: Application},
-            tags: AsStringTags(rest())
-        }
-    }
-    """, nameResolver: new ZipkinNameResolver());
 
     public ZipkinSink(Uri endpoint, HttpMessageHandler messageHandler)
     {
@@ -34,7 +19,7 @@ class ZipkinSink : IBatchedLogEventSink
 
     public async Task EmitBatchAsync(IEnumerable<LogEvent> batch)
     {
-        var content = FormatRequestContent(batch);
+        var content = ZipkinBodyFormatter.FormatRequestContent(batch);
         if (content == null)
             return;
 
@@ -45,39 +30,6 @@ class ZipkinSink : IBatchedLogEventSink
 
         var response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
-    }
-
-    string? FormatRequestContent(IEnumerable<LogEvent> batch)
-    {
-        var content = new StringWriter();
-        content.Write('[');
-
-        var any = false;
-        foreach (var logEvent in batch.Where(IsSpan))
-        {
-            if (any)
-            {
-                content.Write(',');
-            }
-            else
-            {
-                any = true;
-            }
-            _formatter.Format(logEvent, content);
-        }
-
-        if (!any)
-            return null;
-
-        content.Write(']');
-        return content.ToString();
-    }
-
-    static bool IsSpan(LogEvent logEvent)
-    {
-        return logEvent is { TraceId: not null, SpanId: not null } &&
-               logEvent.Properties.TryGetValue(Constants.SpanStartTimestampPropertyName, out var sst) &&
-               sst is ScalarValue { Value: DateTime };
     }
 
     public Task OnEmptyBatchAsync()

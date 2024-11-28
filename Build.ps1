@@ -72,6 +72,6 @@ if ($env:NUGET_API_KEY) {
     if (!($suffix)) {
         Write-Output "build: Creating release for version $versionPrefix"
 
-        gh release create "v$versionPrefix" --title "v$versionPrefix" --generate-notes @$"$(get-item ./artifacts/*.nupkg) $(get-item ./artifacts/*.snupkg)"
+        iex "gh release create v$versionPrefix --title v$versionPrefix --generate-notes $(get-item ./artifacts/*.nupkg) $(get-item ./artifacts/*.snupkg)"
     }
 }

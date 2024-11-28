@@ -28,8 +28,10 @@ public class ActivityListenerInitialLevelConfiguration
     readonly ActivityListenerConfiguration _activityListenerConfiguration;
     readonly Dictionary<string, LoggingLevelSwitch> _overrides = new();
     LogEventLevel _initialLevel = LogEventLevel.Information;
+    bool _ignoreLevelChanges;
 
     internal LevelOverrideMap GetOverrideMap() => new(_overrides, _initialLevel, null);
+    internal bool IgnoreLevelChanges => _ignoreLevelChanges;
 
     internal ActivityListenerInitialLevelConfiguration(ActivityListenerConfiguration activityListenerConfiguration)
     {
@@ -128,5 +130,20 @@ public class ActivityListenerInitialLevelConfiguration
     public ActivityListenerConfiguration Override(string activitySourceName, LogEventLevel level)
     {
         return Override(activitySourceName, new LoggingLevelSwitch(level));
+    }
+
+    /// <summary>
+    /// The first time an external activity source is encountered, check whether its initial level is enabled, and
+    /// cache this decision for the remainder of the listener's lifetime. This can be a significant performance and
+    /// memory usage optimization for apps that don't modify the target logger's minimum level at runtime.
+    /// </summary>
+    /// <remarks>If your application is using dynamic level control, either with <see cref="LoggingLevelSwitch"/>,
+    /// reloadable/bootstrap loggers, or by responding to configuration file changes at runtime, don't apply this
+    /// option.</remarks>
+    /// <returns>The activity listener configuration, to enable method chaining.</returns>
+    public ActivityListenerConfiguration IgnoreChanges()
+    {
+        _ignoreLevelChanges = true;
+        return _activityListenerConfiguration;
     }
 }

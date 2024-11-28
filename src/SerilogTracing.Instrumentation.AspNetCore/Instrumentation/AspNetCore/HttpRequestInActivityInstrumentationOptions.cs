@@ -79,4 +79,11 @@ public sealed class HttpRequestInActivityInstrumentationOptions
     /// <c langword="true"/> if the status code is 500 or greater, and the request was not aborted.
     /// </summary>
     public Func<HttpResponse, bool> IsErrorResponse { get; set; } = DefaultIsErrorResponse;
+    
+    /// <summary>
+    /// An additional filter that will be applied after sampling. If the filter returns <c langword="false"/> then
+    /// the sampling decision and parent sampling flags (if applicable) will be ignored, and the activity will
+    /// be suppressed. Use this to disable tracing entirely for specific routes or callers.
+    /// </summary>
+    public Func<HttpContext, bool>? PostSamplingFilter { get; set; }
 }

@@ -22,6 +22,7 @@ public class LoggerActivityTracingOnBenchmarks: IDisposable
     public LoggerActivityTracingOnBenchmarks()
     {
         _loggerActivityListener = new ActivityListenerConfiguration()
+            .InitialLevel.IgnoreChanges()
             .InitialLevel.Override(_ignoredSource.Name, LogEventLevel.Verbose)
             .Instrument.WithDefaultInstrumentation(false)
             .TraceTo(_log);

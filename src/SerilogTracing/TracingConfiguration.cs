@@ -14,6 +14,7 @@
 
 using System.Diagnostics;
 using Serilog;
+using Serilog.Events;
 using SerilogTracing.Configuration;
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedMember.Global
@@ -40,7 +41,9 @@ public class TracingConfiguration
     public ActivityListenerSamplingConfiguration Sample => _inner.Sample;
 
     /// <summary>
-    /// Configures the initial level assigned to externally created activities.
+    /// Configures the initial level assigned to externally-created activities. Setting the level of an external
+    /// activity source to a lower value, such as <see cref="LogEventLevel.Debug"/>, causes activities from that
+    /// source to be suppressed when the level is not enabled.
     /// </summary>
     public ActivityListenerInitialLevelConfiguration InitialLevel => _inner.InitialLevel;
 
