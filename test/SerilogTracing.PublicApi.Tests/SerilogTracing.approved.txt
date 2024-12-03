@@ -102,7 +102,7 @@ namespace SerilogTracing.Configuration
     {
         public SerilogTracing.ActivityListenerConfiguration AllTraces() { }
         public SerilogTracing.ActivityListenerConfiguration OneTraceIn(ulong interval) { }
-        public SerilogTracing.ActivityListenerConfiguration Using(System.Diagnostics.SampleActivity<System.Diagnostics.ActivityContext> sample) { }
+        public SerilogTracing.ActivityListenerConfiguration Using(System.Diagnostics.SampleActivity<System.Diagnostics.ActivityContext> sample, bool ignoreParent = false) { }
     }
 }
 namespace SerilogTracing.Core
