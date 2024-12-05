@@ -274,7 +274,7 @@ using var listener = new ActivityListenerConfiguration()
     .TraceToSharedLogger();
 ```
 
-More sophisticated sampling strategies can be plugged in through `Sample.Using()`, which provides access to the raw `System.Diagnostics.ActivityListener` sampling API.
+More sophisticated sampling strategies can be plugged in through `Sample.Using()`. These behave like the raw `System.Diagnostics.ActivityListener` API, but only apply to root spans. Setting the `ignoreParent` method parameter to `true` can be used to exactly mimic the `System.Diagnostics.ActivityListener` behavior.
 
 > [!NOTE]
 > Once a sampling decision has been made for the root activity in a trace, SerilogTracing's sampling infrastructure will ensure all child activities inherit that sampling decision, regardless of the sampling policy in use. This means that when sampling decisions are communicated by a remote caller, care should be taken to either discard or trust that caller's decision. See the section [Adding instrumentation for ASP.NET Core requests](#adding-instrumentation-for-aspnet-core-requests) for information on how to do this with SerilogTracing's ASP.NET Core integration.
