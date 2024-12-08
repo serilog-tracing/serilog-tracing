@@ -248,6 +248,50 @@ public static class ActivityInstrumentation
         public override string ToString() => toString ?? "No information available.";
     }
 
+    /// <summary>
+    /// Suppress the current activity, linking any newly created activities with its parent.
+    /// </summary>
+    /// <returns>A value that will restore the suppressed activity on dispose. If there is no current activity, it
+    /// will return null.</returns>
+    /// <remarks>
+    /// This method is intended to suppress activities from outside sources when you want to replace them with your own.
+    /// 
+    /// It takes <see cref="Activity.Current" />, unsets the <see cref="ActivityTraceFlags.Recorded" /> flag,
+    /// sets <see cref="Activity.IsAllDataRequested" /> to false, and re-assigns <see cref="Activity.Current" /> to
+    /// its <see cref="Activity.Parent" />.
+    ///
+    /// When the returned <see cref="IDisposable" /> is disposed, the <see cref="Activity.Current" /> will be restored,
+    /// but the restored activity will remain unrecorded.
+    /// </remarks>
+    public static IDisposable? SuppressCurrentActivity()
+    {
+        return Activity.Current == null ? null : new SuppressedCurrentActivity(Activity.Current);
+    }
+
+    class SuppressedCurrentActivity : IDisposable
+    {
+        internal SuppressedCurrentActivity(Activity suppressed)
+        {
+            suppressed.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+            suppressed.IsAllDataRequested = false;
+        
+            Activity.Current = suppressed.Parent;
+            
+            _suppressed = suppressed;
+        }
+        
+        Activity? _suppressed;
+        
+        public void Dispose()
+        {
+            if (_suppressed != null)
+            {
+                Activity.Current = _suppressed;
+                _suppressed = null;
+            }
+        }
+    }
+
     internal static void AttachLoggerActivity(Activity activity, LoggerActivity loggerActivity)
     {
         activity.SetCustomProperty(Constants.SelfPropertyName, loggerActivity);

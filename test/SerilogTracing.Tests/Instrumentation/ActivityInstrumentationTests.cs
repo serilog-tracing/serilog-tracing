@@ -166,4 +166,36 @@ public class ActivityInstrumentationTests
         
         Assert.True(ActivityInstrumentation.IsDataSuppressed(activity));
     }
+
+    [Fact]
+    public void SuppressCurrentActivityUnsetsAndRestoresActivities()
+    {
+        var root = Some.Activity();
+        root.Start();
+
+        var child1 = Some.Activity();
+        child1.Start();
+
+        Assert.False(ActivityInstrumentation.IsDataSuppressed(child1));
+
+        var suppressed = ActivityInstrumentation.SuppressCurrentActivity();
+
+        Assert.True(ActivityInstrumentation.IsDataSuppressed(child1));
+
+        var child2 = Some.Activity();
+        child2.Start();
+
+        Assert.Equal(root.SpanId, child2.ParentSpanId);
+
+        child2.Stop();
+
+        suppressed?.Dispose();
+
+        Assert.Equal(Activity.Current!.SpanId, child1.SpanId);
+        Assert.True(ActivityInstrumentation.IsDataSuppressed(child1));
+
+        child1.Stop();
+
+        root.Stop();
+    }
 }
