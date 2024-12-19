@@ -14,6 +14,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
 namespace SerilogTracing.Instrumentation.AspNetCore;
 
@@ -21,15 +22,19 @@ static class TraceParentHeader
 {
     public static bool TryParse(string traceParentHeaderValue, [NotNullWhen(true)] out ActivityTraceFlags? flags)
     {
-        if (traceParentHeaderValue.EndsWith("-00"))
+        // If the first 55 chars of the traceparent (defined by version 0) don't look valid then ignore it
+        if (traceParentHeaderValue.Length < 55 || traceParentHeaderValue[2] != '-' ||
+            traceParentHeaderValue[35] != '-' || traceParentHeaderValue[52] != '-')
         {
-            flags = ActivityTraceFlags.None;
-            return true;
+            flags = null;
+            return false;
         }
-        
-        if (traceParentHeaderValue.EndsWith("-01"))
+
+        // Parse the trace flags as an integer. We're only really interested in the sampled flag (least significant bit)
+        // but others may also be set
+        if (int.TryParse(traceParentHeaderValue.AsSpan(53, 2), NumberStyles.AllowHexSpecifier, null, out var parsed))
         {
-            flags = ActivityTraceFlags.Recorded;
+            flags = (ActivityTraceFlags)parsed;
             return true;
         }
 

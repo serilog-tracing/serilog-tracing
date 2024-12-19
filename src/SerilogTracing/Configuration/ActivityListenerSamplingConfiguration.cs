@@ -39,6 +39,7 @@ public class ActivityListenerSamplingConfiguration
     /// a non-default span id identifying the parent.
     /// </summary>
     /// <param name="sample">A callback providing the sampling level for a particular activity.</param>
+    /// <param name="ignoreParent">Whether to ignore the sampling decision made on parent spans. Defaults to false.</param>
     /// <returns>The activity listener configuration, to enable method chaining.</returns>
     /// <remarks>
     /// If the method is called multiple times, the last sampling callback to be specified will be used.
@@ -46,9 +47,9 @@ public class ActivityListenerSamplingConfiguration
     /// on the destination logger.
     /// </remarks>
     /// <seealso cref="ActivityListener.Sample"/>
-    public ActivityListenerConfiguration Using(SampleActivity<ActivityContext> sample)
+    public ActivityListenerConfiguration Using(SampleActivity<ActivityContext> sample, bool ignoreParent = false)
     {
-        _sample = sample;
+        _sample = ignoreParent ? sample : ParentPrecedentSampler.Create(sample);
         return _activityListenerConfiguration;
     }
 
@@ -62,8 +63,7 @@ public class ActivityListenerSamplingConfiguration
     /// <returns>The activity listener configuration, to enable method chaining.</returns>
     public ActivityListenerConfiguration AllTraces()
     {
-        _sample = ParentPrecedentSampler.Create(AlwaysRecordedSampler.Create());
-        return _activityListenerConfiguration;
+        return Using(AlwaysRecordedSampler.Create());
     }
 
     /// <summary>
@@ -78,7 +78,6 @@ public class ActivityListenerSamplingConfiguration
     /// <returns>The activity listener configuration, to enable method chaining.</returns>
     public ActivityListenerConfiguration OneTraceIn(ulong interval)
     {
-        _sample = ParentPrecedentSampler.Create(IntervalSampler.Create(interval));
-        return _activityListenerConfiguration;
+        return Using(IntervalSampler.Create(interval));
     }
 }
