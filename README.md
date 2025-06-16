@@ -263,7 +263,7 @@ and [this article introducing _Serilog.Expressions_ JSON support](https://nblumh
 
 ## Sampling
 
-Sampling is a method of reducing stored data volumes by selectively recording traces. This is similar to levelling, but instead of turning individual span types on and off, sampling causes either _all_ of the spans in a trace to be recorded, or _none_ of them.
+Sampling is a method of reducing stored data volumes by selectively recording traces. This is similar to leveling, but instead of turning individual span types on and off, sampling causes either _all_ of the spans in a trace to be recorded, or _none_ of them.
 
 SerilogTracing implements two simple strategies via `ActivityListenerConfiguration`: `Sample.AllTraces()`, which records all traces (the default), and `Sample.OneTraceIn()`, which records a fixed proportion of possible traces:
 
@@ -279,7 +279,25 @@ More sophisticated sampling strategies can be plugged in through `Sample.Using()
 > [!NOTE]
 > Once a sampling decision has been made for the root activity in a trace, SerilogTracing's sampling infrastructure will ensure all child activities inherit that sampling decision, regardless of the sampling policy in use. This means that when sampling decisions are communicated by a remote caller, care should be taken to either discard or trust that caller's decision. See the section [Adding instrumentation for ASP.NET Core requests](#adding-instrumentation-for-aspnet-core-requests) for information on how to do this with SerilogTracing's ASP.NET Core integration.
 
-Sampling does not affect the recording of log events: log events written during an un-sampled trace will still be recorded, and will carry trace and span ids even though the corresponding spans will be missing.
+Sampling does not affect the recording of log events: log events written during an unsampled trace will still be recorded, and will carry trace and span ids even though the corresponding spans will be missing.
+
+## Starting an activity with a specified trace or parent id
+
+Traces sometimes need to cross process or temporal boundaries. For example, the parent of a server activity for a remote procedure call might be a client activity on a remote machine.
+
+If you're using `HttpClient` and ASP.NET Core, .NET will do this automatically using the `traceparent` HTTP header. If you're in a situation without built-in trace propagation, you'll need to do this yourself, using the `StartActivity()` overload that accepts an `ActivityContext`:
+
+```csharp
+// Parse a W3C `traceparent` header; alternatively, call the `ActivityContext` constructor
+// that accepts a trace and span id directly.
+var context = ActivityContext.Parse("00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01", null);
+
+var activity = Log.Logger.StartActivity(
+    ActivityKind.Server,
+    context,
+    LogEventLevel.Information,
+    "Handle request");
+```
 
 ## How an `Activity` becomes a `LogEvent`
 
@@ -305,7 +323,7 @@ Traces are collections of spans, connected by a common trace id. SerilogTracing 
 | Status description or error event | `Exception`                        |
 | Tags                              | `Properties[*]`                    |
 
-### Levelling for external activity sources
+### Leveling for external activity sources
 
 SerilogTracing can consume activities from .NET itself, and libraries that don't themselves use SerilogTracing. By default, you'll see spans for all activities, from all sources, in your Serilog output.
 
