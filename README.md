@@ -292,7 +292,7 @@ If you're using `HttpClient` and ASP.NET Core, .NET will do this automatically u
 // that accepts a trace and span id directly.
 var context = ActivityContext.Parse("00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01", null);
 
-var activity = Log.Logger.StartActivity(
+using var activity = Log.Logger.StartActivity(
     ActivityKind.Server,
     context,
     LogEventLevel.Information,
