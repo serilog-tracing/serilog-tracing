@@ -8,9 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="serilog.sinks.console" Version="5.0.0" />
-    <PackageReference Include="serilog.sinks.seq" Version="7.0.0" />
-    <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.0.0" />
+    <PackageReference Include="serilog.sinks.console" Version="6.1.1" />
+    <PackageReference Include="serilog.sinks.seq" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
     <ProjectReference Include="../../src/SerilogTracing.Sinks.Zipkin/SerilogTracing.Sinks.Zipkin.csproj" />
     <ProjectReference Include="../../src/SerilogTracing.Expressions/SerilogTracing.Expressions.csproj" />
   </ItemGroup>
