@@ -4,7 +4,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>12</LangVersion>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <VersionPrefix>2.3.1</VersionPrefix>
+        <VersionPrefix>2.4.0</VersionPrefix>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <!-- The condition is required to support BenchmarkDotNet -->
@@ -12,5 +12,7 @@
         <AssemblyOriginatorKeyFile>../../assets/SerilogTracing.snk</AssemblyOriginatorKeyFile>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <CheckEolTargetFramework>false</CheckEolTargetFramework>
+        <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     </PropertyGroup>
 </Project>
