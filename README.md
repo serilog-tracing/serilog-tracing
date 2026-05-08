@@ -18,7 +18,7 @@ And in Zipkin:
 
 ## Getting started
 
-This section walks through a very simple SerilogTracing example. To get started we'll create a simple .NET 8 console application and install some SerilogTracing packages.
+This section walks through a very simple SerilogTracing example. To get started we'll create a simple .NET 10 console application and install some SerilogTracing packages.
 
 ```sh
 mkdir example
