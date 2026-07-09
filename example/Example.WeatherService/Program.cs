@@ -23,6 +23,7 @@ using var _ = new ActivityListenerConfiguration()
         opts.IncomingTraceParent = IncomingTraceParent.Trust;
         opts.PostSamplingFilter = httpContext => !httpContext.Request.Path.StartsWithSegments("/health");
     })
+    // When '.Instrument.HttpClientRequests()' is called you need to ensure that '.Instrument.WithDefaultInstrumentation(false)' is called first!
     .TraceToSharedLogger();
 
 Log.Information("Weather service starting up");
