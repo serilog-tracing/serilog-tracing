@@ -26,11 +26,11 @@ static class ActivityConvert
 {
     static readonly ScalarValue[] Kinds =
     [
-        new ScalarValue((ActivityKind)0),
-        new ScalarValue((ActivityKind)1),
-        new ScalarValue((ActivityKind)2),
-        new ScalarValue((ActivityKind)3),
-        new ScalarValue((ActivityKind)4)
+        new((ActivityKind)0),
+        new((ActivityKind)1),
+        new((ActivityKind)2),
+        new((ActivityKind)3),
+        new((ActivityKind)4)
     ];
 
     static readonly MessageTemplate ActivityEventMessageTemplate = new([new PropertyToken("ActivityEvent", "{ActivityEvent}")]);
@@ -44,7 +44,7 @@ static class ActivityConvert
         var end = new DateTimeOffset(start + activity.Duration).ToLocalTime();
 
         ActivityInstrumentation.TryGetMessageTemplateOverride(activity, out var messageTemplate);
-        var template = messageTemplate ?? new MessageTemplate(new[] { new TextToken(activity.DisplayName) });
+        var template = messageTemplate ?? new MessageTemplate([new TextToken(activity.DisplayName)]);
         ActivityInstrumentation.TryGetException(activity, out var exception);
         var properties = ActivityInstrumentation.TryGetLogEventPropertyCollection(activity, out var activityProperties)
             ? activityProperties
@@ -139,6 +139,12 @@ static class ActivityConvert
         if (kind != ActivityKind.Internal && (int)kind >= 0 && (int)kind < Kinds.Length)
         {
             properties[SpanKindPropertyName] = Kinds[(int)kind];
+        }
+        
+        if (activity.Links.Any())
+        {
+            properties[SpanLinksPropertyName] = new SequenceValue(
+                activity.Links.Select(link => new ScalarValue(link.Context)));
         }
         
         return LogEvent.UnstableAssembleFromParts(
