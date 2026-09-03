@@ -49,9 +49,9 @@ public static class Constants
     public const string SpanKindPropertyName = "SpanKind";
 
     /// <summary>
-    /// The name of the entry in <see cref="LogEvent.Properties"/> that carries the
-    /// set of links on the span. The value will be an <see cref="IEnumerable{ActivityContext}"/>.
-    /// The property is unset for spans that don't carry any links.
+    /// The name of the entry in <see cref="LogEvent.Properties"/> that carries a
+    /// span's links. The value will be a <see cref="SequenceValue"/> of <see cref="ScalarValue"/>s
+    /// holding an <see cref="ActivityContext"/>.
     /// </summary>
     public const string SpanLinksPropertyName = "SpanLinks";
 
