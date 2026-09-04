@@ -144,7 +144,8 @@ static class ActivityConvert
         if (activity.Links.Any())
         {
             properties[SpanLinksPropertyName] = new SequenceValue(
-                activity.Links.Select(link => new ScalarValue(link.Context)));
+                activity.Links.Select(link => new ScalarValue(
+                    Traceparent.Format(link.Context.TraceId, link.Context.SpanId, link.Context.TraceFlags))));
         }
         
         return LogEvent.UnstableAssembleFromParts(

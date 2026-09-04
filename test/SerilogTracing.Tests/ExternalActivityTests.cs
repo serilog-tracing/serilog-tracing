@@ -54,7 +54,7 @@ public class ExternalActivityTests
         Assert.False(span.Properties.ContainsKey("property"));
 
         var links = Assert.IsType<SequenceValue>(span.Properties[Constants.SpanLinksPropertyName]);
-        Assert.Equal(linkedContext, ((ScalarValue)links.Elements.Single()).Value);
+        Assert.Equal(linkedContext, ActivityContext.Parse((string)((ScalarValue)links.Elements.Single()).Value!, null));
     }
 
     [Fact]

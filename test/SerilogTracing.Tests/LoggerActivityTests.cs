@@ -80,8 +80,9 @@ public class LoggerActivityTests
         loggerActivity.Complete();
 
         var span = sink.SingleEvent;
+        
         var links = Assert.IsType<SequenceValue>(span.Properties[Core.Constants.SpanLinksPropertyName]);
-        Assert.Equal(linkedContext, ((ScalarValue)links.Elements.Single()).Value);
+        Assert.Equal(linkedContext, ActivityContext.Parse((string)((ScalarValue)links.Elements.Single()).Value!, null));
     }
 
     [Fact]
