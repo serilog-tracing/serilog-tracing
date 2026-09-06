@@ -316,6 +316,7 @@ Traces are collections of spans, connected by a common trace id. SerilogTracing 
 | Span id                           | `SpanId`                           |
 | Parent id                         | `Properties["ParentSpanId"]`       |
 | Kind                              | `Properties["SpanKind"]`           |
+| Links                             | `Properties["SpanLinks"]`          |
 | Name                              | `MessageTemplate`                  |
 | Start                             | `Properties["SpanStartTimestamp"]` |
 | End                               | `Timestamp`                        |

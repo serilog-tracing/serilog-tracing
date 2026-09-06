@@ -49,6 +49,13 @@ public static class Constants
     public const string SpanKindPropertyName = "SpanKind";
 
     /// <summary>
+    /// The name of the entry in <see cref="LogEvent.Properties"/> that carries a
+    /// span's links. The value will be a <see cref="SequenceValue"/> of values whose <see cref="Object.ToString()"/>
+    /// produces a W3C traceparent.
+    /// </summary>
+    public const string SpanLinksPropertyName = "SpanLinks";
+
+    /// <summary>
     /// For log events derived from <see cref="ActivityEvent"/>, the name of the entry
     /// in <see cref="LogEvent.Properties"/> that carries the activity event's name.
     /// </summary>
