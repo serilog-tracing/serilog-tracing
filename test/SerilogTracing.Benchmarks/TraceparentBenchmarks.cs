@@ -22,5 +22,5 @@ public class TraceparentBenchmarks
     [Benchmark]
     [ArgumentsSource(nameof(RandomInputs))]
     public string Format(ActivityTraceId traceId, ActivitySpanId spanId, ActivityTraceFlags flags)
-        => Traceparent.Format(traceId, spanId, flags);
+        => new Traceparent(traceId, spanId, flags).ToString();
 }

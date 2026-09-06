@@ -50,12 +50,9 @@ public static class Constants
 
     /// <summary>
     /// The name of the entry in <see cref="LogEvent.Properties"/> that carries a
-    /// span's links. The value will be a <see cref="SequenceValue"/> of formatted W3C traceparent strings.
+    /// span's links. The value will be a <see cref="SequenceValue"/> of <see cref="ScalarValue"/>s whose <see cref="Object.ToString()"/>
+    /// produces a W3C traceparent.
     /// </summary>
-    /// <remarks>
-    /// Tags on span links formatted from <see cref="ActivityLink"/>s are not represented in a traceparent
-    /// string, so are discarded.
-    /// </remarks>
     public const string SpanLinksPropertyName = "SpanLinks";
 
     /// <summary>

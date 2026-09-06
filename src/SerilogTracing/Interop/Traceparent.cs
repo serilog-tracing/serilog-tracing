@@ -1,14 +1,23 @@
 using System.Diagnostics;
+#if FEATURE_STRING_CREATE
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#endif
 
 namespace SerilogTracing.Interop;
 
-static class Traceparent
+readonly struct Traceparent : IEquatable<Traceparent>, IComparable<Traceparent>
 {
+    private readonly string? _value;
+
+    public Traceparent(ActivityTraceId traceId, ActivitySpanId spanId, ActivityTraceFlags flags)
+    {
+        _value = Format(traceId, spanId, flags);
+    }
+    
     // {ver}-{traceid}-{spanid}-{flags}
     // 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
-    public static string Format(ActivityTraceId traceId, ActivitySpanId spanId, ActivityTraceFlags flags)
+    static string Format(ActivityTraceId traceId, ActivitySpanId spanId, ActivityTraceFlags flags)
     {
 #if FEATURE_STRING_CREATE
         // This is an optimized activity context to traceparent formatter for recent versions of .NET
@@ -57,5 +66,30 @@ static class Traceparent
 #else
         return $"00-{traceId.ToHexString()}-{spanId.ToHexString()}-{(byte)flags:x2}";
 #endif
+    }
+
+    public bool Equals(Traceparent other)
+    {
+        return ToString() == other.ToString();
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is Traceparent other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return ToString().GetHashCode();
+    }
+
+    public int CompareTo(Traceparent other)
+    {
+        return string.Compare(ToString(), other.ToString(), StringComparison.Ordinal);
+    }
+
+    public override string ToString()
+    {
+        return _value?.Length > 0 ? _value : "00-00000000000000000000000000000000-0000000000000000-00";
     }
 }

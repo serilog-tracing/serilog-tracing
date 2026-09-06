@@ -20,6 +20,36 @@ public class TraceparentTests
     [MemberData(nameof(RoundtripCases))]
     public void TraceparentFormats(string expected, ActivityTraceId traceId, ActivitySpanId spanId, ActivityTraceFlags flags)
     {
-        Assert.Equal(expected, Traceparent.Format(traceId, spanId, flags));
+        Assert.Equal(expected, new Traceparent(traceId, spanId, flags).ToString());
+    }
+
+    [Fact]
+    public void TraceparentDefaultIsDefaultOfFields()
+    {
+        var defaultFields = new Traceparent(default, default, default);
+        var defaultFull = (Traceparent)default;
+        
+        Assert.Equal(defaultFull.ToString(), defaultFields.ToString());
+        Assert.Equal(defaultFull, defaultFields);
+        Assert.Equal(defaultFull.GetHashCode(), defaultFields.GetHashCode());
+        Assert.Equal(0, defaultFull.CompareTo(defaultFields));
+    }
+
+    [Fact]
+    public void TraceparentCompares()
+    {
+        var a = new Traceparent(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(),
+            ActivityTraceFlags.Recorded);
+        
+        var b = new Traceparent(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(),
+            ActivityTraceFlags.Recorded);
+        
+        Assert.Equal(a, a);
+        Assert.Equal(a.GetHashCode(), a.GetHashCode());
+        Assert.Equal(0, a.CompareTo(a));
+        
+        Assert.NotEqual(a, b);
+        Assert.NotEqual(a.GetHashCode(), b.GetHashCode());
+        Assert.NotEqual(0, a.CompareTo(b));
     }
 }
