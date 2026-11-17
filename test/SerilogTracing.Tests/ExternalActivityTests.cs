@@ -33,6 +33,13 @@ public class ExternalActivityTests
             new("property", "P")
         ])));
         activity.AddEvent(new("ignored"));
+
+        var linkedContext = new ActivityContext(
+            ActivityTraceId.CreateRandom(),
+            ActivitySpanId.CreateRandom(),
+            ActivityTraceFlags.Recorded);
+        activity.AddLink(new ActivityLink(linkedContext));
+
         activity.Stop();
 
         var span = sink.SingleEvent;
@@ -45,6 +52,9 @@ public class ExternalActivityTests
         Assert.Equal("M", span.Exception.Message);
         Assert.Equal("S", span.Exception.ToString());
         Assert.False(span.Properties.ContainsKey("property"));
+
+        Assert.True(span.Properties[Constants.SpanLinksPropertyName] is SequenceValue { Elements: [ScalarValue { Value: ActivityLink link }] });
+        Assert.Equal(linkedContext, link.Context);
     }
 
     [Fact]

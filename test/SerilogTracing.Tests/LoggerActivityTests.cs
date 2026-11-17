@@ -58,6 +58,34 @@ public class LoggerActivityTests
     }
 
     [Fact]
+    public void LinksAreUsed()
+    {
+        var sink = new CollectingSink();
+
+        var logger = new LoggerConfiguration()
+            .WriteTo.Sink(sink)
+            .CreateLogger();
+
+        using var activity = Some.Activity();
+        activity.ActivityTraceFlags |= ActivityTraceFlags.Recorded;
+        activity.Start();
+
+        var linkedContext = new ActivityContext(
+            ActivityTraceId.CreateRandom(),
+            ActivitySpanId.CreateRandom(),
+            ActivityTraceFlags.Recorded);
+        activity.AddLink(new ActivityLink(linkedContext));
+
+        var loggerActivity = new LoggerActivity(logger, LogEventLevel.Information, activity, default, MessageTemplate.Empty, []);
+        loggerActivity.Complete();
+
+        var span = sink.SingleEvent;
+        
+        Assert.True(span.Properties[Core.Constants.SpanLinksPropertyName] is SequenceValue { Elements: [ScalarValue { Value: ActivityLink link }] });
+        Assert.Equal(linkedContext, link.Context);
+    }
+
+    [Fact]
     public void ActivityStatusIsLeftUnsetOnDispose()
     {
         var sink = new CollectingSink();

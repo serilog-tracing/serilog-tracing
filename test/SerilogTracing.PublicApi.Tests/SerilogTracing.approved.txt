@@ -113,6 +113,7 @@ namespace SerilogTracing.Core
         public const string ParentSpanIdPropertyName = "ParentSpanId";
         public const string SerilogTracingActivitySourceName = "SerilogTracing";
         public const string SpanKindPropertyName = "SpanKind";
+        public const string SpanLinksPropertyName = "SpanLinks";
         public const string SpanStartTimestampPropertyName = "SpanStartTimestamp";
     }
 }
