@@ -70,8 +70,11 @@ public sealed class ActivityListenerInstrumentationConfiguration
             {
                 throw new ArgumentNullException(nameof(instrumentors));
             }
-
-            _instrumentors.Add(instrumentor);
+            if (instrumentor is HttpRequestOutActivityInstrumentor && this._withDefaultInstrumentors == true)
+            {
+              throw new ArgumentException("Adding 'HttpRequestOutActivityInstrumentor' explicitly while 'WithDefaultInstrumentation' is true would lead to inconsistent behavior. Call 'WithDefaultInstrumentation(false)' to explicitly disable default instrumentation.");
+            }
+      _instrumentors.Add(instrumentor);
         }
 
         return _activityListenerConfiguration;
