@@ -54,6 +54,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".workflows", ".workflows", "{ECE478F5-0719-4E59-8AEF-6AB12BE33B62}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\publish.yml = .github\workflows\publish.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerilogTracing.Benchmarks", "test\SerilogTracing.Benchmarks\SerilogTracing.Benchmarks.csproj", "{9052EA54-5BEE-4203-8966-DEC013DE62CB}"
